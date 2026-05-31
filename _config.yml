@@ -1,2 +1,4 @@
 markdown: kramdown
-theme: jekyll-theme-primer
+kramdown:
+  math_engine: mathjax
+  input: GFM
