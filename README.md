@@ -217,11 +217,11 @@ _Making it work in reality_ (31 articles)
 
 ### Production Considerations
 
-- [Cost optimization](domain-07-practical-aspects/04-production/01-cost-optimization-strategies.md)
-- [Latency vs throughput](domain-07-practical-aspects/04-production/02-latency-vs-throughput-tradeoffs.md)
-- [Scaling inference](domain-07-practical-aspects/04-production/03-scaling-inference-horizontal-vertical.md)
-- [A/B testing](domain-07-practical-aspects/04-production/04-ab-testing-for-llm-applications.md)
-- [Fallback strategies](domain-07-practical-aspects/04-production/05-fallback-strategies-and-error-handling.md)
+- [Cost optimization](domain-07-practical-aspects/04-production-considerations/01-cost-optimization-strategies.md)
+- [Latency vs throughput](domain-07-practical-aspects/04-production-considerations/02-latency-vs-throughput-tradeoffs.md)
+- [Scaling inference](domain-07-practical-aspects/04-production-considerations/03-scaling-inference-horizontal-vertical.md)
+- [A/B testing](domain-07-practical-aspects/04-production-considerations/04-ab-testing-for-llm-applications.md)
+- [Fallback strategies](domain-07-practical-aspects/04-production-considerations/05-fallback-strategies-and-error-handling.md)
 
 ---
 

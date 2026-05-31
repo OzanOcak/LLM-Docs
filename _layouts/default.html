@@ -614,10 +614,42 @@
         container.innerHTML = html;
       }
 
+      // Save sidebar state to localStorage
+      function saveSidebarState() {
+        const openSections = [];
+        document.querySelectorAll(".section-header").forEach((header) => {
+          if (!header.classList.contains("collapsed")) {
+            const sectionName = header.querySelector("span").innerText;
+            openSections.push(sectionName);
+          }
+        });
+        localStorage.setItem("openSections", JSON.stringify(openSections));
+      }
+
+      // Restore sidebar state from localStorage
+      function restoreSidebarState() {
+        const savedSections = JSON.parse(
+          localStorage.getItem("openSections") || "[]",
+        );
+
+        document.querySelectorAll(".section-header").forEach((header) => {
+          const sectionName = header.querySelector("span").innerText;
+          if (savedSections.includes(sectionName)) {
+            header.classList.remove("collapsed");
+            header.nextElementSibling.classList.remove("collapsed");
+          } else {
+            header.classList.add("collapsed");
+            header.nextElementSibling.classList.add("collapsed");
+          }
+        });
+      }
+
+      // Modified toggle function
       function toggleSection(element) {
         element.classList.toggle("collapsed");
         const content = element.nextElementSibling;
         content.classList.toggle("collapsed");
+        saveSidebarState(); // Save after each toggle
       }
 
       function toggleSubsection(element) {
