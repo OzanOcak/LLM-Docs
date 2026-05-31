@@ -34,149 +34,142 @@
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
-        background: #f6f8fa;
-      }
-
-      /* LAYOUT */
-      .docs-container {
-        display: flex;
-        min-height: 100vh;
+        background: #f5f5f5;
       }
 
       /* SIDEBAR */
       .sidebar {
-        width: 320px;
-        background: #ffffff;
-        border-right: 1px solid #e1e4e8;
         position: fixed;
         top: 0;
         left: 0;
+        width: 280px;
         height: 100vh;
+        background: #ffffff;
+        border-right: 1px solid #eaeaea;
         overflow-y: auto;
         z-index: 100;
-        padding: 20px 0;
+        padding: 30px 0;
       }
 
       .sidebar-header {
-        padding: 0 20px 20px 20px;
-        border-bottom: 1px solid #e1e4e8;
+        padding: 0 20px 25px 20px;
+        border-bottom: 1px solid #eaeaea;
         margin-bottom: 20px;
       }
 
       .sidebar-header h1 {
-        font-size: 1.3rem;
-        color: #0969da;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a1a1a;
       }
 
       .sidebar-header p {
-        font-size: 0.8rem;
-        color: #57606a;
-        margin-top: 5px;
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 6px;
       }
 
-      /* ACCORDION */
-      .nav-section {
-        margin-bottom: 5px;
+      /* Navigation items - NO ICONS */
+      .nav-article {
+        display: block;
+        padding: 8px 20px 8px 52px;
+        margin: 2px 0;
+        color: #555;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        border-left: 3px solid transparent;
       }
 
-      .nav-section-header {
+      .nav-article:hover {
+        background: #f0f0f0;
+        color: #0066cc;
+        border-left-color: #0066cc;
+      }
+
+      .nav-article.active {
+        background: #e8f0fe;
+        color: #0066cc;
+        border-left-color: #0066cc;
+        font-weight: 500;
+      }
+
+      /* Section header (Domain - collapsible) */
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         padding: 10px 20px;
         cursor: pointer;
         font-weight: 600;
-        color: #24292f;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        color: #1a1a1a;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
         transition: background 0.2s;
       }
 
-      .nav-section-header:hover {
-        background: #f3f4f6;
+      .section-header:hover {
+        background: #f5f5f5;
       }
 
-      .nav-section-header .arrow {
+      .section-header .arrow {
         font-size: 0.7rem;
-        color: #57606a;
+        color: #999;
         transition: transform 0.2s;
       }
 
-      .nav-section-header.active .arrow {
-        transform: rotate(90deg);
+      .section-header.collapsed .arrow {
+        transform: rotate(-90deg);
       }
 
-      .nav-section-content {
-        display: none;
-      }
-
-      .nav-section-content.show {
+      .section-content {
         display: block;
       }
 
-      .nav-subsection {
-        margin-left: 15px;
+      .section-content.collapsed {
+        display: none;
       }
 
-      .nav-subsection-header {
+      /* Subsection header (Subdomain - collapsible) */
+      .subsection-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         padding: 8px 20px 8px 35px;
         cursor: pointer;
-        font-size: 0.85rem;
         font-weight: 500;
-        color: #57606a;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        color: #333;
+        font-size: 0.85rem;
         transition: background 0.2s;
       }
 
-      .nav-subsection-header:hover {
-        background: #f3f4f6;
+      .subsection-header:hover {
+        background: #f5f5f5;
       }
 
-      .nav-subsection-header .arrow {
+      .subsection-header .arrow {
         font-size: 0.65rem;
+        color: #999;
         transition: transform 0.2s;
       }
 
-      .nav-subsection-header.active .arrow {
-        transform: rotate(90deg);
+      .subsection-header.collapsed .arrow {
+        transform: rotate(-90deg);
       }
 
-      .nav-subsection-content {
+      .subsection-content {
+        display: block;
+      }
+
+      .subsection-content.collapsed {
         display: none;
-        padding-left: 20px;
-      }
-
-      .nav-subsection-content.show {
-        display: block;
-      }
-
-      .nav-item {
-        padding: 6px 20px 6px 50px;
-        font-size: 0.85rem;
-        color: #57606a;
-        text-decoration: none;
-        display: block;
-        border-radius: 6px;
-        margin: 2px 8px;
-        transition: all 0.2s;
-      }
-
-      .nav-item:hover {
-        background: #f0f2f4;
-        color: #0969da;
-      }
-
-      .nav-item.active {
-        background: #ddf4ff;
-        color: #0969da;
-        font-weight: 500;
       }
 
       /* MAIN CONTENT */
       .main-content {
-        margin-left: 320px;
-        flex: 1;
-        padding: 40px 60px;
+        margin-left: 280px;
+        padding: 50px 70px;
         background: #ffffff;
         min-height: 100vh;
       }
@@ -190,16 +183,18 @@
       .menu-toggle {
         display: none;
         position: fixed;
-        top: 15px;
-        left: 15px;
-        background: #0969da;
+        bottom: 20px;
+        right: 20px;
+        background: #0066cc;
         color: white;
         border: none;
-        padding: 10px 15px;
-        border-radius: 8px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
         cursor: pointer;
         z-index: 200;
-        font-size: 1.2rem;
+        font-size: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       }
 
       @media (max-width: 768px) {
@@ -209,6 +204,7 @@
         }
         .sidebar.open {
           transform: translateX(0);
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
         }
         .main-content {
           margin-left: 0;
@@ -219,260 +215,460 @@
         }
       }
 
-      /* MARKDOWN STYLES */
+      /* Markdown styling */
       .markdown-body {
         font-size: 1rem;
+        line-height: 1.6;
       }
       .markdown-body h1 {
-        border-bottom: 1px solid #e1e4e8;
+        border-bottom: 1px solid #eaeaea;
         padding-bottom: 0.3em;
+        margin-top: 0;
       }
       .markdown-body h2 {
-        border-bottom: 1px solid #e1e4e8;
+        border-bottom: 1px solid #eaeaea;
         padding-bottom: 0.3em;
         margin-top: 24px;
       }
       .markdown-body code {
-        background: #f6f8fa;
+        background: #f5f5f5;
         padding: 0.2em 0.4em;
-        border-radius: 6px;
+        border-radius: 4px;
+        font-size: 0.85em;
       }
       .markdown-body pre {
-        background: #f6f8fa;
-        border-radius: 6px;
+        background: #f5f5f5;
+        border-radius: 8px;
         padding: 16px;
         overflow-x: auto;
+      }
+      .markdown-body blockquote {
+        border-left: 4px solid #0066cc;
+        padding-left: 16px;
+        color: #555;
+      }
+      .markdown-body table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .markdown-body th,
+      .markdown-body td {
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+      }
+      .markdown-body th {
+        background: #f5f5f5;
       }
     </style>
   </head>
   <body>
-    <button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
-    <div class="docs-container">
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-          <h1>🧠 ML/LLM Docs</h1>
-          <p>Machine Learning & Large Language Models</p>
-        </div>
-        <nav id="navigation"></nav>
-      </aside>
-
-      <main class="main-content">
-        <div class="content-wrapper markdown-body">{{ content }}</div>
-      </main>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1>ML/LLM Documentation</h1>
+        <p>Machine Learning & Large Language Models</p>
+      </div>
+      <nav id="nav-container"></nav>
     </div>
 
+    <main class="main-content">
+      <div class="content-wrapper markdown-body">{{ content }}</div>
+    </main>
+
     <script>
-      // Your 7 Domains with Subdomains
-      const navigationData = [
+      // NAVIGATION STRUCTURE - Update paths to match your actual folders
+      const navData = [
         {
-          name: "📐 Domain 01: Mathematical Foundations",
+          name: "Mathematical Foundations",
           path: "domain-01-mathematical-foundations",
           subsections: [
             {
               name: "Linear Algebra",
               path: "domain-01-mathematical-foundations/01-linear-algebra",
+              articles: [
+                "01-vectors-and-vector-operations",
+                "02-matrices-and-matrix-operations",
+                "03-eigenvalues-and-eigenvectors",
+                "04-linear-transformations",
+                "05-vector-spaces-and-dimensionality",
+              ],
             },
             {
               name: "Calculus",
               path: "domain-01-mathematical-foundations/02-calculus",
+              articles: [
+                "01-derivatives-and-gradients",
+                "02-partial-derivatives",
+                "03-chain-rule",
+                "04-gradient-descent-concept",
+                "05-multivariable-calculus-basics",
+              ],
             },
             {
               name: "Probability & Statistics",
               path: "domain-01-mathematical-foundations/03-probability-statistics",
+              articles: [
+                "01-basic-probability-rules",
+                "02-random-variables",
+                "03-distributions",
+                "04-mean-variance-standard-deviation",
+                "05-bayes-theorem",
+                "06-maximum-likelihood-estimation",
+              ],
             },
           ],
         },
         {
-          name: "🤖 Domain 02: ML Fundamentals",
+          name: "ML Fundamentals",
           path: "domain-02-ml-fundamentals",
           subsections: [
             {
               name: "ML Basics",
               path: "domain-02-ml-fundamentals/01-ml-basics",
+              articles: [
+                "01-what-is-machine-learning",
+                "02-supervised-unsupervised-reinforcement-learning",
+                "03-training-validation-test-sets",
+                "04-overfitting-underfitting",
+                "05-bias-variance-tradeoff",
+                "06-cross-validation",
+              ],
             },
             {
               name: "Core Algorithms",
               path: "domain-02-ml-fundamentals/02-core-algorithms",
+              articles: [
+                "01-linear-regression",
+                "02-logistic-regression",
+                "03-decision-trees",
+                "04-random-forests",
+                "05-support-vector-machines",
+                "06-k-means-clustering",
+                "07-principal-component-analysis",
+              ],
             },
           ],
         },
         {
-          name: "🧠 Domain 03: Deep Learning Foundations",
+          name: "Deep Learning Foundations",
           path: "domain-03-deep-learning-foundations",
           subsections: [
             {
               name: "Neural Networks Basics",
               path: "domain-03-deep-learning-foundations/01-neural-networks-basics",
+              articles: [
+                "01-perceptron-and-neurons",
+                "02-activation-functions",
+                "03-layers-input-hidden-output",
+                "04-forward-propagation",
+                "05-backpropagation",
+                "06-loss-functions",
+                "07-optimizers-sgd-adam",
+              ],
             },
             {
               name: "Training Neural Networks",
               path: "domain-03-deep-learning-foundations/02-training-neural-networks",
+              articles: [
+                "01-learning-rates",
+                "02-batch-size",
+                "03-epochs",
+                "04-regularization-dropout-l1-l2",
+                "05-batch-normalization",
+                "06-vanishing-exploding-gradients",
+              ],
             },
           ],
         },
         {
-          name: "🏗️ Domain 04: Advanced Architectures",
+          name: "Advanced Architectures",
           path: "domain-04-advanced-architectures",
           subsections: [
             {
               name: "Sequence Models",
               path: "domain-04-advanced-architectures/01-sequence-models",
+              articles: [
+                "01-recurrent-neural-networks-rnn",
+                "02-long-short-term-memory-lstm",
+                "03-gated-recurrent-units-gru",
+                "04-bidirectional-rnns",
+                "05-seq2seq-models",
+                "06-attention-mechanism-original",
+              ],
             },
             {
               name: "Transformers",
               path: "domain-04-advanced-architectures/02-transformers",
+              articles: [
+                "01-self-attention-mechanism",
+                "02-multi-head-attention",
+                "03-positional-encodings",
+                "04-feed-forward-layers",
+                "05-layer-normalization",
+                "06-residual-connections",
+                "07-encoder-vs-decoder-architecture",
+              ],
             },
           ],
         },
         {
-          name: "🚀 Domain 05: LLM-Specific Concepts",
+          name: "LLM-Specific Concepts",
           path: "domain-05-llm-specific-concepts",
           subsections: [
             {
               name: "Tokenization",
               path: "domain-05-llm-specific-concepts/01-tokenization",
+              articles: [
+                "01-word-subword-character-tokenization",
+                "02-byte-pair-encoding-bpe",
+                "03-wordpiece",
+                "04-sentencepiece",
+                "05-special-tokens",
+              ],
             },
             {
               name: "Training Paradigms",
               path: "domain-05-llm-specific-concepts/02-training-paradigms",
+              articles: [
+                "01-pre-training",
+                "02-fine-tuning",
+                "03-few-shot-learning",
+                "04-zero-shot-learning",
+                "05-instruction-tuning",
+                "06-rlhf-reinforcement-learning-human-feedback",
+              ],
             },
             {
               name: "Architecture Variants",
               path: "domain-05-llm-specific-concepts/03-architecture-variants",
+              articles: [
+                "01-encoder-only-bert-like",
+                "02-decoder-only-gpt-like",
+                "03-encoder-decoder-t5-like",
+                "04-sparse-attention",
+                "05-mixture-of-experts-moe",
+              ],
             },
           ],
         },
         {
-          name: "🔍 Domain 06: Vector Space & Retrieval",
+          name: "Vector Space & Retrieval",
           path: "domain-06-vector-space-retrieval",
           subsections: [
             {
               name: "Embeddings",
               path: "domain-06-vector-space-retrieval/01-embeddings",
+              articles: [
+                "01-what-are-embeddings",
+                "02-how-embeddings-capture-semantics",
+                "03-dimensionality-reduction-tsne-umap",
+                "04-properties-of-embedding-spaces",
+              ],
             },
             {
               name: "Distance Metrics",
               path: "domain-06-vector-space-retrieval/02-distance-metrics",
+              articles: [
+                "01-cosine-similarity",
+                "02-euclidean-distance",
+                "03-dot-product",
+                "04-comparing-distance-metrics",
+              ],
             },
             {
               name: "Vector Databases",
               path: "domain-06-vector-space-retrieval/03-vector-databases",
+              articles: [
+                "01-what-are-vector-databases",
+                "02-indexing-algorithms-hnsw-ivf",
+                "03-approximate-nearest-neighbor-ann",
+                "04-similarity-search-basics",
+                "05-popular-vector-databases-pinecone-weaviate-qdrant-milvus",
+              ],
             },
-            { name: "RAG", path: "domain-06-vector-space-retrieval/04-rag" },
+            {
+              name: "RAG",
+              path: "domain-06-vector-space-retrieval/04-rag",
+              articles: [
+                "01-the-problem-llms-have-knowledge-cutoff",
+                "02-retrieve-relevant-documents-first",
+                "03-how-rag-works-step-by-step",
+                "04-chunking-strategies-for-rag",
+                "05-hybrid-search-vector-keyword",
+                "06-real-world-applications",
+              ],
+            },
           ],
         },
         {
-          name: "⚙️ Domain 07: Practical Aspects",
+          name: "Practical Aspects",
           path: "domain-07-practical-aspects",
           subsections: [
             {
               name: "Data Processing",
               path: "domain-07-practical-aspects/01-data-processing",
+              articles: [
+                "01-data-collection",
+                "02-cleaning-and-preprocessing",
+                "03-data-augmentation",
+                "04-dataset-splits",
+                "05-handling-imbalanced-data",
+                "06-data-labeling-strategies",
+              ],
             },
             {
               name: "Evaluation & Metrics",
               path: "domain-07-practical-aspects/02-evaluation-metrics",
+              articles: [
+                "01-perplexity",
+                "02-bleu-score",
+                "03-rouge-score",
+                "04-bertscore",
+                "05-human-evaluation",
+                "06-benchmark-datasets-glue-superglue-mmlu-humaneval-helm",
+                "07-llm-as-judge-evaluation",
+              ],
             },
             {
               name: "Deployment & Optimization",
               path: "domain-07-practical-aspects/03-deployment-optimization",
+              articles: [
+                "01-model-compression",
+                "02-quantization-gptq-awq-gguf",
+                "03-pruning",
+                "04-distillation",
+                "05-kv-caching-for-inference",
+                "06-continuous-batching",
+                "07-pagedattention-vllm",
+                "08-speculative-decoding",
+                "09-inference-optimization",
+                "10-api-design",
+                "11-monitoring-and-observability",
+              ],
             },
             {
               name: "Production Considerations",
               path: "domain-07-practical-aspects/04-production",
+              articles: [
+                "01-cost-optimization-strategies",
+                "02-latency-vs-throughput-tradeoffs",
+                "03-scaling-inference-horizontal-vertical",
+                "04-ab-testing-for-llm-applications",
+                "05-fallback-strategies-and-error-handling",
+              ],
             },
           ],
         },
       ];
 
-      // Article lists for each subdomain (add yours)
-      const articlesData = {
-        "domain-01-mathematical-foundations/01-linear-algebra": [
-          "01-vectors-and-vector-operations",
-          "02-matrices-and-matrix-operations",
-          "03-eigenvalues-and-eigenvectors",
-          "04-linear-transformations",
-          "05-vector-spaces-and-dimensionality",
-        ],
-        "domain-01-mathematical-foundations/02-calculus": [
-          "01-derivatives-and-gradients",
-          "02-partial-derivatives",
-          "03-chain-rule",
-          "04-gradient-descent-concept",
-          "05-multivariable-calculus-basics",
-        ],
-        "domain-01-mathematical-foundations/03-probability-statistics": [
-          "01-basic-probability-rules",
-          "02-random-variables",
-          "03-distributions",
-          "04-mean-variance-standard-deviation",
-          "05-bayes-theorem",
-          "06-maximum-likelihood-estimation",
-        ],
-      };
-
-      function formatArticleName(filename) {
+      function formatName(filename) {
         return filename
           .replace(/^\d+-/, "")
           .replace(/-/g, " ")
           .replace(/\b\w/g, (l) => l.toUpperCase());
       }
 
-      function generateNavigation() {
-        const nav = document.getElementById("navigation");
-        if (!nav) return;
+      function buildNavigation() {
+        const container = document.getElementById("nav-container");
+        if (!container) return;
 
         let html = "";
         const currentPath = window.location.pathname;
 
-        for (const domain of navigationData) {
-          html += `<div class="nav-section">`;
-          html += `<div class="nav-section-header" onclick="toggleSection(this)">`;
-          html += `<span>${domain.name}</span>`;
-          html += `<span class="arrow">▶</span>`;
-          html += `</div>`;
-          html += `<div class="nav-section-content">`;
+        for (const domain of navData) {
+          html += `<div class="section-header" onclick="toggleSection(this)">
+                            <span>${domain.name}</span>
+                            <span class="arrow">▼</span>
+                         </div>`;
+          html += `<div class="section-content">`;
 
           for (const subsection of domain.subsections) {
-            html += `<div class="nav-subsection">`;
-            html += `<div class="nav-subsection-header" onclick="toggleSubsection(this)">`;
-            html += `<span>📂 ${subsection.name}</span>`;
-            html += `<span class="arrow">▶</span>`;
-            html += `</div>`;
-            html += `<div class="nav-subsection-content">`;
+            html += `<div class="subsection-header" onclick="toggleSubsection(this)">
+                                <span>${subsection.name}</span>
+                                <span class="arrow">▼</span>
+                             </div>`;
+            html += `<div class="subsection-content">`;
 
-            const articles = articlesData[subsection.path] || [];
-            for (const article of articles) {
-              const articlePath = `/${subsection.path}/${article}.md`;
-              const isActive = currentPath === articlePath;
-              html += `<a href="${articlePath}" class="nav-item ${isActive ? "active" : ""}">📄 ${formatArticleName(article)}</a>`;
+            for (const article of subsection.articles) {
+              // CHANGE THIS: Add .md if your files have extension
+              const articlePath = `/${subsection.path}/${article}`;
+              const isActive =
+                currentPath === articlePath ||
+                currentPath === articlePath + ".md";
+              const activeClass = isActive ? "active" : "";
+              html += `<a href="${articlePath}" class="nav-article ${activeClass}">${formatName(article)}</a>`;
             }
 
-            html += `</div></div>`;
+            html += `</div>`;
           }
 
-          html += `</div></div>`;
+          html += `</div>`;
         }
 
-        nav.innerHTML = html;
+        container.innerHTML = html;
       }
 
       function toggleSection(element) {
-        element.classList.toggle("active");
-        element.nextElementSibling.classList.toggle("show");
+        element.classList.toggle("collapsed");
+        const content = element.nextElementSibling;
+        content.classList.toggle("collapsed");
       }
 
       function toggleSubsection(element) {
-        element.classList.toggle("active");
-        element.nextElementSibling.classList.toggle("show");
+        element.classList.toggle("collapsed");
+        const content = element.nextElementSibling;
+        content.classList.toggle("collapsed");
       }
 
       function toggleSidebar() {
         document.getElementById("sidebar").classList.toggle("open");
       }
 
-      document.addEventListener("DOMContentLoaded", generateNavigation);
+      function expandCurrentSection() {
+        const currentPath = window.location.pathname;
+
+        for (const domain of navData) {
+          for (const subsection of domain.subsections) {
+            if (currentPath.includes(subsection.path)) {
+              const sectionHeaders =
+                document.querySelectorAll(".section-header");
+              for (const header of sectionHeaders) {
+                if (header.querySelector("span").innerText === domain.name) {
+                  header.classList.remove("collapsed");
+                  header.nextElementSibling.classList.remove("collapsed");
+                }
+              }
+              const subHeaders =
+                document.querySelectorAll(".subsection-header");
+              for (const subHeader of subHeaders) {
+                if (
+                  subHeader.querySelector("span").innerText === subsection.name
+                ) {
+                  subHeader.classList.remove("collapsed");
+                  subHeader.nextElementSibling.classList.remove("collapsed");
+                }
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        buildNavigation();
+        expandCurrentSection();
+      });
+
+      document.addEventListener("click", function (e) {
+        if (
+          window.innerWidth <= 768 &&
+          e.target.classList &&
+          e.target.classList.contains("nav-article")
+        ) {
+          document.getElementById("sidebar").classList.remove("open");
+        }
+      });
     </script>
   </body>
 </html>
