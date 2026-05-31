@@ -36,6 +36,11 @@
           "Helvetica Neue", Arial, sans-serif;
         background: #f5f5f5;
       }
+      hr,
+      h4 {
+        margin-top: 10px;
+        margin-bottom: 40px;
+      }
 
       /* SIDEBAR */
       .sidebar {
@@ -91,7 +96,7 @@
         background: #e8f0fe;
         color: #0066cc;
         border-left-color: #0066cc;
-        font-weight: 500;
+        /*  font-weight: 500;*/
       }
 
       /* Section header (Domain - collapsible) */
@@ -581,14 +586,14 @@
                             <span>${domain.name}</span>
                             <span class="arrow">▼</span>
                          </div>`;
-          html += `<div class="section-content">`;
+          html += `<div class="section-content collapsed">`;
 
           for (const subsection of domain.subsections) {
             html += `<div class="subsection-header" onclick="toggleSubsection(this)">
                                 <span>${subsection.name}</span>
                                 <span class="arrow">▼</span>
                              </div>`;
-            html += `<div class="subsection-content">`;
+            html += `<div class="subsection-content collapsed">`;
 
             for (const article of subsection.articles) {
               // CHANGE THIS: Add .md if your files have extension
@@ -629,29 +634,32 @@
         const currentPath = window.location.pathname;
 
         for (const domain of navData) {
+          html += `<div class="section-header" onclick="toggleSection(this)">
+                <span>${domain.name}</span>
+                <span class="arrow">▼</span>
+             </div>`;
+          html += `<div class="section-content collapsed">`; // ← ADDED collapsed
+
           for (const subsection of domain.subsections) {
-            if (currentPath.includes(subsection.path)) {
-              const sectionHeaders =
-                document.querySelectorAll(".section-header");
-              for (const header of sectionHeaders) {
-                if (header.querySelector("span").innerText === domain.name) {
-                  header.classList.remove("collapsed");
-                  header.nextElementSibling.classList.remove("collapsed");
-                }
-              }
-              const subHeaders =
-                document.querySelectorAll(".subsection-header");
-              for (const subHeader of subHeaders) {
-                if (
-                  subHeader.querySelector("span").innerText === subsection.name
-                ) {
-                  subHeader.classList.remove("collapsed");
-                  subHeader.nextElementSibling.classList.remove("collapsed");
-                }
-              }
-              break;
+            html += `<div class="subsection-header" onclick="toggleSubsection(this)">
+                    <span>${subsection.name}</span>
+                    <span class="arrow">▼</span>
+                 </div>`;
+            html += `<div class="subsection-content collapsed">`; // ← ADDED collapsed
+
+            for (const article of subsection.articles) {
+              const articlePath = `/${subsection.path}/${article}`;
+              const isActive =
+                currentPath === articlePath ||
+                currentPath === articlePath + ".md";
+              const activeClass = isActive ? "active" : "";
+              html += `<a href="${articlePath}" class="nav-article ${activeClass}">${formatName(article)}</a>`;
             }
+
+            html += `</div>`;
           }
+
+          html += `</div>`;
         }
       }
 

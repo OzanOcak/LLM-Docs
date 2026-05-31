@@ -1,6 +1,6 @@
 # Vectors and vector operations
 
-## ## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
 
 ---
 
@@ -30,7 +30,7 @@ Each suspect becomes a point in 3D space. The distance between A and C is small 
 
 ### **4. ASCII diagram**
 
-```
+```text
 Vector in 2D space (two features: age and height)
 
 Age ↑
