@@ -584,23 +584,20 @@
         for (const domain of navData) {
           html += `<div class="section-header" onclick="toggleSection(this)">
                             <span>${domain.name}</span>
-                            <span class="arrow">▼</span>
+                            <span class="arrow">▶</span>
                          </div>`;
           html += `<div class="section-content collapsed">`;
 
           for (const subsection of domain.subsections) {
             html += `<div class="subsection-header" onclick="toggleSubsection(this)">
                                 <span>${subsection.name}</span>
-                                <span class="arrow">▼</span>
+                                <span class="arrow">▶</span>
                              </div>`;
             html += `<div class="subsection-content collapsed">`;
 
             for (const article of subsection.articles) {
-              // CHANGE THIS: Add .md if your files have extension
-              const articlePath = `/LLM-Docs/${subsection.path}/${article}`;
-              const isActive =
-                currentPath === articlePath ||
-                currentPath === articlePath + ".md";
+              const articlePath = `/LLM-Docs/${subsection.path}/${article}.html`;
+              const isActive = currentPath === articlePath;
               const activeClass = isActive ? "active" : "";
               html += `<a href="${articlePath}" class="nav-article ${activeClass}">${formatName(article)}</a>`;
             }
@@ -612,6 +609,12 @@
         }
 
         container.innerHTML = html;
+
+        // Restore saved state after building
+        restoreSidebarState();
+
+        // Expand current article's section
+        expandCurrentSection();
       }
 
       // Save sidebar state to localStorage
@@ -619,7 +622,8 @@
         const openSections = [];
         document.querySelectorAll(".section-header").forEach((header) => {
           if (!header.classList.contains("collapsed")) {
-            const sectionName = header.querySelector("span").innerText;
+            const sectionName =
+              header.querySelector("span:first-child").innerText;
             openSections.push(sectionName);
           }
         });
@@ -633,29 +637,32 @@
         );
 
         document.querySelectorAll(".section-header").forEach((header) => {
-          const sectionName = header.querySelector("span").innerText;
+          const sectionName =
+            header.querySelector("span:first-child").innerText;
+          const content = header.nextElementSibling;
+
           if (savedSections.includes(sectionName)) {
             header.classList.remove("collapsed");
-            header.nextElementSibling.classList.remove("collapsed");
+            if (content) content.classList.remove("collapsed");
           } else {
             header.classList.add("collapsed");
-            header.nextElementSibling.classList.add("collapsed");
+            if (content) content.classList.add("collapsed");
           }
         });
       }
 
-      // Modified toggle function
+      // Toggle functions
       function toggleSection(element) {
         element.classList.toggle("collapsed");
         const content = element.nextElementSibling;
-        content.classList.toggle("collapsed");
-        saveSidebarState(); // Save after each toggle
+        if (content) content.classList.toggle("collapsed");
+        saveSidebarState();
       }
 
       function toggleSubsection(element) {
         element.classList.toggle("collapsed");
         const content = element.nextElementSibling;
-        content.classList.toggle("collapsed");
+        if (content) content.classList.toggle("collapsed");
       }
 
       function toggleSidebar() {
@@ -666,38 +673,45 @@
         const currentPath = window.location.pathname;
 
         for (const domain of navData) {
-          html += `<div class="section-header" onclick="toggleSection(this)">
-                <span>${domain.name}</span>
-                <span class="arrow">▼</span>
-             </div>`;
-          html += `<div class="section-content collapsed">`; // ← ADDED collapsed
-
           for (const subsection of domain.subsections) {
-            html += `<div class="subsection-header" onclick="toggleSubsection(this)">
-                    <span>${subsection.name}</span>
-                    <span class="arrow">▼</span>
-                 </div>`;
-            html += `<div class="subsection-content collapsed">`; // ← ADDED collapsed
-
             for (const article of subsection.articles) {
-              const articlePath = `/${subsection.path}/${article}`;
-              const isActive =
-                currentPath === articlePath ||
-                currentPath === articlePath + ".md";
-              const activeClass = isActive ? "active" : "";
-              html += `<a href="${articlePath}" class="nav-article ${activeClass}">${formatName(article)}</a>`;
+              const articlePath = `/LLM-Docs/${subsection.path}/${article}.html`;
+              if (currentPath === articlePath) {
+                // Expand this domain
+                document
+                  .querySelectorAll(".section-header")
+                  .forEach((header) => {
+                    if (
+                      header.querySelector("span:first-child").innerText ===
+                      domain.name
+                    ) {
+                      header.classList.remove("collapsed");
+                      const content = header.nextElementSibling;
+                      if (content) content.classList.remove("collapsed");
+                    }
+                  });
+                // Expand this subsection
+                document
+                  .querySelectorAll(".subsection-header")
+                  .forEach((subHeader) => {
+                    if (
+                      subHeader.querySelector("span:first-child").innerText ===
+                      subsection.name
+                    ) {
+                      subHeader.classList.remove("collapsed");
+                      const content = subHeader.nextElementSibling;
+                      if (content) content.classList.remove("collapsed");
+                    }
+                  });
+                return;
+              }
             }
-
-            html += `</div>`;
           }
-
-          html += `</div>`;
         }
       }
 
       document.addEventListener("DOMContentLoaded", function () {
         buildNavigation();
-        expandCurrentSection();
       });
 
       document.addEventListener("click", function (e) {
