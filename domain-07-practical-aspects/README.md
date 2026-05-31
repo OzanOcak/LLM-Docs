@@ -37,7 +37,7 @@ _Making it work in reality_
 - API design
 - Monitoring and observability
 
-### [Production Considerations](04-production/)
+### [Production Considerations](04-production-considerations/)
 
 - Cost optimization strategies
 - Latency vs throughput tradeoffs
