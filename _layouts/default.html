@@ -1,10 +1,11 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ page.title | default: "ML/LLM Documentation" }}</title>
 
-    <!-- CRITICAL: MathJax MUST be here directly -->
+    <!-- MathJax -->
     <script>
       MathJax = {
         tex: {
@@ -22,20 +23,456 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
-    <!-- Primer theme CSS -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown.min.css"
-    />
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       body {
-        max-width: 1000px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: #f6f8fa;
+      }
+
+      /* LAYOUT */
+      .docs-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* SIDEBAR */
+      .sidebar {
+        width: 320px;
+        background: #ffffff;
+        border-right: 1px solid #e1e4e8;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 100;
+        padding: 20px 0;
+      }
+
+      .sidebar-header {
+        padding: 0 20px 20px 20px;
+        border-bottom: 1px solid #e1e4e8;
+        margin-bottom: 20px;
+      }
+
+      .sidebar-header h1 {
+        font-size: 1.3rem;
+        color: #0969da;
+      }
+
+      .sidebar-header p {
+        font-size: 0.8rem;
+        color: #57606a;
+        margin-top: 5px;
+      }
+
+      /* ACCORDION */
+      .nav-section {
+        margin-bottom: 5px;
+      }
+
+      .nav-section-header {
+        padding: 10px 20px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #24292f;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+      }
+
+      .nav-section-header:hover {
+        background: #f3f4f6;
+      }
+
+      .nav-section-header .arrow {
+        font-size: 0.7rem;
+        color: #57606a;
+        transition: transform 0.2s;
+      }
+
+      .nav-section-header.active .arrow {
+        transform: rotate(90deg);
+      }
+
+      .nav-section-content {
+        display: none;
+      }
+
+      .nav-section-content.show {
+        display: block;
+      }
+
+      .nav-subsection {
+        margin-left: 15px;
+      }
+
+      .nav-subsection-header {
+        padding: 8px 20px 8px 35px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #57606a;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+      }
+
+      .nav-subsection-header:hover {
+        background: #f3f4f6;
+      }
+
+      .nav-subsection-header .arrow {
+        font-size: 0.65rem;
+        transition: transform 0.2s;
+      }
+
+      .nav-subsection-header.active .arrow {
+        transform: rotate(90deg);
+      }
+
+      .nav-subsection-content {
+        display: none;
+        padding-left: 20px;
+      }
+
+      .nav-subsection-content.show {
+        display: block;
+      }
+
+      .nav-item {
+        padding: 6px 20px 6px 50px;
+        font-size: 0.85rem;
+        color: #57606a;
+        text-decoration: none;
+        display: block;
+        border-radius: 6px;
+        margin: 2px 8px;
+        transition: all 0.2s;
+      }
+
+      .nav-item:hover {
+        background: #f0f2f4;
+        color: #0969da;
+      }
+
+      .nav-item.active {
+        background: #ddf4ff;
+        color: #0969da;
+        font-weight: 500;
+      }
+
+      /* MAIN CONTENT */
+      .main-content {
+        margin-left: 320px;
+        flex: 1;
+        padding: 40px 60px;
+        background: #ffffff;
+        min-height: 100vh;
+      }
+
+      .content-wrapper {
+        max-width: 900px;
         margin: 0 auto;
-        padding: 40px 20px;
+      }
+
+      /* MOBILE */
+      .menu-toggle {
+        display: none;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        background: #0969da;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        z-index: 200;
+        font-size: 1.2rem;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .main-content {
+          margin-left: 0;
+          padding: 20px;
+        }
+        .menu-toggle {
+          display: block;
+        }
+      }
+
+      /* MARKDOWN STYLES */
+      .markdown-body {
+        font-size: 1rem;
+      }
+      .markdown-body h1 {
+        border-bottom: 1px solid #e1e4e8;
+        padding-bottom: 0.3em;
+      }
+      .markdown-body h2 {
+        border-bottom: 1px solid #e1e4e8;
+        padding-bottom: 0.3em;
+        margin-top: 24px;
+      }
+      .markdown-body code {
+        background: #f6f8fa;
+        padding: 0.2em 0.4em;
+        border-radius: 6px;
+      }
+      .markdown-body pre {
+        background: #f6f8fa;
+        border-radius: 6px;
+        padding: 16px;
+        overflow-x: auto;
       }
     </style>
   </head>
-  <body class="markdown-body">
-    {{ content }}
+  <body>
+    <button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+
+    <div class="docs-container">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h1>🧠 ML/LLM Docs</h1>
+          <p>Machine Learning & Large Language Models</p>
+        </div>
+        <nav id="navigation"></nav>
+      </aside>
+
+      <main class="main-content">
+        <div class="content-wrapper markdown-body">{{ content }}</div>
+      </main>
+    </div>
+
+    <script>
+      // Your 7 Domains with Subdomains
+      const navigationData = [
+        {
+          name: "📐 Domain 01: Mathematical Foundations",
+          path: "domain-01-mathematical-foundations",
+          subsections: [
+            {
+              name: "Linear Algebra",
+              path: "domain-01-mathematical-foundations/01-linear-algebra",
+            },
+            {
+              name: "Calculus",
+              path: "domain-01-mathematical-foundations/02-calculus",
+            },
+            {
+              name: "Probability & Statistics",
+              path: "domain-01-mathematical-foundations/03-probability-statistics",
+            },
+          ],
+        },
+        {
+          name: "🤖 Domain 02: ML Fundamentals",
+          path: "domain-02-ml-fundamentals",
+          subsections: [
+            {
+              name: "ML Basics",
+              path: "domain-02-ml-fundamentals/01-ml-basics",
+            },
+            {
+              name: "Core Algorithms",
+              path: "domain-02-ml-fundamentals/02-core-algorithms",
+            },
+          ],
+        },
+        {
+          name: "🧠 Domain 03: Deep Learning Foundations",
+          path: "domain-03-deep-learning-foundations",
+          subsections: [
+            {
+              name: "Neural Networks Basics",
+              path: "domain-03-deep-learning-foundations/01-neural-networks-basics",
+            },
+            {
+              name: "Training Neural Networks",
+              path: "domain-03-deep-learning-foundations/02-training-neural-networks",
+            },
+          ],
+        },
+        {
+          name: "🏗️ Domain 04: Advanced Architectures",
+          path: "domain-04-advanced-architectures",
+          subsections: [
+            {
+              name: "Sequence Models",
+              path: "domain-04-advanced-architectures/01-sequence-models",
+            },
+            {
+              name: "Transformers",
+              path: "domain-04-advanced-architectures/02-transformers",
+            },
+          ],
+        },
+        {
+          name: "🚀 Domain 05: LLM-Specific Concepts",
+          path: "domain-05-llm-specific-concepts",
+          subsections: [
+            {
+              name: "Tokenization",
+              path: "domain-05-llm-specific-concepts/01-tokenization",
+            },
+            {
+              name: "Training Paradigms",
+              path: "domain-05-llm-specific-concepts/02-training-paradigms",
+            },
+            {
+              name: "Architecture Variants",
+              path: "domain-05-llm-specific-concepts/03-architecture-variants",
+            },
+          ],
+        },
+        {
+          name: "🔍 Domain 06: Vector Space & Retrieval",
+          path: "domain-06-vector-space-retrieval",
+          subsections: [
+            {
+              name: "Embeddings",
+              path: "domain-06-vector-space-retrieval/01-embeddings",
+            },
+            {
+              name: "Distance Metrics",
+              path: "domain-06-vector-space-retrieval/02-distance-metrics",
+            },
+            {
+              name: "Vector Databases",
+              path: "domain-06-vector-space-retrieval/03-vector-databases",
+            },
+            { name: "RAG", path: "domain-06-vector-space-retrieval/04-rag" },
+          ],
+        },
+        {
+          name: "⚙️ Domain 07: Practical Aspects",
+          path: "domain-07-practical-aspects",
+          subsections: [
+            {
+              name: "Data Processing",
+              path: "domain-07-practical-aspects/01-data-processing",
+            },
+            {
+              name: "Evaluation & Metrics",
+              path: "domain-07-practical-aspects/02-evaluation-metrics",
+            },
+            {
+              name: "Deployment & Optimization",
+              path: "domain-07-practical-aspects/03-deployment-optimization",
+            },
+            {
+              name: "Production Considerations",
+              path: "domain-07-practical-aspects/04-production",
+            },
+          ],
+        },
+      ];
+
+      // Article lists for each subdomain (add yours)
+      const articlesData = {
+        "domain-01-mathematical-foundations/01-linear-algebra": [
+          "01-vectors-and-vector-operations",
+          "02-matrices-and-matrix-operations",
+          "03-eigenvalues-and-eigenvectors",
+          "04-linear-transformations",
+          "05-vector-spaces-and-dimensionality",
+        ],
+        "domain-01-mathematical-foundations/02-calculus": [
+          "01-derivatives-and-gradients",
+          "02-partial-derivatives",
+          "03-chain-rule",
+          "04-gradient-descent-concept",
+          "05-multivariable-calculus-basics",
+        ],
+        "domain-01-mathematical-foundations/03-probability-statistics": [
+          "01-basic-probability-rules",
+          "02-random-variables",
+          "03-distributions",
+          "04-mean-variance-standard-deviation",
+          "05-bayes-theorem",
+          "06-maximum-likelihood-estimation",
+        ],
+      };
+
+      function formatArticleName(filename) {
+        return filename
+          .replace(/^\d+-/, "")
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase());
+      }
+
+      function generateNavigation() {
+        const nav = document.getElementById("navigation");
+        if (!nav) return;
+
+        let html = "";
+        const currentPath = window.location.pathname;
+
+        for (const domain of navigationData) {
+          html += `<div class="nav-section">`;
+          html += `<div class="nav-section-header" onclick="toggleSection(this)">`;
+          html += `<span>${domain.name}</span>`;
+          html += `<span class="arrow">▶</span>`;
+          html += `</div>`;
+          html += `<div class="nav-section-content">`;
+
+          for (const subsection of domain.subsections) {
+            html += `<div class="nav-subsection">`;
+            html += `<div class="nav-subsection-header" onclick="toggleSubsection(this)">`;
+            html += `<span>📂 ${subsection.name}</span>`;
+            html += `<span class="arrow">▶</span>`;
+            html += `</div>`;
+            html += `<div class="nav-subsection-content">`;
+
+            const articles = articlesData[subsection.path] || [];
+            for (const article of articles) {
+              const articlePath = `/${subsection.path}/${article}.md`;
+              const isActive = currentPath === articlePath;
+              html += `<a href="${articlePath}" class="nav-item ${isActive ? "active" : ""}">📄 ${formatArticleName(article)}</a>`;
+            }
+
+            html += `</div></div>`;
+          }
+
+          html += `</div></div>`;
+        }
+
+        nav.innerHTML = html;
+      }
+
+      function toggleSection(element) {
+        element.classList.toggle("active");
+        element.nextElementSibling.classList.toggle("show");
+      }
+
+      function toggleSubsection(element) {
+        element.classList.toggle("active");
+        element.nextElementSibling.classList.toggle("show");
+      }
+
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+      }
+
+      document.addEventListener("DOMContentLoaded", generateNavigation);
+    </script>
   </body>
 </html>

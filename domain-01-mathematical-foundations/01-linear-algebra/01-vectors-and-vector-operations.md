@@ -1,5 +1,3 @@
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-
 # Vectors and vector operations
 
 ## ## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
