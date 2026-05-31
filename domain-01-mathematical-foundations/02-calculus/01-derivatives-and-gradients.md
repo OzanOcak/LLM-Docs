@@ -1,22 +1,22 @@
 # Derivatives and gradients
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 How does a mind learn from mistakes? It measures error, then changes just a little in the direction that reduces that error. That tiny adjustment—the slope of the error landscape—is a derivative. When your AI has thousands or millions of parameters, the collection of all those slopes is the gradient. Learning is gradient following. Without derivatives, your system cannot improve. Without gradients, it cannot learn in high-dimensional spaces. Derivatives and gradients are the compass needles of machine learning.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A derivative measures how fast a function changes when you nudge its input; a gradient is a vector containing all partial derivatives of a multivariable function, pointing in the direction of steepest ascent.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are blindfolded on a mountain at night. You want to reach the valley bottom (minimum error). You stomp your foot. Which way does the ground slope? That slope at your feet is the derivative in one direction. Now imagine feeling the slope forward/backward (∂f/∂x) and left/right (∂f/∂y). The arrow combining both directions—pointing steepest downhill—is the negative gradient. You take a step that direction. Then feel again. Step again. This is gradient descent, the engine of almost every learning algorithm.
 
@@ -24,9 +24,9 @@ If the mountain is smooth, each step gets you closer to the bottom. If the mount
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Derivative as slope of a tangent line:
 
     f(x)
@@ -64,7 +64,7 @@ Negative gradient points downhill (toward lower error).
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Derivative of a single-variable function:**
 
@@ -112,9 +112,9 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a simple loss function**
+#### **Step 1: Define a simple loss function**
 
 A neural network with one weight w, one bias b, and mean squared error loss for a single training example with target t=0:
 
@@ -122,13 +122,13 @@ Prediction: ŷ = w·x + b, where x=1 (input)
 
 Loss: L(w,b) = (ŷ - t)² = (w + b - 0)² = (w + b)²
 
-**Step 2: Compute partial derivatives**
+#### **Step 2: Compute partial derivatives**
 
 ∂L/∂w = 2(w + b) × 1 = 2(w + b)
 
 ∂L/∂b = 2(w + b) × 1 = 2(w + b)
 
-**Step 3: Evaluate at a specific point**
+#### **Step 3: Evaluate at a specific point**
 
 Current weights: w = 0.5, b = 0.3
 
@@ -138,19 +138,19 @@ w + b = 0.8
 
 ∂L/∂b = 2 × 0.8 = 1.6
 
-**Step 4: Form the gradient**
+#### **Step 4: Form the gradient**
 
 $$
 \nabla L = \begin{bmatrix} 1.6 \\ 1.6 \end{bmatrix}
 $$
 
-**Step 5: Take one gradient descent step (learning rate α = 0.1)**
+#### **Step 5: Take one gradient descent step (learning rate α = 0.1)**
 
 New w = w - α × ∂L/∂w = 0.5 - 0.1 × 1.6 = 0.5 - 0.16 = 0.34
 
 New b = b - α × ∂L/∂b = 0.3 - 0.1 × 1.6 = 0.3 - 0.16 = 0.14
 
-**Step 6: Verify loss decreased**
+#### **Step 6: Verify loss decreased**
 
 Old loss = (0.5 + 0.3)² = 0.8² = 0.64
 
@@ -158,7 +158,7 @@ New loss = (0.34 + 0.14)² = 0.48² = 0.2304 ✓ (decreased)
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Backpropagation**: The chain rule of calculus is applied backward through the network to compute the gradient of the loss with respect to every parameter.
 
@@ -176,7 +176,7 @@ New loss = (0.34 + 0.14)² = 0.48² = 0.2304 ✓ (decreased)
 
 ---
 
-**8. Brain-like connection (learning as gradient following)**
+### **8. Brain-like connection (learning as gradient following)**
 
 The brain does not explicitly compute gradients, but it approximates them. Hebbian plasticity ("neurons that fire together wire together") is a local rule that, over time, moves synaptic weights in directions that reduce prediction error. The cerebellum, which handles motor learning, contains circuitry that performs something remarkably close to gradient descent on movement error. Dopamine signals in the basal ganglia encode a "reward prediction error" that acts like a global gradient signal for reinforcement learning.
 
@@ -184,7 +184,7 @@ Your own motor learning—throwing a ball, playing an instrument—relies on you
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "The gradient tells me exactly how far to move to reach the minimum."
 
@@ -192,9 +192,9 @@ _Why it is wrong:_ The gradient only tells you the direction of steepest ascent 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -210,7 +210,7 @@ _Why it is wrong:_ The gradient only tells you the direction of steepest ascent 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a loss function L(w) = w⁴ - 4w² + 4.
 

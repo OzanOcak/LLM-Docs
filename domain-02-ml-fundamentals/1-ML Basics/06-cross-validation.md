@@ -1,22 +1,22 @@
 # Cross-validation
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A single train-validation split is fragile. What if your validation set happens to be unusually easy or hard? Your hyperparameter choice and performance estimate would be biased by random chance. Cross-validation solves this by repeatedly splitting the data into different train-validation pairs and averaging the results. It gives you a more reliable estimate of how your model will perform on new data. For small datasets where you cannot afford to hold out a large validation set, cross-validation is essential. Understanding cross-validation means understanding how to extract honest performance estimates from limited data without fooling yourself.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Cross-validation estimates model performance by partitioning data into K subsets, training on K-1 subsets, validating on the held-out subset, and rotating which subset is held out, then averaging the results across all K rotations.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a coach selecting players for a basketball team. You have 100 players and want to know who performs best under pressure. Instead of relying on one big game (a single validation split), you run multiple scrimmages:
 
@@ -30,9 +30,9 @@ Your final assessment of each player averages their performance across scrimmage
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 K-fold cross-validation (K=5):
 
     Complete Dataset (all examples)
@@ -89,7 +89,7 @@ K-fold cross-validation (K=5):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 Given dataset D of size n. Partition D into K disjoint folds (subsets) of approximately equal size: D₁, D₂, ..., D_K.
 
@@ -134,13 +134,13 @@ Where f̂⁽⁻ⁱ⁾ is trained on all data except example i.
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define the dataset**
+#### **Step 1: Define the dataset**
 
 Small dataset of 10 examples. Binary classification. Want to estimate model accuracy without a separate test set (all data is for validation).
 
-**Step 2: Choose K=5 (2 examples per fold)**
+#### **Step 2: Choose K=5 (2 examples per fold)**
 
 Folds:
 
@@ -150,42 +150,42 @@ Folds:
 - Fold4: examples 7,8
 - Fold5: examples 9,10
 
-**Step 3: Iteration 1**
+#### **Step 3: Iteration 1**
 
 Train on Folds 2,3,4,5 (8 examples). Validate on Fold1 (examples 1,2).
 Model predicts correctly on 1 of 2 examples → Score₁ = 0.5
 
-**Step 4: Iteration 2**
+#### **Step 4: Iteration 2**
 
 Train on Folds 1,3,4,5. Validate on Fold2 (examples 3,4).
 Predicts correctly on 2 of 2 → Score₂ = 1.0
 
-**Step 5: Iteration 3**
+#### **Step 5: Iteration 3**
 
 Train on Folds 1,2,4,5. Validate on Fold3 (examples 5,6).
 Predicts correctly on 2 of 2 → Score₃ = 1.0
 
-**Step 6: Iteration 4**
+#### **Step 6: Iteration 4**
 
 Train on Folds 1,2,3,5. Validate on Fold4 (examples 7,8).
 Predicts correctly on 1 of 2 → Score₄ = 0.5
 
-**Step 7: Iteration 5**
+#### **Step 7: Iteration 5**
 
 Train on Folds 1,2,3,4. Validate on Fold5 (examples 9,10).
 Predicts correctly on 2 of 2 → Score₅ = 1.0
 
-**Step 8: Compute CV accuracy**
+#### **Step 8: Compute CV accuracy**
 
 CV = (0.5 + 1.0 + 1.0 + 0.5 + 1.0) / 5 = 4.0 / 5 = 0.8
 
-**Step 9: Interpret**
+#### **Step 9: Interpret**
 
 Estimated model accuracy on unseen data is 80%. Every example was used for validation exactly once. No example was used for both training and validation in any iteration.
 
 ---
 
-**7. How this appears inside neural networks or LLMs**
+### **7. How this appears inside neural networks or LLMs**
 
 - **Hyperparameter tuning with limited data:** When labeled data is scarce (e.g., medical imaging with 500 samples), use 5-fold or 10-fold CV to select learning rate, batch size, architecture.
 
@@ -205,13 +205,13 @@ Estimated model accuracy on unseen data is 80%. Every example was used for valid
 
 ---
 
-**8. Brain-like connection (multiple perspectives)**
+### **8. Brain-like connection (multiple perspectives)**
 
 When you learn a new concept, you do not rely on a single example or a single test. You encounter the concept in multiple contexts, from multiple angles. This is cross-validation in the brain. Studying the same fact in different rooms, at different times, with different cues strengthens memory and improves generalization. In visual perception, seeing an object from multiple viewpoints builds a robust representation invariant to rotation and lighting. The brain averages across experiences, similar to how cross-validation averages across folds. Lesion studies in neuroscience approximate leave-one-out cross-validation: remove one brain region, measure performance change, repeat for each region.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Cross-validation gives me a test set for free. I can use it to report my final performance without holding out a separate test set."
 
@@ -219,9 +219,9 @@ _Why it is wrong:_ Cross-validation reduces bias in performance estimation but d
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -238,7 +238,7 @@ _Why it is wrong:_ Cross-validation reduces bias in performance estimation but d
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have 200 labeled examples. You want to compare two hyperparameter settings (A and B) and report which is better, but you cannot afford a separate test set.
 

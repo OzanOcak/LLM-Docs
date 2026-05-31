@@ -1,22 +1,22 @@
 # Partial derivatives
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A neural network has thousands or millions of parameters. Each parameter influences the final output. But how do you isolate the effect of a single weight when all the others are also changing? You need a way to hold everything constant except one variable, measure the sensitivity, then repeat for every variable. That is a partial derivative. Partial derivatives are the atomic units of the gradient. Without them, you cannot tell which knob is responsible for which part of the error. With them, every parameter gets its own personalized learning signal.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A partial derivative measures how a multivariable function changes when you vary one input variable while holding all other variables fixed.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are baking bread. The final quality Q depends on three variables: temperature T (oven), time t (baking minutes), and hydration H (water percentage). You want to improve your bread. But changing temperature also changes how time behaves. How do you isolate each factor?
 
@@ -28,9 +28,9 @@ Each partial derivative tells you the isolated effect of one ingredient. The col
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Visualizing partial derivatives on a 3D surface:
 
     f(x,y) (height)
@@ -63,11 +63,11 @@ Visualizing partial derivatives on a 3D surface:
          │    ┌─────┐
          │   ╱ ∂f/∂y ╲
          │  ╱ (y-direction) ╲
-         │ ╱         ↑      ╲
-         │╱          │       ╲
+         │ ╱         ↑       ╲
+         │╱          │        ╲
          ●───────────┼──────────→ x
-          ╲          │       ╱
-           ╲    ∂f/∂x→      ╱
+          ╲          │         ╱
+           ╲    ∂f/∂x→        ╱
             ╲   (x-direction)╱
              ╲              ╱
               └────────────┘
@@ -75,7 +75,7 @@ Visualizing partial derivatives on a 3D surface:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 For a function f(x₁, x₂, ..., xₙ), the partial derivative with respect to x_i is:
 
@@ -112,9 +112,9 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a simple neural network loss**
+#### **Step 1: Define a simple neural network loss**
 
 Network with two weights w₁ and w₂, input x=2, target t=3.
 
@@ -122,7 +122,7 @@ Prediction: ŷ = w₁ × x + w₂ = 2w₁ + w₂
 
 Loss (mean squared error): L = (ŷ - t)² = (2w₁ + w₂ - 3)²
 
-**Step 2: Compute partial derivative with respect to w₁**
+#### **Step 2: Compute partial derivative with respect to w₁**
 
 Treat w₂ as constant. Let u = 2w₁ + (w₂ - 3)
 
@@ -132,13 +132,13 @@ Treat w₂ as constant. Let u = 2w₁ + (w₂ - 3)
 
 Therefore: ∂L/∂w₁ = 2(2w₁ + w₂ - 3) × 2 = 4(2w₁ + w₂ - 3)
 
-**Step 3: Compute partial derivative with respect to w₂**
+#### **Step 3: Compute partial derivative with respect to w₂**
 
 Treat w₁ as constant. ∂/∂w₂(2w₁ + w₂ - 3) = 1
 
 Therefore: ∂L/∂w₂ = 2(2w₁ + w₂ - 3) × 1 = 2(2w₁ + w₂ - 3)
 
-**Step 4: Evaluate at specific weights**
+#### **Step 4: Evaluate at specific weights**
 
 Current weights: w₁ = 1, w₂ = 0
 
@@ -148,14 +148,14 @@ Compute error term: 2×1 + 0 - 3 = 2 - 3 = -1
 
 ∂L/∂w₂ = 2 × (-1) = -2
 
-**Step 5: Interpret the partial derivatives**
+#### **Step 5: Interpret the partial derivatives**
 
 - ∂L/∂w₁ = -4: Increasing w₁ by a small amount reduces loss by approximately 4× that amount
 - ∂L/∂w₂ = -2: Increasing w₂ reduces loss by approximately 2× that amount
 
 w₁ has twice the impact of w₂ on the loss at this point.
 
-**Step 6: Gradient**
+#### **Step 6: Gradient**
 
 $$
 \nabla L = \begin{bmatrix} -4 \\ -2 \end{bmatrix}
@@ -165,7 +165,7 @@ Negative gradient points downhill: increase both w₁ and w₂ to decrease loss.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Backpropagation core**: The chain rule for partial derivatives is applied layer by layer. ∂L/∂w for layer l depends on ∂L/∂output of layer l (the "error signal" from above) and the input to that layer.
 
@@ -181,13 +181,13 @@ Negative gradient points downhill: increase both w₁ and w₂ to decrease loss.
 
 ---
 
-**8. Brain-like connection (isolating causes)**
+### **8. Brain-like connection (isolating causes)**
 
 The brain cannot compute explicit partial derivatives, but it solves the credit assignment problem: which synapse caused which part of the error? Local learning rules (like spike-timing-dependent plasticity) approximate partial derivatives by correlating pre-synaptic activity with post-synaptic error signals. The cerebellum uses a clever trick: it has parallel fibers (inputs) and climbing fibers (error signals). When a climbing fiber fires, it modifies all parallel fiber synapses that were recently active, effectively computing a partial derivative of error with respect to each input. Evolution found a biological implementation of ∂E/∂w before calculus was formalized.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "A partial derivative treats other variables as constant, so they don't matter at all."
 
@@ -195,9 +195,9 @@ _Why it is wrong:_ "Treat as constant" only means you do not differentiate with 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -213,7 +213,7 @@ _Why it is wrong:_ "Treat as constant" only means you do not differentiate with 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a function f(x,y) = x²y + 3x - y².
 

@@ -1,22 +1,22 @@
 # Multivariable calculus basics
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Single-variable calculus handles one knob. A neural network has millions of knobs (weights). You cannot optimize each one in isolation because they interact. Changing weight A changes how weight B affects the output. Multivariable calculus is the mathematics of many interacting knobs. It gives you the tools to understand surfaces in high-dimensional spaces, measure curvature, find valleys, and navigate toward better solutions. Every modern AI system is built on the foundation of multivariable calculus, from gradient descent to attention mechanisms to variational autoencoders.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Multivariable calculus extends differentiation and integration to functions with more than one input, using partial derivatives, gradients, directional derivatives, and second-order information to describe how the function behaves in multiple directions simultaneously.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a farmer on a hillside. Your crop yield depends on two factors: how much fertilizer you add (x) and how much water you provide (y). This is a function f(x,y).
 
@@ -32,9 +32,9 @@ Multivariable calculus gives you the full topographical map of your optimization
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Multivariable function landscape (2 inputs, 1 output):
 
     f(x,y) [height]
@@ -77,7 +77,7 @@ Saddle point (neither min nor max):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Gradient (vector of first partial derivatives):**
 
@@ -138,19 +138,19 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a function**
+#### **Step 1: Define a function**
 
 f(x,y) = x²y + 3xy²
 
-**Step 2: Compute first partial derivatives**
+#### **Step 2: Compute first partial derivatives**
 
 ∂f/∂x = 2xy + 3y² (treat y constant, differentiate x terms)
 
 ∂f/∂y = x² + 6xy (treat x constant, differentiate y terms)
 
-**Step 3: Evaluate gradient at point (x=1, y=2)**
+#### **Step 3: Evaluate gradient at point (x=1, y=2)**
 
 ∂f/∂x at (1,2) = 2×1×2 + 3×4 = 4 + 12 = 16
 
@@ -158,7 +158,7 @@ f(x,y) = x²y + 3xy²
 
 ∇f(1,2) = [16, 13]ᵀ
 
-**Step 4: Compute directional derivative in a specific direction**
+#### **Step 4: Compute directional derivative in a specific direction**
 
 Unit vector u = [0.6, 0.8] (points at 53° from x-axis, check: √(0.6²+0.8²)=1)
 
@@ -166,7 +166,7 @@ D_u f = ∇f · u = 16×0.6 + 13×0.8 = 9.6 + 10.4 = 20
 
 Interpretation: Moving from (1,2) in direction u increases f at rate 20 per unit step.
 
-**Step 5: Compute second partial derivatives for Hessian**
+#### **Step 5: Compute second partial derivatives for Hessian**
 
 ∂²f/∂x² = 2y
 
@@ -176,7 +176,7 @@ Interpretation: Moving from (1,2) in direction u increases f at rate 20 per unit
 
 Check mixed partials: ∂²f/∂y∂x = 2x + 6y (same, symmetric)
 
-**Step 6: Hessian at (1,2)**
+#### **Step 6: Hessian at (1,2)**
 
 ∂²f/∂x² = 2×2 = 4
 
@@ -192,7 +192,7 @@ The Hessian tells curvature. Positive eigenvalues (check later) indicate local m
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Loss landscape optimization**: The gradient (first derivatives) guides descent. The Hessian (second derivatives) helps understand curvature, saddle points, and enables second-order optimizers like Newton's method.
 
@@ -210,13 +210,13 @@ The Hessian tells curvature. Positive eigenvalues (check later) indicate local m
 
 ---
 
-**8. Brain-like connection (high-dimensional navigation)**
+### **8. Brain-like connection (high-dimensional navigation)**
 
 The brain does not visualize 1000-dimensional spaces, but it navigates them. Each neuron is one dimension. A pattern of firing across 1 million neurons is a point in 1-million-dimensional space. Learning rewires connections, moving that point. The brain's plasticity rules approximate gradient descent in this unimaginably high-dimensional space. Multivariable calculus provides the language to describe what the brain does: it follows the gradient of a reward function, navigates curved manifolds of neural activity, and finds low-dimensional attractor states that represent memories and concepts.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Multivariable calculus is just single-variable calculus done multiple times independently."
 
@@ -224,9 +224,9 @@ _Why it is wrong:_ The interactions between variables create entirely new phenom
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -241,7 +241,7 @@ _Why it is wrong:_ The interactions between variables create entirely new phenom
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have f(x,y) = 3x² + 2y² - 4xy.
 

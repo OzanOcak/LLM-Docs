@@ -1,22 +1,22 @@
 # Backpropagation
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Forward propagation is thinking. But how does a network learn to think correctly? It needs to know how to adjust its weights when it makes a mistake. Backpropagation is the algorithm that computes the gradient of the loss with respect to every weight in the network, propagating error signals backward from the output to the input. It is the chain rule applied systematically and efficiently. Without backpropagation, neural networks could not learn. Every modern AI system—every LLM, every vision model, every speech recognizer—is trained using backpropagation. Understanding backpropagation means understanding how error flows backward to improve future predictions.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Backpropagation computes gradients of the loss function with respect to all network parameters by applying the chain rule backwards through the network, propagating error signals from the output layer to the input layer.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine a row of circus performers balancing on each other's shoulders. The top performer (output) makes a mistake—they wobble. To fix the wobble, you must figure out who caused it. The top performer says: "I wobbled because the performer below me (layer 3) shifted left." That performer says: "I shifted left because the performer below me (layer 2) pushed up unevenly." That performer says: "I pushed unevenly because the performer below me (layer 1) leaned right."
 
@@ -26,9 +26,9 @@ Backpropagation does the same for a neural network. The loss (error) at the outp
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Backpropagation flow vs forward propagation:
 
     Forward (computation):
@@ -66,13 +66,13 @@ Detailed backward pass for a single layer:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Define:** For a network with L layers, loss L (e.g., cross-entropy or MSE)
 
-**Step 1: Forward pass** (store all activations a^(l) and pre-activations z^(l))
+#### **Step 1: Forward pass** (store all activations a^(l) and pre-activations z^(l))
 
-**Step 2: Compute output layer gradient (δ^L):**
+#### **Step 2: Compute output layer gradient (δ^L):**
 
 For loss L and activation f^L at output layer:
 
@@ -84,7 +84,7 @@ For mean squared error with linear output: δ^(L) = a^(L) - y
 
 For cross-entropy with sigmoid output: δ^(L) = a^(L) - y (same simple form!)
 
-**Step 3: Backpropagate through hidden layers (l = L-1 down to 1):**
+#### **Step 3: Backpropagate through hidden layers (l = L-1 down to 1):**
 
 $$
 \delta^{(l)} = \left( \mathbf{W}^{(l+1)T} \delta^{(l+1)} \right) \odot f'(\mathbf{z}^{(l)})
@@ -92,7 +92,7 @@ $$
 
 Where ⊙ is elementwise multiplication (Hadamard product).
 
-**Step 4: Compute gradients for weights and biases:**
+#### **Step 4: Compute gradients for weights and biases:**
 
 $$
 \frac{\partial L}{\partial \mathbf{W}^{(l)}} = \delta^{(l)} \left( \mathbf{a}^{(l-1)} \right)^T
@@ -104,7 +104,7 @@ $$
 
 (For batches: sum or average gradients across examples)
 
-**Step 5: Update parameters (gradient descent):**
+#### **Step 5: Update parameters (gradient descent):**
 
 $$
 \mathbf{W}^{(l)} \leftarrow \mathbf{W}^{(l)} - \eta \frac{\partial L}{\partial \mathbf{W}^{(l)}}
@@ -122,16 +122,16 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a tiny network**
+#### **Step 1: Define a tiny network**
 
 Input: x = 1
 Hidden: 1 neuron, weight w₁=0.5, bias b₁=0, activation sigmoid
 Output: 1 neuron, weight w₂=1.0, bias b₂=0, activation sigmoid (for binary classification)
 True label y = 0
 
-**Step 2: Forward pass**
+#### **Step 2: Forward pass**
 
 z₁ = w₁×x + b₁ = 0.5×1 + 0 = 0.5
 a₁ = σ(z₁) = 1/(1+e^{-0.5}) = 1/(1+0.6065) = 0.6225
@@ -141,16 +141,16 @@ z₂ = w₂×a₁ + b₂ = 1.0×0.6225 + 0 = 0.6225
 
 Loss (binary cross-entropy): L = -[y log(ŷ) + (1-y) log(1-ŷ)] = -[0 + 1×log(0.3493)] = -(-1.052) = 1.052
 
-**Step 3: Output layer gradient (δ₂)**
+#### **Step 3: Output layer gradient (δ₂)**
 
 For sigmoid + binary cross-entropy: δ₂ = ŷ - y = 0.6507 - 0 = 0.6507
 
-**Step 4: Gradients for output layer**
+#### **Step 4: Gradients for output layer**
 
 ∂L/∂w₂ = δ₂ × a₁ = 0.6507 × 0.6225 = 0.405
 ∂L/∂b₂ = δ₂ = 0.6507
 
-**Step 5: Backpropagate to hidden layer**
+#### **Step 5: Backpropagate to hidden layer**
 
 δ₁ = w₂ × δ₂ × σ'(z₁)
 
@@ -158,17 +158,17 @@ For sigmoid + binary cross-entropy: δ₂ = ŷ - y = 0.6507 - 0 = 0.6507
 
 δ₁ = 1.0 × 0.6507 × 0.235 = 0.153
 
-**Step 6: Gradients for hidden layer**
+#### **Step 6: Gradients for hidden layer**
 
 ∂L/∂w₁ = δ₁ × x = 0.153 × 1 = 0.153
 ∂L/∂b₁ = δ₁ = 0.153
 
-**Step 7: Update weights (learning rate η=0.1)**
+#### **Step 7: Update weights (learning rate η=0.1)**
 
 w₁_new = 0.5 - 0.1×0.153 = 0.5 - 0.0153 = 0.4847
 w₂_new = 1.0 - 0.1×0.405 = 1.0 - 0.0405 = 0.9595
 
-**Step 8: Verify loss decreased**
+#### **Step 8: Verify loss decreased**
 
 Forward pass with new weights:
 
@@ -178,7 +178,7 @@ New loss = -log(1-0.644) = -log(0.356) = 1.033 (lower than 1.052 ✓)
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Automatic differentiation:** Modern frameworks (PyTorch, TensorFlow, JAX) compute gradients automatically using backpropagation. You only write forward pass.
 
@@ -198,13 +198,13 @@ New loss = -log(1-0.644) = -log(0.356) = 1.033 (lower than 1.052 ✓)
 
 ---
 
-**8. Brain-like connection (error-driven learning)**
+### **8. Brain-like connection (error-driven learning)**
 
 The brain does not use exact backpropagation—it uses local learning rules (e.g., Hebbian plasticity, spike-timing-dependent plasticity). However, some theories propose that the brain approximates backpropagation through feedback alignment or target propagation. The cerebellum uses climbing fibers to carry error signals that modify parallel fiber synapses—a biological approximation of backpropagated error. While the brain's algorithm differs, the principle is the same: error signals propagate backward to adjust synaptic strengths, improving future behavior. Evolution discovered error-driven learning long before AI researchers formalized backpropagation.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Backpropagation is just the chain rule. It's trivial."
 
@@ -212,9 +212,9 @@ _Why it is wrong:_ The chain rule is mathematically simple, but backpropagation'
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -232,7 +232,7 @@ _Why it is wrong:_ The chain rule is mathematically simple, but backpropagation'
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 A network has: input x=2, hidden weight w₁=1.0, bias b₁=0, activation ReLU. Output weight w₂=0.5, bias b₂=0, activation linear (no activation). Loss = MSE: L = (ŷ - y)² with y=3.
 

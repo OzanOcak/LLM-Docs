@@ -1,22 +1,22 @@
 # Maximum likelihood estimation
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 You have data. You have a model. Which parameters make the model most consistent with the data? Maximum likelihood estimation (MLE) answers this question: choose the parameters that maximize the probability of observing the data you actually saw. This simple principle underlies almost all supervised learning. Linear regression, logistic regression, and even neural networks trained with cross-entropy loss are performing maximum likelihood estimation. Understanding MLE means understanding why we minimize negative log likelihood, why the loss function has that form, and how to derive new models from first principles.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Maximum likelihood estimation finds the parameter values that make the observed data most probable, by maximizing the likelihood function over the parameter space.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a detective investigating a biased coin. You flip it 10 times and get 7 heads, 3 tails. You do not know the probability p of heads. What is your best guess?
 
@@ -30,9 +30,9 @@ p=0.7 gives the highest likelihood. That is the maximum likelihood estimate. Int
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Maximum likelihood estimation visualized:
 
     Likelihood function L(θ) for coin flip data (7 heads, 3 tails)
@@ -80,7 +80,7 @@ Maximum likelihood estimation visualized:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Likelihood function:** For independent and identically distributed data {x₁, ..., xₙ}:
 
@@ -127,21 +127,21 @@ For Gaussian with fixed variance, this gives mean squared error. For Bernoulli, 
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define the problem**
+#### **Step 1: Define the problem**
 
 You measure waiting times at a bus stop: [3, 5, 2, 8, 4] minutes. You assume waiting times follow an exponential distribution with rate λ (mean = 1/λ). Find λ̂ (MLE).
 
-**Step 2: Write the exponential PDF**
+#### **Step 2: Write the exponential PDF**
 
 f(x|λ) = λ e^{-λx}, x ≥ 0
 
-**Step 3: Write the likelihood**
+#### **Step 3: Write the likelihood**
 
 L(λ) = ∏\_{i=1}^5 λ e^{-λ x_i} = λ⁵ e^{-λ Σ x_i}
 
-**Step 4: Write the log-likelihood**
+#### **Step 4: Write the log-likelihood**
 
 ℓ(λ) = 5 log λ - λ Σ x_i
 
@@ -149,7 +149,7 @@ L(λ) = ∏\_{i=1}^5 λ e^{-λ x_i} = λ⁵ e^{-λ Σ x_i}
 
 ℓ(λ) = 5 log λ - 22λ
 
-**Step 5: Take derivative and set to zero**
+#### **Step 5: Take derivative and set to zero**
 
 dℓ/dλ = 5/λ - 22 = 0
 
@@ -157,22 +157,22 @@ dℓ/dλ = 5/λ - 22 = 0
 
 λ = 5/22 ≈ 0.2273
 
-**Step 6: Verify it is a maximum**
+#### **Step 6: Verify it is a maximum**
 
 Second derivative: d²ℓ/dλ² = -5/λ² < 0 (concave down, so maximum)
 
-**Step 7: Interpret**
+#### **Step 7: Interpret**
 
 λ̂ = 0.2273. The mean waiting time is 1/λ̂ = 22/5 = 4.4 minutes. This matches the sample mean (22/5 = 4.4). For exponential distribution, MLE of the mean is just the sample mean.
 
-**Step 8: Check with another method**
+#### **Step 8: Check with another method**
 
 If you guessed λ=0.2, ℓ = 5 log(0.2) - 22×0.2 = 5×(-1.609) - 4.4 = -8.045 - 4.4 = -12.445
 If λ=0.2273, ℓ = 5 log(0.2273) - 22×0.2273 = 5×(-1.481) - 5.0 = -7.405 - 5.0 = -12.405 (higher)
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Cross-entropy loss:** For classification, minimizing cross-entropy is equivalent to MLE for a multinomial distribution. This is the standard loss for LLMs (next token prediction).
 
@@ -192,13 +192,13 @@ If λ=0.2273, ℓ = 5 log(0.2273) - 22×0.2273 = 5×(-1.481) - 5.0 = -7.405 - 5.
 
 ---
 
-**8. Brain-like connection (efficient coding)**
+### **8. Brain-like connection (efficient coding)**
 
 The efficient coding hypothesis proposes that sensory neurons maximize the likelihood of representing natural stimuli given limited metabolic resources. The retina's center-surround receptive fields emerge from maximizing mutual information (closely related to likelihood) between neural responses and visual input. In the auditory system, neurons tune their response properties to maximize the likelihood of encoding species-specific sounds. The brain may not perform explicit MLE calculations, but evolution has shaped neural circuits to behave as if they are maximizing likelihood under biological constraints.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "MLE gives the true parameter values. If I have enough data, MLE finds the truth."
 
@@ -206,9 +206,9 @@ _Why it is wrong:_ MLE is consistent (converges to true value as n → ∞) but 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -224,7 +224,7 @@ _Why it is wrong:_ MLE is consistent (converges to true value as n → ∞) but 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a Poisson distribution with unknown mean λ. You observe data: [2, 3, 1, 4, 2].
 

@@ -1,22 +1,22 @@
 # Loss functions
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A neural network produces predictions. But how do you know if those predictions are good? The loss function is your answer. It quantifies the gap between prediction and truth—a single number that measures how wrong the network is. This number drives everything: backpropagation uses its gradient, optimization minimizes it, and model selection compares it. Without a loss function, learning has no objective. With it, every training step has a purpose: reduce the loss. Understanding loss functions means understanding what your network is optimizing for—and whether that aligns with your true goal.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A loss function measures the discrepancy between predicted outputs and true targets, providing a scalar signal that guides learning by penalizing incorrect predictions more than correct ones.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are an archery coach. Each arrow (prediction) lands somewhere relative to the bullseye (true target). You need a single number to evaluate each shot.
 
@@ -30,9 +30,9 @@ You watch each arrow, compute the loss, and tell the archer: "This shot was bad 
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Loss functions compared for regression (true y=0):
 
     Loss ↑
@@ -88,7 +88,7 @@ Choosing the right loss:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Regression losses (continuous outputs):**
 
@@ -146,20 +146,20 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define regression scenario**
+#### **Step 1: Define regression scenario**
 
 True values: y = [3, 5, 8]
 Predictions: ŷ = [2, 6, 7]
 
-**Step 2: Compute MSE**
+#### **Step 2: Compute MSE**
 
 Squared errors: (3-2)²=1, (5-6)²=1, (8-7)²=1
 Sum = 3
 MSE = 3/3 = 1.0
 
-**Step 3: Compute MAE**
+#### **Step 3: Compute MAE**
 
 Absolute errors: |3-2|=1, |5-6|=1, |8-7|=1
 Sum = 3
@@ -167,22 +167,22 @@ MAE = 3/3 = 1.0
 
 (Same in this example, but would differ if one error was large.)
 
-**Step 4: Define classification scenario**
+#### **Step 4: Define classification scenario**
 
 Binary classification, true label y=1
 Model predictions (probabilities): ŷ = 0.9 and ŷ = 0.6
 
-**Step 5: Compute BCE for ŷ=0.9**
+#### **Step 5: Compute BCE for ŷ=0.9**
 
 L = -[1×log(0.9) + 0×log(0.1)] = -log(0.9) = -(-0.1054) = 0.105
 
-**Step 6: Compute BCE for ŷ=0.6**
+#### **Step 6: Compute BCE for ŷ=0.6**
 
 L = -[log(0.6)] = -(-0.5108) = 0.511
 
 Interpretation: Being 90% confident in the correct class gives loss 0.105. Being only 60% confident gives loss 0.511—about 5× worse. The loss function strongly encourages high-confidence correct predictions.
 
-**Step 7: Wrong prediction example**
+#### **Step 7: Wrong prediction example**
 
 ŷ = 0.1 (10% confident in correct class)
 L = -log(0.1) = -(-2.3026) = 2.303 (very high penalty)
@@ -191,7 +191,7 @@ Confidently wrong is heavily punished.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Next-token prediction:** LLMs use categorical cross-entropy between predicted token distribution and actual next token. Minimizing this trains the model to assign high probability to the correct next word.
 
@@ -213,13 +213,13 @@ Confidently wrong is heavily punished.
 
 ---
 
-**8. Brain-like connection (reward prediction error)**
+### **8. Brain-like connection (reward prediction error)**
 
 The brain's learning signal is not a loss function but a reward prediction error (RPE). When dopamine neurons fire, they signal: "outcome was better than expected." This RPE drives learning in the basal ganglia. Mathematically, RPE = actual reward - expected reward. This is like a gradient of a loss function, but with positive reinforcement instead of negative error. The brain uses a reward maximization framework, while deep learning typically uses error minimization. However, reinforcement learning in AI uses the same dopamine-inspired update rules. The loss function's role—providing a scalar learning signal—is deeply analogous to the brain's neuromodulatory systems.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Lower loss always means better model. I should minimize loss at all costs."
 
@@ -227,9 +227,9 @@ _Why it is wrong:_ Loss is measured on training data. You can drive training los
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -246,7 +246,7 @@ _Why it is wrong:_ Loss is measured on training data. You can drive training los
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a binary classification with true label y=1. Model A predicts ŷ=0.99, model B predicts ŷ=0.51.
 

@@ -1,22 +1,22 @@
 # Chain rule
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A neural network is a chain of functions: input → layer 1 → activation → layer 2 → activation → ... → output → loss. An error at the end must propagate backward through every link in the chain to update weights at the beginning. How does a change in layer 1 affect the final loss after passing through five intermediate transformations? The chain rule is the answer. Without it, you cannot train deep networks. Backpropagation is the chain rule applied systematically. The chain rule is the glue that connects each layer's blame to the final mistake.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **The chain rule tells you how to differentiate a composite function: the derivative of the outer function multiplied by the derivative of the inner function, extended through any number of nested functions.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a manager at a factory. You want to know how changing the raw material order (R) affects the final profit (P). But there are intermediate steps:
 
@@ -38,9 +38,9 @@ If each step amplifies or dampens the signal, the product tells the total effect
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Chain rule as a cascade of functions:
 
     x ──→ f ──→ u ──→ g ──→ y
@@ -72,7 +72,7 @@ Visualizing error flow in a neural network:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Single-variable chain rule (two functions):**
 
@@ -114,9 +114,9 @@ Where a = activation, z = pre-activation (weighted sum).
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a tiny neural network**
+#### **Step 1: Define a tiny neural network**
 
 Input x = 2  
 Weight w = 3  
@@ -124,13 +124,13 @@ Linear layer: z = w × x = 3 × 2 = 6
 Activation (sigmoid): a = σ(z) = 1/(1 + e⁻ᶻ)  
 Loss (simple): L = a² (just to keep it minimal)
 
-**Step 2: Forward pass compute values**
+#### **Step 2: Forward pass compute values**
 
 z = 6  
 a = σ(6) ≈ 0.9975  
 L = (0.9975)² ≈ 0.995
 
-**Step 3: Compute derivatives backward using chain rule**
+#### **Step 3: Compute derivatives backward using chain rule**
 
 We want dL/dw to update the weight.
 
@@ -140,7 +140,7 @@ Second, da/dz = σ(z) × (1 - σ(z)) = a(1-a) ≈ 0.9975 × 0.0025 ≈ 0.0025
 
 Third, dz/dw = x = 2
 
-**Step 4: Apply chain rule**
+#### **Step 4: Apply chain rule**
 
 $$
 \frac{dL}{dw} = \frac{dL}{da} \times \frac{da}{dz} \times \frac{dz}{dw}
@@ -148,11 +148,11 @@ $$
 
 dL/dw ≈ 1.995 × 0.0025 × 2 ≈ 1.995 × 0.005 ≈ 0.009975
 
-**Step 5: Interpret**
+#### **Step 5: Interpret**
 
 A small increase in w (from 3 to 3.001) increases L by about 0.00001 (0.009975 × 0.001). The sigmoid saturated (z=6 is far in the tail), so the derivative is tiny. The network has learned nothing from this example because the activation is already near 1.
 
-**Step 6: Compare if sigmoid were unsaturated**
+#### **Step 6: Compare if sigmoid were unsaturated**
 
 If z = 0 instead of 6:  
 a = 0.5  
@@ -163,7 +163,7 @@ Much larger gradient. The chain rule reveals that saturated neurons kill learnin
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Backpropagation algorithm**: The entire algorithm is the chain rule applied layer by layer from output to input. Each layer receives error from above, multiplies by its local derivative, and passes the result backward.
 
@@ -181,13 +181,13 @@ Much larger gradient. The chain rule reveals that saturated neurons kill learnin
 
 ---
 
-**8. Brain-like connection (error propagation)**
+### **8. Brain-like connection (error propagation)**
 
 The brain does not literally compute the chain rule, but it solves the same credit assignment problem. When you reach for a coffee cup and miss, how does your brain adjust the motor commands from shoulder, elbow, wrist, and fingers? Each joint contributed to the error. Theories of cerebellar learning propose that climbing fibers carry error signals that multiply with parallel fiber activities—a biological approximation of the chain rule. The brain's ability to learn sequences (speech, music, dance) requires propagating error through time, just like backpropagation through time in RNNs. Evolution discovered the chain rule in the form of synaptic plasticity rules that correlate pre-synaptic activity with post-synaptic error.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "The chain rule is just canceling fractions. dy/dx = (dy/du) × (du/dx) and the du cancels like (dy/~~du~~) × (~~du~~/dx)."
 
@@ -195,9 +195,9 @@ _Why it is wrong:_ The "cancellation" is a helpful mnemonic, not a mathematical 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -213,7 +213,7 @@ _Why it is wrong:_ The "cancellation" is a helpful mnemonic, not a mathematical 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have three functions:  
 f(x) = x²  

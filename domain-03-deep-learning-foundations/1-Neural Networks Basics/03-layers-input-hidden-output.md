@@ -1,22 +1,22 @@
 # Layers (input, hidden, output)
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A single neuron is a line. Two neurons can draw a corner. But to recognize a face, understand a sentence, or play chess, you need depth—layers of neurons stacked on top of each other. The input layer receives raw data. Hidden layers transform it step by step into increasingly abstract representations. The output layer produces the final prediction. Each layer builds on the previous one, extracting higher-level features: pixels → edges → shapes → objects → faces. Without multiple layers, neural networks cannot learn hierarchical structure. Understanding layers means understanding the architecture of deep learning itself.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Neural network layers are organized stacks of neurons: the input layer receives data, hidden layers progressively transform representations through nonlinear combinations, and the output layer produces the final prediction for classification or regression.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine an assembly line in a factory:
 
@@ -34,9 +34,9 @@ Each hidden layer transforms the representation from the previous layer. Early l
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Fully connected neural network with layers:
 
     Input Layer      Hidden Layer 1    Hidden Layer 2      Output Layer
@@ -80,7 +80,7 @@ Depth in modern LLMs (GPT-3 example):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Layer operations (fully connected/dense layer):**
 
@@ -150,15 +150,15 @@ Adds input to output, allowing gradients to flow directly through layers.
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a tiny network**
+#### **Step 1: Define a tiny network**
 
 Input: 2 features (x₁, x₂)
 Hidden layer 1: 3 neurons, ReLU activation
 Output layer: 1 neuron (binary classification), sigmoid activation
 
-**Step 2: Initialize weights and biases**
+#### **Step 2: Initialize weights and biases**
 
 W¹ = [[0.5, 0.2], [0.3, 0.8], [0.1, 0.4]] (3×2 matrix)
 b¹ = [0.1, 0.2, 0.3]
@@ -166,11 +166,11 @@ b¹ = [0.1, 0.2, 0.3]
 W² = [[0.6, 0.4, 0.2]] (1×3 matrix)
 b² = [0.1]
 
-**Step 3: Input example**
+#### **Step 3: Input example**
 
 x = [2, 1]
 
-**Step 4: Hidden layer computation**
+#### **Step 4: Hidden layer computation**
 
 z¹₁ = 0.5×2 + 0.2×1 + 0.1 = 1.0 + 0.2 + 0.1 = 1.3
 z¹₂ = 0.3×2 + 0.8×1 + 0.2 = 0.6 + 0.8 + 0.2 = 1.6
@@ -178,7 +178,7 @@ z¹₃ = 0.1×2 + 0.4×1 + 0.3 = 0.2 + 0.4 + 0.3 = 0.9
 
 z¹ = [1.3, 1.6, 0.9]
 
-**Step 5: Apply ReLU activation**
+#### **Step 5: Apply ReLU activation**
 
 a¹₁ = max(0, 1.3) = 1.3
 a¹₂ = max(0, 1.6) = 1.6
@@ -186,21 +186,21 @@ a¹₃ = max(0, 0.9) = 0.9
 
 a¹ = [1.3, 1.6, 0.9]
 
-**Step 6: Output layer computation**
+#### **Step 6: Output layer computation**
 
 z² = 0.6×1.3 + 0.4×1.6 + 0.2×0.9 + 0.1 = 0.78 + 0.64 + 0.18 + 0.1 = 1.70
 
-**Step 7: Apply sigmoid activation**
+#### **Step 7: Apply sigmoid activation**
 
 ŷ = 1/(1 + e^{-1.70}) = 1/(1 + 0.1827) = 1/1.1827 = 0.845
 
-**Step 8: Interpret**
+#### **Step 8: Interpret**
 
 Prediction: 84.5% probability of class 1. The network transformed 2 raw inputs through 3 hidden neurons into a classification decision. Each hidden neuron learned a different weighted combination of inputs.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Transformer blocks as layers:** Each transformer block contains attention layer + feed-forward layer. GPT-3 has 96 such blocks (layers).
 
@@ -220,13 +220,13 @@ Prediction: 84.5% probability of class 1. The network transformed 2 raw inputs t
 
 ---
 
-**8. Brain-like connection (cortical columns)**
+### **8. Brain-like connection (cortical columns)**
 
 The brain's neocortex has a layered structure. Input arrives at layer 4 (sensory), propagates to layers 2/3 (processing), then to layer 5 (output to other regions). Each cortical column (about 0.5mm wide) is a "layer" of neurons processing a local patch of sensory space. Deep networks (50+ layers) are inspired by this hierarchical processing: visual cortex has V1 (edges) → V2 (shapes) → V4 (parts) → IT (objects). Each layer in a deep network corresponds roughly to one of these cortical areas. The brain's depth is limited by biology (neuron firing time, axon conduction), but artificial networks are not bound by these constraints, allowing hundreds of layers.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "More layers always means more performance. Deeper is always better."
 
@@ -234,9 +234,9 @@ _Why it is wrong:_ Deeper networks are harder to train (vanishing gradients, exp
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -254,7 +254,7 @@ _Why it is wrong:_ Deeper networks are harder to train (vanishing gradients, exp
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 A neural network has: input dimension 10, hidden layer 1 with 50 neurons, hidden layer 2 with 25 neurons, output layer with 5 neurons. All layers are fully connected.
 

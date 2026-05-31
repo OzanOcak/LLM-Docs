@@ -1,22 +1,22 @@
 # Random forests
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A single decision tree is interpretable but fragile. Change a few data points and the tree changes completely. It overfits easily, creating deep, brittle rules that fail on new data. Random forests solve this by growing many trees—each slightly different—and averaging their predictions. This is ensemble learning: wisdom of the crowds applied to machine learning. The random forest is one of the most successful off-the-shelf algorithms: it handles mixed data types, resists overfitting, provides feature importance, and often outperforms neural networks on tabular data. Understanding random forests means understanding how combining many weak models creates a strong one.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A random forest builds many decision trees on bootstrapped copies of the training data, randomly selecting a subset of features at each split, and aggregates their predictions by majority vote (classification) or average (regression).**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a doctor diagnosing a rare disease. Instead of trusting one specialist, you consult 100 specialists. Each specialist:
 
@@ -30,9 +30,9 @@ This is the random forest. Each tree is a "specialist" with limited data and lim
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Random forest architecture:
 
     Training Data (n examples, d features)
@@ -71,7 +71,7 @@ Random forest architecture:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Bootstrap aggregating (Bagging):**
 
@@ -123,9 +123,9 @@ Sum over all trees of the total decrease in Gini impurity from splits on feature
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define small dataset**
+#### **Step 1: Define small dataset**
 
 Predict whether to go out (Yes/No) based on weather:
 
@@ -142,23 +142,23 @@ Predict whether to go out (Yes/No) based on weather:
 
 n=8 examples, d=3 features
 
-**Step 2: Bootstrap sample 1 (n=8, with replacement)**
+#### **Step 2: Bootstrap sample 1 (n=8, with replacement)**
 
 Random sample: [75,H,W,Y], [85,H,S,N], [70,N,W,Y], [72,H,S,N], [78,N,W,Y], [82,N,S,N], [75,H,W,Y], [65,N,S,N]
 
 Tree built on this sample using mtry = √3 ≈ 2 features per split.
 
-**Step 3: Bootstrap sample 2**
+#### **Step 3: Bootstrap sample 2**
 
 Different sample: [80,H,W,Y], [85,H,S,N], [78,N,W,Y], [72,H,S,N], [82,N,S,N], [65,N,S,N], [70,N,W,Y], [80,H,W,Y]
 
 Build second tree on this sample.
 
-**Step 4: Continue for B=5 trees**
+#### **Step 4: Continue for B=5 trees**
 
 Each tree sees different data and different feature subsets.
 
-**Step 5: Predict new example**
+#### **Step 5: Predict new example**
 
 New: Temp=77, Humidity=Normal, Wind=Weak
 
@@ -170,13 +170,13 @@ Tree 5: Yes
 
 Majority: 4 Yes, 1 No → Predict Yes
 
-**Step 6: OOB error estimate**
+#### **Step 6: OOB error estimate**
 
 Example 1 (75,H,W,Y): Which trees did NOT see this example? Suppose trees 2 and 5 did not. Their predictions: Tree 2=Yes, Tree5=Yes → OOB predicts Yes (correct). Track OOB accuracy across all examples.
 
 ---
 
-**7. How this appears inside neural networks or LLMs**
+### **7. How this appears inside neural networks or LLMs**
 
 - **Feature importance analysis:** Before feeding features into an LLM, random forests identify which features actually matter, reducing input dimensionality.
 
@@ -194,13 +194,13 @@ Example 1 (75,H,W,Y): Which trees did NOT see this example? Suppose trees 2 and 
 
 ---
 
-**8. Brain-like connection (ensemble coding)**
+### **8. Brain-like connection (ensemble coding)**
 
 The brain uses ensemble coding constantly. Orientation tuning in visual cortex: each neuron prefers a specific orientation, but the population's average activity encodes orientation more precisely than any single neuron. Decision-making: multiple brain regions (prefrontal cortex, parietal cortex, basal ganglia) each produce their own "vote," integrated to produce a final action. The random forest principle—diversity + averaging—appears in the brain's redundant, distributed representations. A single neuron can die without impairing function; the population compensates. This robustness mirrors the random forest's resistance to overfitting.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "More trees are always better. I should use as many as my computer can handle."
 
@@ -208,9 +208,9 @@ _Why it is wrong:_ Adding more trees reduces variance, but the benefit diminishe
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -227,7 +227,7 @@ _Why it is wrong:_ Adding more trees reduces variance, but the benefit diminishe
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a dataset with 1000 examples and 20 features. You train a random forest with 100 trees.
 

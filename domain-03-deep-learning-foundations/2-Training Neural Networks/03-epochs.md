@@ -1,22 +1,22 @@
 # Epochs
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 How many times should your network see the same data? One pass is rarely enough to learn. A hundred passes might be too many (overfitting). The epoch—one complete pass through the entire training dataset—is the unit of learning time. It tells you how many times the model has had the opportunity to learn from each example. But epochs alone are misleading: with large datasets, even one epoch can be enormous. With small datasets, you need many epochs. Understanding epochs means understanding when to stop training—before you memorize noise but after you have learned the signal.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **An epoch is one complete pass of all training examples through the learning algorithm; the number of epochs determines how many times the model sees each example during training.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are studying for an exam with a set of 100 flashcards.
 
@@ -32,9 +32,9 @@ The number of epochs is not absolute. It depends on dataset size, model capacity
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Training over epochs (learning curves):
 
     Loss/Error
@@ -84,7 +84,7 @@ Epochs needed varies by dataset size:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Definition:** For a dataset of n examples, one epoch = n gradient updates (if batch size = 1) or n/B updates (if batch size = B > 1).
 
@@ -127,23 +127,23 @@ Gap grows with overfitting (E too large).
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define training setup**
+#### **Step 1: Define training setup**
 
 Dataset: 5,000 images
 Batch size: 100
 Epochs: 10
 
-**Step 2: Calculate total updates per epoch**
+#### **Step 2: Calculate total updates per epoch**
 
 Updates per epoch = 5,000 / 100 = 50 batches
 
-**Step 3: Calculate total updates over training**
+#### **Step 3: Calculate total updates over training**
 
 Total updates = 10 epochs × 50 updates = 500 weight updates
 
-**Step 4: Observe training dynamics**
+#### **Step 4: Observe training dynamics**
 
 | Epoch | Train Loss | Val Loss | Notes                              |
 | ----- | ---------- | -------- | ---------------------------------- |
@@ -158,11 +158,11 @@ Total updates = 10 epochs × 50 updates = 500 weight updates
 | 9     | 0.20       | 0.70     | Clear overfitting                  |
 | 10    | 0.15       | 0.75     | Severe overfitting                 |
 
-**Step 5: Choose optimal E**
+#### **Step 5: Choose optimal E**
 
 Best validation loss at epoch 6 (0.60). Train for 6 epochs, stop before overfitting.
 
-**Step 6: Compare with different dataset sizes**
+#### **Step 6: Compare with different dataset sizes**
 
 Same model architecture:
 
@@ -172,7 +172,7 @@ Same model architecture:
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **LLM pretraining (1 epoch):** Models like GPT-4 train on massive datasets (trillions of tokens) for slightly less than 1 epoch. More than 1 epoch leads to overfitting to repeated data. The dataset is so large that one pass is enough.
 
@@ -192,13 +192,13 @@ Same model architecture:
 
 ---
 
-**8. Brain-like connection (spaced repetition and sleep)**
+### **8. Brain-like connection (spaced repetition and sleep)**
 
 The brain does not use epochs. You never see the exact same experience twice. But the brain uses spaced repetition: revisiting concepts at increasing intervals. This is more efficient than massed repetition (many epochs in a row). Sleep plays a role in replay—the hippocampus replays memories during slow-wave sleep, effectively performing additional "epochs" offline without new sensory input. This replay strengthens important memories and prunes weak ones. The optimal number of "epochs" for human learning depends on spacing, not just count. Deep learning could benefit from similar strategies (replay buffers, experience replay in RL).
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "If one epoch is good, ten epochs must be ten times better. I should train for as many epochs as possible."
 
@@ -206,9 +206,9 @@ _Why it is wrong:_ After a certain point, more epochs cause overfitting. The mod
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -225,7 +225,7 @@ _Why it is wrong:_ After a certain point, more epochs cause overfitting. The mod
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have 10,000 training examples. Batch size = 200. You train for 5 epochs.
 

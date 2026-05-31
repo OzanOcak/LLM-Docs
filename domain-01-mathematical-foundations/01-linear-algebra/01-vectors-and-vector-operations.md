@@ -1,22 +1,22 @@
 # Vectors and vector operations
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
+## ## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Every intelligent system must represent information. A single number is too small to capture meaning. A rigid database table cannot transform and learn. What you need is a flexible container that holds rich meaning while remaining mathematically manipulable. That container is the vector. When you build a system that thinks, every input (sight, sound, text), every memory, and every decision becomes a vector. Without vectors, your AI cannot compare, transform, or learn anything.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A vector is an ordered list of numbers that exists in space, allowing you to measure similarity, direction, and magnitude between any two representations.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a detective profiling three suspects using three features: age, height in centimeters, and estimated annual income in thousands.
 
@@ -28,7 +28,7 @@ Each suspect becomes a point in 3D space. The distance between A and C is small 
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
 ```
 Vector in 2D space (two features: age and height)
@@ -52,7 +52,7 @@ Age ↑
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 A vector v with n dimensions is written as:
 
@@ -108,7 +108,7 @@ Result ranges from -1 (opposite) to 0 (unrelated) to +1 (identical direction).
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
 Three word-vectors in a tiny 2D "meaning space":
 
@@ -118,13 +118,13 @@ Three word-vectors in a tiny 2D "meaning space":
 | Queen  | 0.8             | 0.5             |
 | Tyrant | 0.95            | 0.05            |
 
-**Step 1: Write as vectors**
+#### **Step 1: Write as vectors**
 
 - King = [0.9, 0.4]
 - Queen = [0.8, 0.5]
 - Tyrant = [0.95, 0.05]
 
-**Step 2: Compute similarity between King and Queen**
+#### **Step 2: Compute similarity between King and Queen**
 
 Dot product:
 
@@ -150,7 +150,7 @@ $$
 
 (Unicode: 0.92 / (0.985 × 0.943) = 0.92 / 0.929 = 0.99)
 
-**Step 3: Compare King to Tyrant**
+#### **Step 3: Compare King to Tyrant**
 
 Dot product:
 
@@ -174,7 +174,7 @@ $$
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Word embeddings**: Every word in an LLM's vocabulary is stored as a vector (typically 300 to 4096 dimensions). "King" and "Queen" have nearly parallel vectors.
 
@@ -190,7 +190,7 @@ $$
 
 ---
 
-**8. Brain-like connection (memory)**
+### **8. Brain-like connection (memory)**
 
 The hippocampus stores memories as distributed patterns across neurons—functionally equivalent to vectors. When you encounter a familiar smell (cinnamon), the brain converts it into a neural activity vector and performs something like a dot product search across stored memory vectors. The memory with the highest similarity (grandma's kitchen) surfaces into consciousness.
 
@@ -198,7 +198,7 @@ This is why similarity matters more than exact matching. You never experience th
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "A vector is just an array or list. Why make it special?"
 
@@ -213,9 +213,9 @@ Without these operations, your "list" cannot learn, compare, or transform. With 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -231,7 +231,7 @@ Without these operations, your "list" cannot learn, compare, or transform. With 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have three vectors in a 2D emotion space:
 

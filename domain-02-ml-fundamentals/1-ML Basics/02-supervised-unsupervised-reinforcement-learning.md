@@ -1,22 +1,22 @@
 # Supervised vs unsupervised vs reinforcement learning
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Not all learning is the same. Sometimes you have a teacher showing you the right answers (supervised). Sometimes you have no answers and must find hidden structure (unsupervised). Sometimes you get only rewards or punishments for your actions, with no one telling you the right move (reinforcement). Each type of learning appears in intelligent systems, and each requires different algorithms and data. Knowing which one to use for which problem is the first design decision in building any mind-like system. Choose wrong and your system cannot learn. Choose right and you match the learning strategy to the nature of the task.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Supervised learning uses labeled input-output pairs to learn a mapping; unsupervised learning finds hidden structure in unlabeled data; reinforcement learning learns actions by maximizing cumulative rewards through trial and error.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Three ways to learn chess:
 
@@ -30,9 +30,9 @@ Real intelligence uses all three. A child learns object names from labeled examp
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Three paradigms of machine learning:
 
     SUPERVISED LEARNING
@@ -80,7 +80,7 @@ Three paradigms of machine learning:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Supervised learning:**
 
@@ -134,13 +134,13 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define three tasks**
+#### **Step 1: Define three tasks**
 
 You have a dataset of houses with size (sq ft), bedrooms, price.
 
-**Step 2: Supervised task**
+#### **Step 2: Supervised task**
 
 Predict price from size and bedrooms. Labeled data: each house has known price.
 
@@ -148,7 +148,7 @@ Goal: Learn f(size, bedrooms) ≈ price
 
 Application: Estimate value of a new house
 
-**Step 3: Unsupervised task**
+#### **Step 3: Unsupervised task**
 
 Given only size and bedrooms (no price). Find clusters of similar houses.
 
@@ -156,7 +156,7 @@ Goal: Discover natural groupings (e.g., "small downtown condos," "suburban famil
 
 Application: Market segmentation
 
-**Step 4: Reinforcement task**
+#### **Step 4: Reinforcement task**
 
 A robot vacuums a house. Actions: move forward, turn left, turn right. Reward: +1 for cleaning dirt, -0.01 for battery usage, -10 for getting stuck.
 
@@ -164,13 +164,13 @@ Goal: Learn policy mapping sensor readings to actions that maximizes total rewar
 
 Application: Autonomous vacuum cleaner
 
-**Step 5: Compare data requirements**
+#### **Step 5: Compare data requirements**
 
 Supervised: needs many labeled examples (expensive labels)
 Unsupervised: needs only unlabeled data (cheap, abundant)
 Reinforcement: needs only reward signal (no explicit labels, but requires interaction)
 
-**Step 6: Compare feedback loops**
+#### **Step 6: Compare feedback loops**
 
 Supervised: immediate, correct output provided
 Unsupervised: no explicit feedback, structure is intrinsic
@@ -178,7 +178,7 @@ Reinforcement: delayed, sparse, trial-and-error
 
 ---
 
-**7. How this appears inside neural networks or LLMs**
+### **7. How this appears inside neural networks or LLMs**
 
 - **Supervised in LLMs:** Next-token prediction is supervised learning (the next token is the label). Fine-tuning on instruction-response pairs is supervised.
 
@@ -196,7 +196,7 @@ Reinforcement: delayed, sparse, trial-and-error
 
 ---
 
-**8. Brain-like connection (multiple learning systems)**
+### **8. Brain-like connection (multiple learning systems)**
 
 The brain uses all three paradigms in different circuits:
 
@@ -210,7 +210,7 @@ These systems operate in parallel. When you learn to catch a ball, supervised sy
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Unsupervised learning is just supervised learning without labels. Reinforcement learning is just supervised learning with delayed rewards."
 
@@ -218,9 +218,9 @@ _Why it is wrong:_ The differences are fundamental, not superficial. In supervis
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -237,7 +237,7 @@ _Why it is wrong:_ The differences are fundamental, not superficial. In supervis
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 For each scenario, identify the learning paradigm:
 

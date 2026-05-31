@@ -1,22 +1,22 @@
 # Training vs validation vs test sets
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 You cannot judge a student by the questions they have already practiced. They might have memorized the answers without understanding. The same is true for machine learning models. If you evaluate a model on the same data used to train it, you have no idea whether it learned general patterns or simply memorized examples. The solution is to split your data into three distinct sets: one to teach (training), one to tune (validation), and one to truthfully evaluate (test). This separation is the difference between a model that works in the real world and one that fails the moment it sees new data.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **The training set is used to learn model parameters; the validation set is used to tune hyperparameters and select models; the test set is used only once to evaluate final performance on unseen data.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a medical student preparing for a licensing exam. You have a bank of 1000 practice questions.
 
@@ -30,9 +30,9 @@ Crucially, you must never look at the test questions before exam day. The moment
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Data splitting for supervised learning:
 
     Complete Dataset (100%)
@@ -78,7 +78,7 @@ Data splitting for supervised learning:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 Let D = {(x₁, y₁), ..., (xₙ, yₙ)} be the full dataset.
 
@@ -124,19 +124,19 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define the dataset**
+#### **Step 1: Define the dataset**
 
 100 labeled examples of handwritten digits (0-9). Want to build a classifier.
 
-**Step 2: Split the data**
+#### **Step 2: Split the data**
 
 - Training: 70 examples (70%)
 - Validation: 15 examples (15%)
 - Test: 15 examples (15%)
 
-**Step 3: Train models with different hyperparameters**
+#### **Step 3: Train models with different hyperparameters**
 
 Model A (simple): 1 hidden layer, 50 neurons  
 Training accuracy: 85%  
@@ -148,11 +148,11 @@ Validation accuracy: 78% (worse than model A!)
 
 Model A has better validation performance (82% > 78%). The complex model memorized training data but does not generalize (overfitting).
 
-**Step 4: Select best model based on validation**
+#### **Step 4: Select best model based on validation**
 
 Choose model A (1 layer, 50 neurons).
 
-**Step 5: Final test evaluation**
+#### **Step 5: Final test evaluation**
 
 Test on 15 unseen examples:
 
@@ -160,13 +160,13 @@ Model A test accuracy: 80%
 
 This is the honest estimate of real-world performance.
 
-**Step 6: What not to do**
+#### **Step 6: What not to do**
 
 If you had looked at test set earlier and tuned hyperparameters to improve test accuracy, your reported 80% would be invalid (overly optimistic). The test set must remain untouched until the final moment.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Early stopping:** Monitor validation loss during training. If validation loss stops decreasing (or increases) for N epochs, stop training. Prevents overfitting.
 
@@ -184,13 +184,13 @@ If you had looked at test set earlier and tuned hyperparameters to improve test 
 
 ---
 
-**8. Brain-like connection (sleep and memory consolidation)**
+### **8. Brain-like connection (sleep and memory consolidation)**
 
 The brain separates learning phases. Wakefulness is training: you experience examples, update neural connections. Slow-wave sleep may act as validation: the brain replays memories, strengthens important patterns, and weakens irrelevant ones. The test set is real-world performance the next day—how well did you actually learn? Cramming before an exam (training on test-like questions) gives inflated confidence but poor generalization. Spaced learning with proper separation mirrors the train-val-test paradigm, suggesting the brain evolved similar principles to avoid overfitting to recent experiences.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "If I have a lot of data, I don't need a validation or test set. I can just train on all data and trust the training accuracy."
 
@@ -198,9 +198,9 @@ _Why it is wrong:_ Training accuracy is always optimistic. A model with enough c
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -217,7 +217,7 @@ _Why it is wrong:_ Training accuracy is always optimistic. A model with enough c
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have 1000 labeled examples. You split into 700 train, 150 validation, 150 test. You train 20 different hyperparameter combinations, selecting the best based on validation accuracy. You then report that model's test accuracy as 85%.
 

@@ -1,22 +1,22 @@
 # Batch normalization
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Deep networks are hard to train. Activations can explode or vanish. Gradients can become tiny. The distribution of inputs to each layer shifts constantly as earlier layers change—a problem called internal covariate shift. Batch normalization solves this by normalizing layer inputs to have zero mean and unit variance before each activation. This stabilizes training, allows much higher learning rates, and acts as a regularizer. Without batch norm, deep networks required careful initialization and low learning rates. With it, you can train networks 10x deeper and 10x faster. Understanding batch norm means understanding one of the key innovations that made deep learning practical.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Batch normalization normalizes the inputs of each layer across a mini-batch to have zero mean and unit variance, then applies learned scale and shift parameters, stabilizing training and enabling much higher learning rates.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a piano teacher with students at different skill levels. Each student's fingers move at different speeds and ranges. Teaching them with the same instructions is chaotic.
 
@@ -28,9 +28,9 @@ Batch normalization does this for neural networks. Each layer's inputs are norma
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Batch normalization applied to one layer:
 
     Input batch (B examples, d features)
@@ -80,7 +80,7 @@ At inference time (using running averages):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Batch normalization forward pass (training):**
 
@@ -142,21 +142,21 @@ Original BN paper: applied before activation (x after Wx+b). Later work (Pre-act
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Input batch**
+#### **Step 1: Input batch**
 
 Batch size B=3, one feature dimension (simplified). Input values: x = [2.0, 4.0, 6.0]
 
-**Step 2: Compute batch mean**
+#### **Step 2: Compute batch mean**
 
 μ = (2 + 4 + 6)/3 = 12/3 = 4.0
 
-**Step 3: Compute batch variance**
+#### **Step 3: Compute batch variance**
 
 σ² = [(2-4)² + (4-4)² + (6-4)²]/3 = [4 + 0 + 4]/3 = 8/3 = 2.6667
 
-**Step 4: Normalize (ε=0 for simplicity)**
+#### **Step 4: Normalize (ε=0 for simplicity)**
 
 x̂₁ = (2 - 4)/√2.6667 = (-2)/1.633 = -1.225
 x̂₂ = (4 - 4)/1.633 = 0
@@ -164,7 +164,7 @@ x̂₃ = (6 - 4)/1.633 = 2/1.633 = 1.225
 
 Check: mean of x̂ = (-1.225 + 0 + 1.225)/3 = 0, variance = 1.0 ✓
 
-**Step 5: Learnable scale and shift**
+#### **Step 5: Learnable scale and shift**
 
 Assume γ = 0.5, β = 1.0
 
@@ -172,13 +172,13 @@ y₁ = 0.5 × (-1.225) + 1.0 = -0.6125 + 1.0 = 0.3875
 y₂ = 0.5 × 0 + 1.0 = 1.0
 y₃ = 0.5 × 1.225 + 1.0 = 0.6125 + 1.0 = 1.6125
 
-**Step 6: Without batch norm (no normalization)**
+#### **Step 6: Without batch norm (no normalization)**
 
 Raw x = [2, 4, 6] would go directly to activation. Distribution is uncentered with variance 2.67.
 
 With batch norm, distribution centered at 0 (before γ,β) and unit variance. After γ,β, network controls mean and variance.
 
-**Step 7: Inference with running statistics**
+#### **Step 7: Inference with running statistics**
 
 After training, running mean = 4.2, running variance = 2.8.
 
@@ -190,7 +190,7 @@ No batch statistics computed during inference.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **CNN architectures:** Batch norm is standard in ResNet, Inception, and most CNNs. Placed after convolution, before activation (Conv → BN → ReLU).
 
@@ -208,13 +208,13 @@ No batch statistics computed during inference.
 
 ---
 
-**8. Brain-like connection (gain control)**
+### **8. Brain-like connection (gain control)**
 
 The brain performs normalization continuously. Retinal ganglion cells adapt to mean light level (subtract mean) and contrast (divide by standard deviation). This is batch normalization in early vision. Cortical neurons also normalize their inputs: the firing rate of a neuron is often divided by the sum of activity in surrounding neurons (divisive normalization). This keeps neural activity within a dynamic range, prevents saturation, and enhances contrast. The brain's normalization is local (not across a batch of images) but serves the same purpose: stable, efficient processing across varying input conditions.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Batch normalization eliminates the need for careful initialization. I can use any initialization and it will work."
 
@@ -222,9 +222,9 @@ _Why it is wrong:_ Batch norm greatly reduces sensitivity to initialization but 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -243,7 +243,7 @@ _Why it is wrong:_ Batch norm greatly reduces sensitivity to initialization but 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You are training a ResNet on ImageNet with batch size 32. A colleague suggests switching to batch size 4 to fit a larger model on the same GPU memory.
 

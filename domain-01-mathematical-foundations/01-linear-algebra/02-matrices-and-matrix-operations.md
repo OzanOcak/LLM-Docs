@@ -1,22 +1,22 @@
 # Matrices and matrix operations
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 If vectors are the nouns of machine intelligence (individual ideas, memories, or perceptions), then matrices are the verbs. A matrix transforms one vector into another. Every time a neural network takes an input (a vector) and produces an output (another vector), a matrix multiplication just happened. Without matrices, your AI would be static—unable to learn, unable to recognize patterns, unable to think. Matrices are how information flows and changes inside an intelligent system.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A matrix is a rectangular grid of numbers that transforms vectors by rotating, scaling, or projecting them into new spaces, enabling a system to learn patterns from data.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you run a small bakery with three products: bread, croissant, and cake. You have two stores. Each morning, you need to know how many of each product to send to each store.
 
@@ -31,9 +31,9 @@ Multiply the inventory vector by the distribution matrix, and you get a new vect
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Matrix as a transformation machine:
 
     Input Vector          Matrix            Output Vector
@@ -57,7 +57,7 @@ Matrix as a transformation machine:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 A matrix is a rectangular array of numbers with m rows and n columns:
 
@@ -114,11 +114,11 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
 A tiny neural network layer with 2 inputs and 3 outputs.
 
-**Step 1: Define the weight matrix (3 rows, 2 columns)**
+#### **Step 1: Define the weight matrix (3 rows, 2 columns)**
 
 $$
 \mathbf{W} = \begin{bmatrix}
@@ -128,13 +128,13 @@ $$
 \end{bmatrix}
 $$
 
-**Step 2: Define input vector**
+#### **Step 2: Define input vector**
 
 $$
 \mathbf{x} = \begin{bmatrix} 4 \\ 3 \end{bmatrix}
 $$
 
-**Step 3: Multiply W × x**
+#### **Step 3: Multiply W × x**
 
 First output neuron (row 1):
 
@@ -154,7 +154,7 @@ $$
 0.1 \times 4 + 0.4 \times 3 = 0.4 + 1.2 = 1.6
 $$
 
-**Step 4: Result**
+#### **Step 4: Result**
 
 $$
 \mathbf{W}\mathbf{x} = \begin{bmatrix} 2.6 \\ 3.6 \\ 1.6 \end{bmatrix}
@@ -164,7 +164,7 @@ The input vector [4, 3] was transformed into a 3-dimensional output. The matrix 
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Every neural network layer**: A fully connected layer is exactly output = activation( W × input + b ), where W is a weight matrix and b is a bias vector.
 
@@ -180,7 +180,7 @@ The input vector [4, 3] was transformed into a 3-dimensional output. The matrix 
 
 ---
 
-**8. Brain-like connection (learning)**
+### **8. Brain-like connection (learning)**
 
 Long-term potentiation (LTP) in synapses is the biological analog of adjusting matrix weights. When two neurons fire together, the connection between them strengthens. In a neural network, the weight matrix stores the "strength" of connections between input and output neurons. Learning is the process of adjusting these matrix values so that the transformation produces better outputs.
 
@@ -188,7 +188,7 @@ The brain's ability to learn a new skill—riding a bike, speaking a language, r
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Matrix multiplication is just multiplying corresponding entries, like element-wise multiplication."
 
@@ -198,9 +198,9 @@ _Why it is wrong:_ Element-wise multiplication (called Hadamard product) exists 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -215,7 +215,7 @@ _Why it is wrong:_ Element-wise multiplication (called Hadamard product) exists 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a weight matrix W (2×2) and input vector x:
 

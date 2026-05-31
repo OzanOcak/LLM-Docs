@@ -1,22 +1,22 @@
 # Optimizers (SGD, Adam)
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Gradients tell you which direction is downhill. But how far should you step? What if the terrain is rocky, with steep cliffs and flat valleys? What if some directions need smaller steps than others? Optimizers answer these questions. They convert raw gradients into parameter updates, shaping the trajectory through the loss landscape. Standard SGD takes naive steps. Momentum accelerates through flat regions. Adam adapts the step size for each parameter individually. The choice of optimizer determines whether your network trains in hours, days, or never. Understanding optimizers means understanding how to navigate the complex terrain of high-dimensional learning.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Optimizers are algorithms that update neural network parameters using gradients, with different strategies for step size, momentum, and per-parameter adaptation to accelerate convergence and escape poor local minima.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are descending a mountain in thick fog. You can feel the slope at your feet (gradient), but you cannot see the terrain ahead.
 
@@ -30,9 +30,9 @@ In deep learning, the "mountain" has millions of dimensions. Momentum and adapti
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 SGD without momentum (erratic, slow):
 
     Loss ↓
@@ -85,7 +85,7 @@ Adaptive per-parameter learning rates (Adam):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **SGD (Stochastic Gradient Descent):**
 
@@ -179,20 +179,20 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Simple 1D problem**
+#### **Step 1: Simple 1D problem**
 
 Minimize f(w) = w². Minimum at w=0.
 Start w=2. Gradient = 2w = 4.
 
-**Step 2: SGD with η=0.1**
+#### **Step 2: SGD with η=0.1**
 
 w₁ = 2 - 0.1×4 = 2 - 0.4 = 1.6
 w₂ = 1.6 - 0.1×3.2 = 1.6 - 0.32 = 1.28
 Converges to 0 but slowly.
 
-**Step 3: Momentum with β=0.9, η=0.1**
+#### **Step 3: Momentum with β=0.9, η=0.1**
 
 v₀ = 0
 v₁ = 0.9×0 + 4 = 4, w₁ = 2 - 0.1×4 = 1.6
@@ -201,7 +201,7 @@ v₃ = 0.9×6.8 + (2×0.92=1.84) = 6.12 + 1.84 = 7.96, w₃ = 0.92 - 0.796 = 0.1
 
 Momentum converges faster (0.124 vs 1.28 after 2 steps).
 
-**Step 4: Adam on same problem**
+#### **Step 4: Adam on same problem**
 
 β₁=0.9, β₂=0.999, η=0.1, ε=1e-8
 
@@ -213,7 +213,7 @@ Adam took a smaller first step than SGD (1.9 vs 1.6) because second moment estim
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **AdamW as default for LLMs:** Most LLMs (GPT, Llama, BERT) use AdamW (Adam with decoupled weight decay). Handles the scale of billions of parameters.
 
@@ -229,17 +229,17 @@ Adam took a smaller first step than SGD (1.9 vs 1.6) because second moment estim
 
 - **ZeRO optimizer (DeepSpeed):** Distributes optimizer states across GPUs, enabling training of trillion-parameter models.
 
-- **8-bit optimizers (bitsandbytes):** Compresses optimizer states to 8-bit integers, reducing memory by 75%.
+- ### **8-bit optimizers (bitsandbytes):** Compresses optimizer states to 8-bit integers, reducing memory by 75%.
 
 ---
 
-**8. Brain-like connection (synaptic plasticity and momentum)**
+### **8. Brain-like connection (synaptic plasticity and momentum)**
 
 The brain's learning rules incorporate momentum-like effects. Synaptic changes persist over time (short-term plasticity). Recent firing patterns influence current plasticity, smoothing out noisy updates. Dopamine signals (reward prediction errors) are integrated over time, behaving like a momentum term in reinforcement learning. The brain's ability to learn stable representations despite noisy neural activity suggests biological optimizers have built-in momentum and adaptive properties. While the brain's exact algorithm differs from Adam, the functional requirements—stability, noise robustness, and efficient use of limited information—are identical.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Adam always converges faster and to a lower loss than SGD. It is strictly better."
 
@@ -247,9 +247,9 @@ _Why it is wrong:_ Adam often converges faster in early training but can general
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -265,7 +265,7 @@ _Why it is wrong:_ Adam often converges faster in early training but can general
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a loss landscape with two parameters: w₁ has large, consistent gradients; w₂ has small, noisy gradients.
 

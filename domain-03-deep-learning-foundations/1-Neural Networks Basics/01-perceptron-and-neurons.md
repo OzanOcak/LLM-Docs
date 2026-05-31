@@ -1,22 +1,22 @@
 # Perceptron and neurons
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Before there were billion-parameter LLMs, there was the perceptron—the first trainable artificial neuron. It is the atom of deep learning. Every modern neural network, from simple classifiers to GPT-4, is built from thousands or billions of these basic units arranged in layers. A single perceptron is trivial: it draws a straight line. But stacked together, they create curves, surfaces, boundaries, and eventually, reasoning. Understanding the perceptron means understanding the fundamental building block of all deep learning. Master the neuron and you master the grammar of neural computation.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A perceptron (artificial neuron) computes a weighted sum of its inputs, adds a bias, and passes the result through an activation function to produce an output, mimicking the biological neuron's "fire or not fire" behavior.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine a decision committee. Each member (input) has a certain influence (weight). They vote, but some members have more say than others. The committee chair adds a personal bias (leaning yes or no regardless of votes). Then they apply a rule: if the total weighted vote exceeds a threshold, the committee says YES (1); otherwise NO (0). This is a perceptron.
 
@@ -26,16 +26,16 @@ A single neuron is a simple rule. Thousands of them, connected in layers, can le
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 The artificial neuron (perceptron):
 
     Inputs        Weights      Sum        Activation      Output
     x₁ ────────→ w₁ ──┐
-                       │
+                      │
     x₂ ────────→ w₂ ──┼──→ Σ (x_i·w_i) + b ──→ f(z) ──→ ŷ
-                       │
+                      │
     x₃ ────────→ w₃ ──┘
 
     z = w₁x₁ + w₂x₂ + w₃x₃ + b
@@ -43,11 +43,11 @@ The artificial neuron (perceptron):
     Step-by-step:
 
     x₁ ──●
-          │
+         │
     x₂ ──●──→ [Multiply] ──→ [Sum] ──→ [Activation] ──→ Output
-          │
+         │
     x₃ ──●
-          │
+         │
         bias
 
 
@@ -94,7 +94,7 @@ The artificial neuron (perceptron):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Perceptron (binary classification):**
 
@@ -189,28 +189,28 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a single neuron**
+#### **Step 1: Define a single neuron**
 
 Two inputs: x₁, x₂
 Weights: w₁ = 0.5, w₂ = -0.5
 Bias: b = 0
 Activation: ReLU
 
-**Step 2: Compute for input (x₁=2, x₂=1)**
+#### **Step 2: Compute for input (x₁=2, x₂=1)**
 
 z = 0.5×2 + (-0.5)×1 + 0 = 1.0 - 0.5 = 0.5
 
 ReLU(0.5) = 0.5 (positive, so output = 0.5)
 
-**Step 3: Compute for input (x₁=1, x₂=3)**
+#### **Step 3: Compute for input (x₁=1, x₂=3)**
 
 z = 0.5×1 + (-0.5)×3 = 0.5 - 1.5 = -1.0
 
 ReLU(-1.0) = 0 (negative, so output = 0)
 
-**Step 4: Show learning with perceptron rule**
+#### **Step 4: Show learning with perceptron rule**
 
 Binary classification: predict class 1 if ŷ=1 (step activation), class 0 otherwise.
 
@@ -231,7 +231,7 @@ New prediction on same example: z = 0.6×1 + (-0.2)×3 + 0.1 = 0.6 - 0.6 + 0.1 =
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Basic building block:** Every fully connected layer is a vector of neurons. Hidden states in LLMs are activations of thousands of neurons.
 
@@ -249,7 +249,7 @@ New prediction on same example: z = 0.6×1 + (-0.2)×3 + 0.1 = 0.6 - 0.6 + 0.1 =
 
 ---
 
-**8. Brain-like connection (the biological neuron)**
+### **8. Brain-like connection (the biological neuron)**
 
 The artificial neuron was directly inspired by the biological neuron. A real neuron:
 
@@ -263,7 +263,7 @@ Biological neurons are far more complex (spikes are discrete events, timing matt
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 *Misunderstanding:* "The original perceptron can learn any function. A single perceptron is a universal function approximator."
 
@@ -271,9 +271,9 @@ Biological neurons are far more complex (spikes are discrete events, timing matt
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -290,7 +290,7 @@ Biological neurons are far more complex (spikes are discrete events, timing matt
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 A single perceptron with step activation has weights w₁=1, w₂=2, bias b=-3.
 

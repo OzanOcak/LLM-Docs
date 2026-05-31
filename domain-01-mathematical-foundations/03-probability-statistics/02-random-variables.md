@@ -1,22 +1,22 @@
 # Random variables
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Probability tells you how likely events are. But intelligent systems need more than event probabilities—they need to work with quantities that vary unpredictably: tomorrow's stock price, the next word in a sentence, the brightness of a pixel. These quantities are random variables. A random variable is a bridge between abstract probability theory and concrete numbers. It lets you compute averages, measure spread, and model relationships between uncertain quantities. Every prediction your AI makes is a random variable. Every evaluation metric (accuracy, loss) is a function of random variables.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A random variable is a function that assigns a numerical value to each outcome of a random process, transforming events into numbers that can be averaged, compared, and modeled mathematically.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you run a carnival booth with a spinning wheel divided into 8 equal slices. The wheel is fair—each slice has probability 1/8 of stopping under the pointer.
 
@@ -31,9 +31,9 @@ Now you can ask: What is the average prize? That is E[X] (expected value). How m
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Random variable as a function from sample space to numbers:
 
     Sample Space Ω          Random Variable X          Real Numbers ℝ
@@ -79,7 +79,7 @@ Random variable as a function from sample space to numbers:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Definition:** A random variable X is a function X: Ω → ℝ, where Ω is the sample space.
 
@@ -140,13 +140,13 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define the random variable**
+#### **Step 1: Define the random variable**
 
 Roll two fair six-sided dice. Let X = the sum of the two dice.
 
-**Step 2: Determine possible values and probabilities**
+#### **Step 2: Determine possible values and probabilities**
 
 Possible sums: 2 through 12
 
@@ -166,7 +166,7 @@ Number of outcomes: 6×6 = 36
 | 11  | (5,6),(6,5)                         | 2     | 2/36 ≈ 0.0556 |
 | 12  | (6,6)                               | 1     | 1/36 ≈ 0.0278 |
 
-**Step 3: Compute expected value**
+#### **Step 3: Compute expected value**
 
 E[X] = Σ [sum × P(sum)]
 
@@ -178,7 +178,7 @@ E[X] = Σ [sum × P(sum)]
 
 Intuition: The average sum of two dice is 7.
 
-**Step 4: Compute variance**
+#### **Step 4: Compute variance**
 
 E[X²] = Σ [sum² × P(sum)]
 
@@ -196,7 +196,7 @@ Typical sum is 7 ± about 2.4.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Input embeddings**: Each word is mapped to a vector—but from the model's perspective, the next word is a random variable with a probability distribution over the vocabulary.
 
@@ -216,13 +216,13 @@ Typical sum is 7 ± about 2.4.
 
 ---
 
-**8. Brain-like connection (neural variability)**
+### **8. Brain-like connection (neural variability)**
 
 Individual neurons do not fire deterministically. In response to the same stimulus, a neuron's spike count varies randomly. This variability is not just noise—it may be a computational feature. The brain represents uncertainty through the variability of neural firing rates. A neuron's firing rate can be interpreted as the mean of an underlying Poisson random variable. Populations of neurons encode probability distributions over stimuli, actions, and rewards. Your brain's ability to make decisions under uncertainty relies on representing and manipulating random variables at the neural level.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "A random variable is a variable whose value is completely unpredictable—like a coin flip before you look."
 
@@ -230,9 +230,9 @@ _Why it is wrong:_ A random variable has a precise probability distribution. You
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -248,7 +248,7 @@ _Why it is wrong:_ A random variable has a precise probability distribution. You
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 A bag contains 3 red marbles and 2 blue marbles. You draw two marbles without replacement. Define random variable X = number of red marbles drawn.
 

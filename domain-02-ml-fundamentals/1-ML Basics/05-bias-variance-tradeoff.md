@@ -1,22 +1,22 @@
 # Bias-variance tradeoff
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Overfitting and underfitting describe symptoms. Bias and variance describe causes. The bias-variance tradeoff is the fundamental constraint that every learning algorithm faces: simple models have high bias (systematically wrong) but low variance (stable across datasets); complex models have low bias (can fit anything) but high variance (unstable, sensitive to noise). You cannot eliminate both. You must choose where to fall on this spectrum. Every design decision—model size, regularization strength, architecture choice—is a tradeoff between bias and variance. Understand this tradeoff and you understand the deep limits of learning from finite data.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Bias is the error from incorrect assumptions in the learning algorithm; variance is the error from sensitivity to fluctuations in the training set; the total prediction error is their sum plus irreducible noise, and reducing one typically increases the other.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are an archer shooting at a target. You shoot many arrows. The bullseye is the true value.
 
@@ -30,9 +30,9 @@ In machine learning, you cannot see the bullseye directly—only through noisy t
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Bias-Variance tradeoff visualized:
 
     High Bias (Underfitting)        Low Bias, Low Variance (Ideal)
@@ -76,7 +76,7 @@ Bias-Variance tradeoff visualized:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 For a model f̂(x) trained on dataset D, predicting target y = f(x) + ε with E[ε]=0, Var(ε)=σ²:
 
@@ -114,23 +114,23 @@ Gap between test and training error ≈ Variance
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define the true function**
+#### **Step 1: Define the true function**
 
 True relationship: f(x) = sin(2πx) over x ∈ [0,1]
 
-**Step 2: Generate multiple training sets**
+#### **Step 2: Generate multiple training sets**
 
 Generate 5 different training sets, each with 20 noisy samples (add Gaussian noise σ=0.3)
 
-**Step 3: Fit models of different complexity on each training set**
+#### **Step 3: Fit models of different complexity on each training set**
 
 Model A: Degree 1 polynomial (linear, high bias)
 Model B: Degree 5 polynomial (moderate, just right)
 Model C: Degree 15 polynomial (very flexible, high variance)
 
-**Step 4: Compute predictions across training sets**
+#### **Step 4: Compute predictions across training sets**
 
 For each model type, compute predictions at x=0.5 across the 5 different training sets:
 
@@ -140,13 +140,13 @@ For each model type, compute predictions at x=0.5 across the 5 different trainin
 | B (degree 5)  | 0.0         | [0.05, -0.02, 0.08, -0.05, 0.03] | 0.02 | 0.0004 | 0.0025   |
 | C (degree 15) | 0.0         | [0.6, -0.8, 1.2, -1.1, 0.9]      | 0.16 | 0.0256 | 0.85     |
 
-**Step 5: Analyze results**
+#### **Step 5: Analyze results**
 
 - Model A: High bias (0.102), low variance (0.0007) → systematically off, consistent
 - Model B: Low bias (0.0004), moderate variance (0.0025) → best
 - Model C: Low bias? Actually bias is higher than B? No—mean is 0.16, bias²=0.0256, but variance huge (0.85) → unstable
 
-**Step 6: Total error (ignoring irreducible noise)**
+#### **Step 6: Total error (ignoring irreducible noise)**
 
 Model A total = 0.102 + 0.0007 = 0.1027
 Model B total = 0.0004 + 0.0025 = 0.0029 (best)
@@ -156,7 +156,7 @@ Degree 5 polynomial balances bias and variance for optimal generalization.
 
 ---
 
-**7. How this appears inside neural networks or LLMs**
+### **7. How this appears inside neural networks or LLMs**
 
 - **Regularization strength (λ)**: Increasing λ increases bias, decreases variance. Optimal λ balances tradeoff.
 
@@ -178,13 +178,13 @@ Degree 5 polynomial balances bias and variance for optimal generalization.
 
 ---
 
-**8. Brain-like connection (accuracy vs precision)**
+### **8. Brain-like connection (accuracy vs precision)**
 
 The brain faces the bias-variance tradeoff in perception and decision-making. When you see a blurry shape in peripheral vision, your visual system uses prior knowledge (high bias) to guess it is a face, sacrificing accuracy for speed. When you fixate, you gather more visual evidence (reducing bias but increasing variance in initial processing). Perceptual learning reduces both bias and variance through experience. In motor control, the brain trades off between systematic errors (bias) and noise (variance). Older adults show higher bias in some tasks (stereotyped movements) but lower variance; younger adults show lower bias but higher variance. The optimal balance changes with context and age.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Bias is bad. Variance is bad. I should minimize both independently."
 
@@ -192,9 +192,9 @@ _Why it is wrong:_ You cannot minimize both simultaneously beyond a point. The t
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -210,7 +210,7 @@ _Why it is wrong:_ You cannot minimize both simultaneously beyond a point. The t
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a dataset of 100 points. You train three models:
 

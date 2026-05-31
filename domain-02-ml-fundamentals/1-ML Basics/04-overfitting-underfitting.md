@@ -1,22 +1,22 @@
 # Overfitting and underfitting
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A model that fails to learn the pattern in training data is useless. A model that learns the training data perfectly but fails on new data is equally useless. Between these extremes lies the sweet spot of generalization. Overfitting and underfitting are the two failure modes of every learning system. Recognizing them—and knowing how to balance between them—is the central practical challenge of machine learning. No matter how sophisticated your neural network, if it overfits or underfits, it does not generalize. Understanding these concepts means understanding the fundamental tension in all learning: fidelity to data versus flexibility for the unknown.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Underfitting occurs when a model is too simple to capture the underlying pattern in the data; overfitting occurs when a model is too complex and learns noise instead of the signal, failing to generalize to new data.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine two students preparing for a geography exam with practice maps.
 
@@ -30,9 +30,9 @@ Your machine learning model is a student. The training data is practice problems
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Underfitting vs Overfitting visualized:
 
     Underfitting (High Bias)         Just Right             Overfitting (High Variance)
@@ -70,7 +70,7 @@ Underfitting vs Overfitting visualized:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Bias-variance decomposition of expected prediction error:**
 
@@ -114,16 +114,16 @@ Underfit region ← Optimal → Overfit region
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Generate simple data**
+#### **Step 1: Generate simple data**
 
 True relationship: y = 2x + 1 + noise, where x in [0,10]
 
 Training set: 10 points with noise
 Test set: 50 clean points (no noise, for evaluation)
 
-**Step 2: Try a linear model (underfitting candidate)**
+#### **Step 2: Try a linear model (underfitting candidate)**
 
 Model: y = w₁x + w₀
 
@@ -134,27 +134,27 @@ Both errors high and similar. Model too simple to capture any curvature (though 
 
 **Let's use true relationship: y = 0.5x³ - 3x² + 2x + 10 + noise**
 
-**Step 3: Model A (degree 1 polynomial) — UNDERFITTING**
+#### **Step 3: Model A (degree 1 polynomial) — UNDERFITTING**
 
 y = w₁x + w₀
 
 Cannot capture cubic shape. Training error: 45.2, Test error: 47.8
 High bias. Both errors high.
 
-**Step 4: Model B (degree 3 polynomial) — JUST RIGHT**
+#### **Step 4: Model B (degree 3 polynomial) — JUST RIGHT**
 
 y = w₃x³ + w₂x² + w₁x + w₀
 
 Matches true cubic shape. Training error: 2.1, Test error: 2.3
 Low errors, train ≈ test. Generalizes well.
 
-**Step 5: Model C (degree 15 polynomial) — OVERFITTING**
+#### **Step 5: Model C (degree 15 polynomial) — OVERFITTING**
 
 y = w₁₅x¹⁵ + ... + w₀
 
 Enough parameters to fit every training point exactly (error 0.0). But test error: 89.4 (much higher than training). The model learned noise in training data.
 
-**Step 6: Compare**
+#### **Step 6: Compare**
 
 | Model     | Training Error | Test Error | Verdict                 |
 | --------- | -------------- | ---------- | ----------------------- |
@@ -164,7 +164,7 @@ Enough parameters to fit every training point exactly (error 0.0). But test erro
 
 ---
 
-**7. How this appears inside neural networks or LLMs**
+### **7. How this appears inside neural networks or LLMs**
 
 - **Early stopping:** Monitor validation loss during training. When validation loss increases while training loss decreases, you are overfitting. Stop training at that point.
 
@@ -184,13 +184,13 @@ Enough parameters to fit every training point exactly (error 0.0). But test erro
 
 ---
 
-**8. Brain-like connection (memorization vs generalization)**
+### **8. Brain-like connection (memorization vs generalization)**
 
 The brain also faces the overfitting-underfitting tradeoff. Memorizing every detail of every past experience is maladaptive—you would be paralyzed by irrelevant specifics. But too much compression loses important patterns. Sleep plays a role in generalization: during slow-wave sleep, the hippocampus replays memories while the neocortex extracts general patterns, effectively "regularizing" memories to prevent overfitting to specific episodes. Patients with highly detailed (photographic) memory often struggle with abstraction—their brains overfit. Conversely, patients with hippocampal damage cannot form specific memories but retain general knowledge—their brains underfit. The healthy brain balances both.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Low training error means my model is good. If training error is high, I need a bigger model."
 
@@ -198,9 +198,9 @@ _Why it is wrong:_ Low training error is necessary but not sufficient. A model w
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -216,7 +216,7 @@ _Why it is wrong:_ Low training error is necessary but not sufficient. A model w
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You train three neural networks on the same dataset:
 

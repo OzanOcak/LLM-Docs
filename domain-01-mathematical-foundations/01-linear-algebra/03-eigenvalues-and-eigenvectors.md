@@ -1,22 +1,22 @@
 # Eigenvalues and eigenvectors
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 When a matrix transforms a vector, most vectors change direction. They twist, turn, and point somewhere new. But some special vectors do not change direction at all—they only stretch or shrink. These are the eigenvectors, and their stretch factors are eigenvalues. Finding them is like discovering the "axes of transformation" that never twist. In intelligent systems, eigenvalues reveal the core patterns hidden inside data, the principal directions of variation, and the stable states of learning. They tell you what stays constant when everything else changes.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **An eigenvector is a vector that, when multiplied by a matrix, only scales in length without changing direction; the eigenvalue is the factor by which it scales.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are the director of a puppet theater. You pull strings to transform the puppet's pose. Most string pulls twist the puppet into a completely new shape. But some special pulls—maybe pulling all strings evenly—simply make the puppet larger or smaller while keeping the exact same proportions. Those special pulls are eigenvectors. The amount of scaling (double size? half size?) is the eigenvalue.
 
@@ -24,9 +24,9 @@ Now imagine analyzing thousands of face images. Each face is a vector. The matri
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Visualizing an eigenvector in 2D:
 
     Before transformation          After transformation
@@ -56,7 +56,7 @@ Visualizing an eigenvector in 2D:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 For a square matrix A (n × n), an eigenvector v and eigenvalue λ satisfy:
 
@@ -99,7 +99,7 @@ The eigenvalues are the solutions to this quadratic equation.
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
 Find eigenvalues and eigenvectors of:
 
@@ -107,7 +107,7 @@ $$
 \mathbf{A} = \begin{bmatrix} 4 & 1 \\ 2 & 3 \end{bmatrix}
 $$
 
-**Step 1: Write the characteristic equation**
+#### **Step 1: Write the characteristic equation**
 
 $$
 \det\left(\begin{bmatrix} 4-\lambda & 1 \\ 2 & 3-\lambda \end{bmatrix}\right) = 0
@@ -117,7 +117,7 @@ $$
 (4-\lambda)(3-\lambda) - (1)(2) = 0
 $$
 
-**Step 2: Expand and simplify**
+#### **Step 2: Expand and simplify**
 
 $$
 (12 - 4\lambda - 3\lambda + \lambda^2) - 2 = 0
@@ -127,7 +127,7 @@ $$
 \lambda^2 - 7\lambda + 10 = 0
 $$
 
-**Step 3: Solve quadratic**
+#### **Step 3: Solve quadratic**
 
 $$
 (\lambda - 2)(\lambda - 5) = 0
@@ -135,7 +135,7 @@ $$
 
 Eigenvalues: λ₁ = 2, λ₂ = 5
 
-**Step 4: Find eigenvector for λ₁ = 2**
+#### **Step 4: Find eigenvector for λ₁ = 2**
 
 Solve (A - 2I)v = 0:
 
@@ -149,7 +149,7 @@ Choose x = 1, then y = -2
 
 Eigenvector v₁ = [1, -2]ᵀ (or any scalar multiple)
 
-**Step 5: Find eigenvector for λ₂ = 5**
+#### **Step 5: Find eigenvector for λ₂ = 5**
 
 Solve (A - 5I)v = 0:
 
@@ -167,7 +167,7 @@ Eigenvector v₂ = [1, 1]ᵀ
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Principal Component Analysis (PCA)** : PCA finds the eigenvectors of a data covariance matrix. The eigenvector with the largest eigenvalue points in the direction of greatest data variation. This is how you reduce 1000-dimensional data to 50 dimensions while preserving most information.
 
@@ -183,7 +183,7 @@ Eigenvector v₂ = [1, 1]ᵀ
 
 ---
 
-**8. Brain-like connection (stable patterns)**
+### **8. Brain-like connection (stable patterns)**
 
 The brain has eigenpatterns too. When you see a familiar face from different angles, lighting conditions, or expressions, your brain extracts the "eigenface"—the stable identity pattern that remains invariant under all those transformations. The transformation from retinal image to perceived identity is nonlinear, but the concept is the same: finding what stays constant when everything else changes.
 
@@ -191,7 +191,7 @@ In memory, certain neural activity patterns are "attractors"—stable states tha
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Eigenvalues and eigenvectors are just abstract math with no practical use. I can build neural networks without them."
 
@@ -206,9 +206,9 @@ Ignoring eigenvalues is like driving a car without a fuel gauge—it works until
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -223,7 +223,7 @@ Ignoring eigenvalues is like driving a car without a fuel gauge—it works until
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a matrix:
 

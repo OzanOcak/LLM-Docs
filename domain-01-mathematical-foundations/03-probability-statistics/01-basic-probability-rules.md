@@ -1,22 +1,22 @@
 # Basic probability rules
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 The world is uncertain. Sensors have noise. Language is ambiguous. The future is unpredictable. A system that cannot handle uncertainty is brittle—it will fail the moment reality deviates from its training data. Probability is the mathematics of uncertainty. It gives you the rules for quantifying doubt, combining evidence, and making optimal decisions when you cannot be certain. Every LLM, every vision system, every reinforcement learning agent is probabilistic at its core, even when it pretends to be deterministic.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Probability rules provide a consistent framework for quantifying uncertainty, combining events, and updating beliefs when new evidence arrives, with all probabilities lying between 0 (impossible) and 1 (certain).**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine a bag containing 3 red marbles and 2 blue marbles. You reach in without looking.
 
@@ -30,9 +30,9 @@ Your AI faces this constantly: given that it saw a "the," what is the probabilit
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Probability as area on a unit square (Venn diagram):
 
     Total space = 1.0 (certainty)
@@ -70,7 +70,7 @@ Probability as area on a unit square (Venn diagram):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Probability axioms (Kolmogorov):**
 
@@ -128,9 +128,9 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define the scenario**
+#### **Step 1: Define the scenario**
 
 A medical test for a disease has:
 
@@ -138,7 +138,7 @@ A medical test for a disease has:
 - Test sensitivity: P(Positive | D) = 0.99 (99% of sick test positive)
 - Test specificity: P(Negative | not D) = 0.95 (95% of healthy test negative)
 
-**Step 2: Compute probability of a positive test**
+#### **Step 2: Compute probability of a positive test**
 
 Using law of total probability:
 
@@ -150,7 +150,7 @@ P(not D) = 1 - P(D) = 0.99
 
 P(Pos) = (0.99 × 0.01) + (0.05 × 0.99) = 0.0099 + 0.0495 = 0.0594
 
-**Step 3: Compute probability you actually have the disease given a positive test**
+#### **Step 3: Compute probability you actually have the disease given a positive test**
 
 Using conditional probability (Bayes' rule, though not yet formally introduced):
 
@@ -158,7 +158,7 @@ P(D|Pos) = P(Pos|D) × P(D) / P(Pos) = (0.99 × 0.01) / 0.0594 = 0.0099 / 0.0594
 
 Even with a 99% accurate test, a positive result means only ~16.7% chance of having the disease because the disease is rare (1%) and false positives (5% of healthy) outnumber true positives.
 
-**Step 4: Verify complement rule**
+#### **Step 4: Verify complement rule**
 
 P(not D | Pos) = 1 - P(D|Pos) = 1 - 0.1667 = 0.8333
 
@@ -166,7 +166,7 @@ The vast majority of positive tests are false positives. This counterintuitive r
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Softmax output layer**: Converts logits into probabilities summing to 1. The model's prediction is a probability distribution over possible next words or classes.
 
@@ -186,13 +186,13 @@ The vast majority of positive tests are false positives. This counterintuitive r
 
 ---
 
-**8. Brain-like connection (predictive coding)**
+### **8. Brain-like connection (predictive coding)**
 
 The brain continuously makes probabilistic predictions about sensory input. When you reach for a coffee cup, your brain predicts the weight, temperature, and texture. The mismatch between prediction and actual sensation (prediction error) drives learning and attention. This "predictive coding" theory suggests the brain implements something like Bayesian inference: prior beliefs (P(hypothesis)) combined with sensory evidence (P(data|hypothesis)) yield posterior beliefs (P(hypothesis|data)). Dopamine signals encode reward prediction errors—a probabilistic quantity. Your daily experience of surprise is your brain's probability calculation making itself felt.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Probability 0.5 means 'I don't know,' and probability 0.9 means 'I'm pretty sure.'"
 
@@ -200,9 +200,9 @@ _Why it is wrong:_ Probability 0.5 is a precise statement: an event that occurs 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -218,7 +218,7 @@ _Why it is wrong:_ Probability 0.5 is a precise statement: an event that occurs 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You roll a fair six-sided die twice.
 

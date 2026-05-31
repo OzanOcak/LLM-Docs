@@ -1,22 +1,22 @@
 # Linear transformations
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Linear Algebra**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A vector is a point in space. A matrix is a static grid of numbers. But intelligence is neither static nor a single point—it is a process of transformation. A linear transformation is the rule that takes an input vector and produces an output vector. Every layer of every neural network is a linear transformation (followed by a nonlinear activation). Every time information flows from perception to thought to action, a transformation just occurred. Understanding linear transformations means understanding how intelligence reshapes information.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A linear transformation is a function that maps vectors to other vectors while preserving two operations: vector addition and scalar multiplication.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine a rubber sheet stretched across a table. Draw a grid on it. Now push, pull, rotate, or shear the sheet. Any straight line remains straight. The origin (0,0) stays fixed. Grid lines that were parallel remain parallel. This is a linear transformation.
 
@@ -26,9 +26,9 @@ Your brain does this constantly. When you rotate your head, the image of the wor
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Linear transformation as grid deformation:
 
     Before (identity)              After (shear transform)
@@ -55,7 +55,7 @@ Linear transformation as grid deformation:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 A linear transformation T: ℝⁿ → ℝᵐ satisfies two rules for all vectors u, v and scalars c:
 
@@ -113,17 +113,17 @@ Where:
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
 Define a linear transformation that rotates vectors by 90° counterclockwise and then scales x-coordinates by 2.
 
-**Step 1: Find where basis vectors go**
+#### **Step 1: Find where basis vectors go**
 
 Standard basis vectors in ℝ²:
 e₁ = [1, 0]ᵀ
 e₂ = [0, 1]ᵀ
 
-**Step 2: Apply rotation by 90°**
+#### **Step 2: Apply rotation by 90°**
 
 90° rotation matrix:
 
@@ -134,7 +134,7 @@ $$
 T_rotate(e₁) = [0, 1]ᵀ
 T_rotate(e₂) = [-1, 0]ᵀ
 
-**Step 3: Apply scaling (x2 on x-coordinate only)**
+#### **Step 3: Apply scaling (x2 on x-coordinate only)**
 
 Scale matrix:
 
@@ -147,13 +147,13 @@ Final transformation: T = S × R (apply R first, then S)
 First column = T(e₁) = S × [0, 1]ᵀ = [0, 1]ᵀ
 Second column = T(e₂) = S × [-1, 0]ᵀ = [-2, 0]ᵀ
 
-**Step 4: Write the matrix**
+#### **Step 4: Write the matrix**
 
 $$
 \mathbf{A} = \begin{bmatrix} 0 & -2 \\ 1 & 0 \end{bmatrix}
 $$
 
-**Step 5: Test on a sample vector**
+#### **Step 5: Test on a sample vector**
 
 Take v = [1, 1]ᵀ (point at (1,1))
 
@@ -163,7 +163,7 @@ Interpretation: The point (1,1) rotated 90° becomes (-1,1), then x-coordinate d
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Fully connected layer:** y = Wx + b is an affine transformation (linear + translation). The linear part Wx is a linear transformation.
 
@@ -181,7 +181,7 @@ Interpretation: The point (1,1) rotated 90° becomes (-1,1), then x-coordinate d
 
 ---
 
-**8. Brain-like connection (sensory processing)**
+### **8. Brain-like connection (sensory processing)**
 
 The primary visual cortex (V1) performs something remarkably close to a linear transformation on retinal images. Each neuron responds to a specific orientation of an edge (like a Gabor filter). The collection of these neurons forms a basis—the brain is projecting the incoming image onto orientation-sensitive "feature vectors." This transformation is approximate and has nonlinearities, but the core idea is linear projection: the brain re-represents the world in a format useful for higher cognition.
 
@@ -189,7 +189,7 @@ Similarly, the cochlea (inner ear) performs a linear transformation called the F
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Linear transformations are too simple. Neural networks use nonlinear activation functions, so linearity doesn't matter."
 
@@ -197,9 +197,9 @@ _Why it is wrong:_ Neural networks are built as alternating linear and nonlinear
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -215,7 +215,7 @@ _Why it is wrong:_ Neural networks are built as alternating linear and nonlinear
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a linear transformation T: ℝ² → ℝ² defined by:
 

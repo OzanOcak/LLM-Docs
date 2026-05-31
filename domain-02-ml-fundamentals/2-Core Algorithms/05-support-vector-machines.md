@@ -1,22 +1,22 @@
 # SVM (Support Vector Machines)
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Before deep learning, Support Vector Machines were the state of the art for classification. But SVMs are not just historical artifacts—they embody a beautiful geometric idea: find the boundary that separates classes with the widest possible margin. This "maximum margin" principle connects to generalization theory: wider margins lead to lower error on new data. SVMs also introduce the kernel trick, which lets linear classifiers learn nonlinear patterns without explicitly computing high-dimensional representations. Understanding SVMs gives you intuition for margin-based learning, regularization, and feature spaces—concepts that appear throughout modern machine learning.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A Support Vector Machine finds the hyperplane that maximizes the margin between two classes, where the margin is the distance from the hyperplane to the nearest points (support vectors) on each side.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you have two groups of campers: Team Red and Team Blue. You need to stake a straight line (in flat terrain) that separates their tents as clearly as possible. But the wind might shift tents slightly. If your line passes too close to either group, a small shift could cause misclassification.
 
@@ -26,23 +26,23 @@ In high dimensions, the "line" becomes a hyperplane. SVMs find the hyperplane wi
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Maximum margin hyperplane in 2D:
 
     Class A (+1)          Margin        Class B (-1)
-         ↑                  ↑               ↑
-         │                  │               │
+         ↑                  ↑                ↑
+         │                  │                │
     ×   ×   ×           ←───┼───→        ○   ○   ○
       ×   ×                 │             ○   ○
     ×   ×   ×               │           ○   ○   ○
-         │                  │               │
+         │                  │                │
          │←─── distance ───→│←─── distance ─→│
-         │      to closest   │     to closest │
-         │      support      │     support    │
-         │      vector       │     vector     │
-         ↓                  ↓               ↓
+         │      to closest  │     to closest │
+         │      support     │     support    │
+         │      vector      │     vector     │
+         ↓                  ↓                ↓
 
     ─────────────────────────────────────────────→
          Negative          Hyperplane        Positive
@@ -59,7 +59,7 @@ Maximum margin hyperplane in 2D:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Given:** Training data (x_i, y_i) with y_i ∈ {-1, +1}
 
@@ -124,20 +124,20 @@ Only support vectors (α_i > 0) contribute.
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define 1D data (linearly separable)**
+#### **Step 1: Define 1D data (linearly separable)**
 
 Points: Class +1 at x=3, Class -1 at x=1
 
 Find hyperplane (in 1D, a point) w·x + b = 0
 
-**Step 2: Set up constraints**
+#### **Step 2: Set up constraints**
 
 For x=3 (y=+1): 3w + b ≥ 1
 For x=1 (y=-1): w + b ≤ -1 → multiply by -1: -w - b ≥ 1
 
-**Step 3: At optimal margin, both constraints are tight (equal to 1)**
+#### **Step 3: At optimal margin, both constraints are tight (equal to 1)**
 
 3w + b = 1
 -w - b = 1
@@ -146,23 +146,23 @@ Add equations: 2w = 2 → w = 1
 
 Substitute: 3(1) + b = 1 → b = -2
 
-**Step 4: Hyperplane**
+#### **Step 4: Hyperplane**
 
 1·x - 2 = 0 → x = 2 (midpoint between 1 and 3)
 
-**Step 5: Margin**
+#### **Step 5: Margin**
 
 Distance from hyperplane to support vectors = |1×1 - 2| = 1
 Distance to x=3: |3-2| = 1
 Margin = 2 (total width)
 
-**Step 6: Support vectors**
+#### **Step 6: Support vectors**
 
 Both points are support vectors (α_i > 0 for both)
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Hinge loss:** The loss function for SVMs is max(0, 1 - y_i·f(x_i)). This margin-based loss appears in some neural network formulations, especially for ranking tasks.
 
@@ -180,13 +180,13 @@ Both points are support vectors (α_i > 0 for both)
 
 ---
 
-**8. Brain-like connection (perceptual decision boundaries)**
+### **8. Brain-like connection (perceptual decision boundaries)**
 
 The brain's perceptual systems learn decision boundaries similar to SVMs. Neurons in visual cortex V4 and IT respond to features that separate categories (faces vs non-faces, cats vs dogs). Recordings show that some neurons act like support vectors—they fire most strongly for exemplars near the category boundary. The brain also seems to use margin-like principles: perceptual learning makes the decision boundary more robust, increasing "psychological distance" between similar categories. While the brain does not implement the quadratic optimization of SVMs, the functional result—maximum margin separation—appears to be a principle of biological as well as artificial classification.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "SVMs are obsolete. Deep learning always works better."
 
@@ -194,9 +194,9 @@ _Why it is wrong:_ SVMs remain valuable in specific regimes: small datasets (tho
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -212,7 +212,7 @@ _Why it is wrong:_ SVMs remain valuable in specific regimes: small datasets (tho
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have 2D points: Class +1: (0,0) and (2,2). Class -1: (0,2) and (2,0).
 

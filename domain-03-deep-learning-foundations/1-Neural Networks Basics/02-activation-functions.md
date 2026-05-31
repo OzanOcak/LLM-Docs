@@ -1,22 +1,22 @@
 # Activation functions (ReLU, sigmoid, tanh)
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Neural Networks Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A weighted sum plus bias is just a linear function. Stack linear functions and you still get a linear function. No matter how many layers, without nonlinearity, a neural network collapses to a single linear transformation. Activation functions break this linearity. They are the "decision gates" that let neural networks model curves, edges, boundaries, and eventually, language. Choosing the right activation function determines whether your network trains quickly, suffers vanishing gradients, or produces sparse representations. Understanding activation functions means understanding how neurons "decide" to fire—and how deep networks become more than just complicated linear regression.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Activation functions introduce nonlinearity into neural networks, transforming the weighted sum of inputs into an output that determines whether a neuron "fires" and with what strength, enabling the network to learn complex patterns.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine three types of volume knobs:
 
@@ -30,9 +30,9 @@ In a neural network, each neuron has such a knob. The activation function determ
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Activation functions compared:
 
     Sigmoid: σ(z) = 1/(1+e^{-z})
@@ -90,7 +90,7 @@ Activation functions compared:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Sigmoid:**
 
@@ -150,31 +150,31 @@ Where Φ is standard normal CDF. Approximated as 0.5z(1 + tanh(√(2/π)(z + 0.0
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define inputs**
+#### **Step 1: Define inputs**
 
 A single neuron receives weighted sum z = -2, 0, and 2.
 
-**Step 2: Compute sigmoid outputs**
+#### **Step 2: Compute sigmoid outputs**
 
 σ(-2) = 1/(1 + e²) = 1/(1 + 7.389) = 1/8.389 = 0.119
 σ(0) = 1/(1 + 1) = 0.5
 σ(2) = 1/(1 + e⁻²) = 1/(1 + 0.135) = 1/1.135 = 0.881
 
-**Step 3: Compute tanh outputs**
+#### **Step 3: Compute tanh outputs**
 
 tanh(-2) = (e⁻² - e²)/(e⁻² + e²) = (0.135 - 7.389)/(0.135 + 7.389) = (-7.254)/7.524 = -0.964
 tanh(0) = 0
 tanh(2) = 0.964
 
-**Step 4: Compute ReLU outputs**
+#### **Step 4: Compute ReLU outputs**
 
 ReLU(-2) = max(0, -2) = 0
 ReLU(0) = max(0, 0) = 0
 ReLU(2) = max(0, 2) = 2
 
-**Step 5: Compare gradients (how learning signal propagates)**
+#### **Step 5: Compare gradients (how learning signal propagates)**
 
 For sigmoid, gradient at z=2 is σ'(2) = 0.881 × 0.119 = 0.105 (small)
 For tanh, gradient at z=2 is 1 - 0.964² = 1 - 0.929 = 0.071 (very small)
@@ -182,7 +182,7 @@ For ReLU, gradient at z=2 is 1 (full signal passes through)
 
 ReLU does not saturate for positive inputs, allowing deep networks to train.
 
-**Step 6: Show dying ReLU**
+#### **Step 6: Show dying ReLU**
 
 If a neuron always receives negative inputs (e.g., due to bad initialization), its output is always 0. Gradient is 0, so it never recovers. It is "dead forever."
 
@@ -190,7 +190,7 @@ Example: z = -1 always → ReLU = 0 → gradient = 0 → weights never update.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **ReLU in early deep learning:** Standard for CNNs and fully connected networks. Fast, simple, avoids vanishing gradients.
 
@@ -210,13 +210,13 @@ Example: z = -1 always → ReLU = 0 → gradient = 0 → weights never update.
 
 ---
 
-**8. Brain-like connection (neural firing rates)**
+### **8. Brain-like connection (neural firing rates)**
 
 Biological neurons have activation functions—they are not linear. The firing rate of a neuron as a function of input current follows a sigmoid-like curve: low input produces few spikes, high input saturates at maximum firing rate. The sharpness of the curve is adaptive. ReLU approximates a neuron with a threshold but no upper bound—not biologically realistic but computationally efficient. The brain's activation functions are analog, continuous, and plastic—they change with experience. The diversity of artificial activation functions reflects different tradeoffs between biological plausibility, computational efficiency, and trainability.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Sigmoid and tanh are obsolete. ReLU is always better."
 
@@ -224,9 +224,9 @@ _Why it is wrong:_ ReLU has the dying ReLU problem—neurons can get stuck at ze
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -243,7 +243,7 @@ _Why it is wrong:_ ReLU has the dying ReLU problem—neurons can get stuck at ze
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 A neuron has z = -1, 0, 3. For each activation (sigmoid, tanh, ReLU), compute the output and the gradient (derivative) at that point.
 

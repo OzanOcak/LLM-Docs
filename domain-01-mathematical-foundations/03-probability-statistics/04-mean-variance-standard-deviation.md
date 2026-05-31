@@ -1,22 +1,22 @@
 # Mean, variance, standard deviation
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A distribution tells you everything about a random variable. But everything is too much. You need summary statistics—numbers that capture the most important features at a glance. The mean tells you the center. The variance tells you the spread. The standard deviation tells you the spread in the original units. These three numbers are the DNA of a dataset. Every neural network uses them for normalization. Every evaluation report reports them. Every Bayesian update tracks them. Without mean, variance, and standard deviation, you cannot summarize data, normalize features, or understand uncertainty.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **The mean is the average value; the variance is the average squared distance from the mean; the standard deviation is the square root of the variance, measuring spread in the same units as the original data.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are an archer. You shoot 10 arrows at a target. Your arrows land at different positions.
 
@@ -30,9 +30,9 @@ In machine learning, the "target" is the true value, the "arrows" are your model
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Mean, variance, and standard deviation visualized:
 
     Dataset: [1, 2, 3, 4, 5]
@@ -79,7 +79,7 @@ Mean, variance, and standard deviation visualized:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **For a population of N values:**
 
@@ -143,21 +143,21 @@ Variance: Var(X) = E[(X - E[X])²] = E[X²] - (E[X])²
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a small dataset**
+#### **Step 1: Define a small dataset**
 
 Test scores (out of 100): [85, 90, 78, 92, 88, 75, 95, 89]
 
 n = 8
 
-**Step 2: Compute the mean**
+#### **Step 2: Compute the mean**
 
 Sum = 85 + 90 + 78 + 92 + 88 + 75 + 95 + 89 = 692
 
 x̄ = 692 / 8 = 86.5
 
-**Step 3: Compute deviations from mean**
+#### **Step 3: Compute deviations from mean**
 
 | Score | Deviation (x - x̄) | Squared deviation |
 | ----- | ----------------- | ----------------- |
@@ -170,21 +170,21 @@ x̄ = 692 / 8 = 86.5
 | 95    | 8.5               | 72.25             |
 | 89    | 2.5               | 6.25              |
 
-**Step 4: Compute variance (population formula, denominator n)**
+#### **Step 4: Compute variance (population formula, denominator n)**
 
 Sum of squared deviations = 2.25 + 12.25 + 72.25 + 30.25 + 2.25 + 132.25 + 72.25 + 6.25 = 330.0
 
 σ² = 330.0 / 8 = 41.25
 
-**Step 5: Compute standard deviation**
+#### **Step 5: Compute standard deviation**
 
 σ = √41.25 ≈ 6.42
 
-**Step 6: Interpret**
+#### **Step 6: Interpret**
 
 The average test score is 86.5. A typical score is about 6.4 points away from this average. Scores roughly range from about 80 to 93 (mean ± 1σ), though individual scores span 75 to 95 (full range).
 
-**Step 7: Sample variance (optional, denominator n-1)**
+#### **Step 7: Sample variance (optional, denominator n-1)**
 
 s² = 330.0 / 7 ≈ 47.14
 
@@ -192,7 +192,7 @@ s = √47.14 ≈ 6.87 (slightly larger, unbiased estimate for population)
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Batch Normalization:** Normalizes layer inputs to mean 0, variance 1 using running estimates of μ and σ². Accelerates training and improves stability.
 
@@ -214,13 +214,13 @@ s = √47.14 ≈ 6.87 (slightly larger, unbiased estimate for population)
 
 ---
 
-**8. Brain-like connection (normalization in neural coding)**
+### **8. Brain-like connection (normalization in neural coding)**
 
 The brain continuously normalizes sensory inputs. Retinal ganglion cells adapt to mean light level (μ) and contrast (σ), efficiently using limited dynamic range. Auditory neurons adjust to average sound intensity. This normalization happens locally in neural circuits and is computationally similar to batch normalization in deep networks. The brain's ability to recognize objects across changing lighting conditions relies on subtracting the mean and dividing by the standard deviation of local image patches. Evolution discovered statistical normalization as a fundamental preprocessing step for perception.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Variance and standard deviation tell you how spread out the data is, so larger is always worse."
 
@@ -228,7 +228,7 @@ _Why it is wrong:_ Larger spread is not inherently bad—it depends on context. 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
 ```
 -------------------------------------------------------------
@@ -246,7 +246,7 @@ _Why it is wrong:_ Larger spread is not inherently bad—it depends on context. 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 Dataset: [10, 12, 23, 23, 16, 23, 21, 16]
 

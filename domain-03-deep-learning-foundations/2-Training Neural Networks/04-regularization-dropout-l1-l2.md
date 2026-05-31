@@ -1,22 +1,22 @@
 # Regularization (dropout, L1/L2)
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A powerful network can memorize the training data perfectly. But memorization is not intelligence—it is overfitting. Regularization is the set of techniques that prevent memorization, encouraging the network to learn general patterns instead of noise. L1 and L2 regularization penalize large weights, forcing the network to distribute importance across many features. Dropout randomly turns off neurons during training, forcing each neuron to be useful on its own. Without regularization, deep networks fail on new data. With it, they generalize. Understanding regularization means understanding how to keep your network humble and robust.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Regularization adds constraints or noise to the training process to reduce overfitting, encouraging simpler models that generalize better to unseen data.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine two students preparing for an exam with 100 practice questions.
 
@@ -32,9 +32,9 @@ The regularized student understands concepts. The unregularized student memorize
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 L1 vs L2 regularization geometry:
 
     L1 (Lasso) - creates sparsity        L2 (Ridge) - shrinks weights
@@ -73,7 +73,7 @@ Dropout during training vs inference:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **L2 regularization (Ridge, weight decay):**
 
@@ -131,16 +131,16 @@ Or equivalently, scale training activations by 1/(1-p) (inverted dropout).
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Without regularization**
+#### **Step 1: Without regularization**
 
 Linear regression on 5 points: True function y = 2x. But we fit degree 10 polynomial (overparameterized).
 
 Training loss: 0.0 (perfect fit to noise)
 Test loss: 5.2 (terrible generalization)
 
-**Step 2: With L2 regularization (λ=0.01)**
+#### **Step 2: With L2 regularization (λ=0.01)**
 
 Minimize L = MSE + 0.01 × Σ w_i²
 
@@ -149,7 +149,7 @@ Large weights penalized. Forces all coefficients to be small.
 Training loss: 0.5 (not perfect, good)
 Test loss: 1.2 (much better)
 
-**Step 3: With L1 regularization (λ=0.01)**
+#### **Step 3: With L1 regularization (λ=0.01)**
 
 Minimize L = MSE + 0.01 × Σ |w_i|
 
@@ -159,7 +159,7 @@ Result: 7 out of 10 polynomial coefficients = 0. Sparse model.
 
 Training loss: 0.8, Test loss: 1.5 (sparse, interpretable)
 
-**Step 4: Dropout example**
+#### **Step 4: Dropout example**
 
 Hidden layer with 4 neurons, dropout rate p=0.5.
 
@@ -175,7 +175,7 @@ Expected training activation (before dropout) = [2.0, 3.0, 1.5, 0.5] × 0.5 = sa
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Weight decay (L2) in AdamW:** Standard practice for LLMs. Default λ = 0.01 to 0.1. Prevents weights from growing too large.
 
@@ -195,13 +195,13 @@ Expected training activation (before dropout) = [2.0, 3.0, 1.5, 0.5] × 0.5 = sa
 
 ---
 
-**8. Brain-like connection (synaptic homeostasis)**
+### **8. Brain-like connection (synaptic homeostasis)**
 
 The brain regulates connection strengths to prevent runaway excitation (L2-like regularization). Synaptic scaling keeps total excitatory input balanced. The brain also performs dropout-like computation: not all neurons fire on every stimulus. Sparse coding—only a small fraction of neurons active at any time—is a form of L1 regularization that saves energy. During sleep, the brain down-scales synaptic strengths (weight decay), preventing unlimited growth. These homeostatic mechanisms keep neural circuits stable and generalizable, just as regularization keeps artificial networks from overfitting.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Dropout and L2 regularization both prevent overfitting, so I should use maximum regularization possible."
 
@@ -209,9 +209,9 @@ _Why it is wrong:_ Too much regularization causes underfitting. If λ is too lar
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -229,7 +229,7 @@ _Why it is wrong:_ Too much regularization causes underfitting. If λ is too lar
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a neural network with L2 regularization (λ=0.01) and dropout (p=0.5). After training, the model works well on validation data. A colleague says: "Turn off dropout during final training to get better performance."
 

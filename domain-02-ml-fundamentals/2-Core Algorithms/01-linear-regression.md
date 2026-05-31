@@ -1,22 +1,22 @@
 # Linear regression
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Before neural networks, before random forests, before SVMs, there was linear regression. It is the simplest learning algorithm, yet it contains all the essential ideas: a model, a loss function, an optimization procedure, and generalization to new data. More importantly, linear regression is the foundation upon which everything else is built. A neural network layer is linear regression followed by an activation function. The last layer of most LLMs is linear regression (plus softmax). Understanding linear regression means understanding the atomic unit of deep learning.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Linear regression models the relationship between input variables and an output variable as a weighted sum plus an intercept, finding the weights that minimize the sum of squared prediction errors.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a real estate agent trying to predict house prices. You notice that larger houses tend to cost more. You collect data: sizes and prices of 10 recent sales. You draw a scatter plot and try to draw the best straight line through the points. That line is your linear regression model.
 
@@ -26,23 +26,23 @@ Now add more features: number of bedrooms, lot size, age of house. Instead of a 
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Linear regression in 1D (one input feature):
 
     Price ($100k)
         ↑
       500│                                    ●
-          │
+         │
       400│                        ●
-          │
+         │
       300│            ●
-          │                    ╱
+         │                    ╱
       200│        ● ╱
-          │      ╱
+         │      ╱
       100│  ●  ╱
-          │ ╱
+         │ ╱
         0┼───────╱────────────────→ Size (sq ft)
           0   1000  2000  3000
 
@@ -58,12 +58,12 @@ Linear regression in 1D (one input feature):
     Can visualize as a plane in 3D:
 
               Price ↑
-                 │    ╱
-                 │   ╱
-                 │  ╱
-                 │ ╱
-                ╱│
-               ╱ │
+                  │   ╱
+                  │  ╱
+                  │ ╱
+                  │╱
+                 ╱│
+                ╱ │
             Size  ┼──→ Bedrooms
 
     The coefficients w₁, w₂ tell you how much price changes
@@ -72,7 +72,7 @@ Linear regression in 1D (one input feature):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Simple linear regression (one input):**
 
@@ -141,11 +141,11 @@ $$
 
 Where ȳ = mean of observed y. R² = 1 means perfect fit, 0 means no better than predicting the mean.
 
----
+---text
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define the data**
+#### **Step 1: Define the data**
 
 House sizes (x) in 1000 sq ft and prices (y) in $100k:
 
@@ -157,7 +157,7 @@ House sizes (x) in 1000 sq ft and prices (y) in $100k:
 | 2.5      | 3.5       |
 | 3.0      | 4.0       |
 
-**Step 2: Guess a line and compute errors**
+#### **Step 2: Guess a line and compute errors**
 
 Guess w₁ = 1, w₀ = 1 → ŷ = 1×x + 1
 
@@ -171,17 +171,17 @@ Guess w₁ = 1, w₀ = 1 → ŷ = 1×x + 1
 
 MSE = 0. Perfect fit! But this is contrived—real data has noise.
 
-**Step 3: Noisy data example**
+#### **Step 3: Noisy data example**
 
 Data: (1, 2.1), (2, 2.9), (3, 4.2), (4, 3.8), (5, 5.0)
 
-**Step 4: Compute means**
+#### **Step 4: Compute means**
 
 x̄ = (1+2+3+4+5)/5 = 15/5 = 3
 
 ȳ = (2.1+2.9+4.2+3.8+5.0)/5 = 18/5 = 3.6
 
-**Step 5: Compute w₁ (slope) using formula**
+#### **Step 5: Compute w₁ (slope) using formula**
 
 w₁ = Σ(x_i - x̄)(y_i - ȳ) / Σ(x_i - x̄)²
 
@@ -199,21 +199,21 @@ Sum of squares = 4 + 1 + 0 + 1 + 4 = 10
 
 w₁ = 6.7 / 10 = 0.67
 
-**Step 6: Compute w₀**
+#### **Step 6: Compute w₀**
 
 w₀ = ȳ - w₁x̄ = 3.6 - 0.67×3 = 3.6 - 2.01 = 1.59
 
-**Step 7: Final model**
+#### **Step 7: Final model**
 
 ŷ = 0.67x + 1.59
 
-**Step 8: Make prediction**
+#### **Step 8: Make prediction**
 
 New house size x = 2.5 → predicted price = 0.67×2.5 + 1.59 = 1.675 + 1.59 = 3.265 ($326,500)
 
 ---
 
-**7. How this appears inside neural networks or LLMs**
+### **7. How this appears inside neural networks or LLMs**
 
 - **Linear layer:** Every fully connected layer in a neural network is y = Wx + b—linear regression on features.
 
@@ -235,13 +235,13 @@ New house size x = 2.5 → predicted price = 0.67×2.5 + 1.59 = 1.675 + 1.59 = 3
 
 ---
 
-**8. Brain-like connection (linear receptive fields)**
+### **8. Brain-like connection (linear receptive fields)**
 
 Neurons in the primary visual cortex have linear receptive fields. Each neuron computes a weighted sum of light intensities in a small region of the retina (plus a bias, the spontaneous firing rate). The weights form a Gabor filter tuned to a specific orientation and frequency. This is linear regression performed by biology. The neuron's output is approximately ŷ = w^T x + b, where x are pixel intensities. The brain learns these weights through experience, just as linear regression learns from data. The simplicity of linear regression is not a limitation—it is a building block reused throughout biological and artificial neural systems.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Linear regression can only fit straight lines. Real-world relationships are rarely linear, so linear regression is useless."
 
@@ -249,9 +249,9 @@ _Why it is wrong:_ Linear regression fits linear combinations of features—but 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -267,7 +267,7 @@ _Why it is wrong:_ Linear regression fits linear combinations of features—but 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 A linear regression model is trained to predict exam score (y) from hours studied (x). The model is ŷ = 5x + 40.
 

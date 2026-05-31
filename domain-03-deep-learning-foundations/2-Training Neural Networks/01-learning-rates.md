@@ -1,22 +1,22 @@
 # Learning rates
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Gradients tell you which direction to move. But how far? That is the learning rate. It is the single most important hyperparameter in deep learning. Too large and your network diverges into nonsense. Too small and training takes forever or gets stuck in poor local minima. The right learning rate balances speed and stability. Modern training often uses schedules that start high (fast progress) and decay over time (fine-tune at the end). Understanding learning rates means understanding the throttle of neural network training—push too hard and you crash, too soft and you never arrive.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **The learning rate controls the step size during gradient descent, determining how much the parameters change in response to the estimated error at each training iteration.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are trying to find the lowest point in a dark valley. You can feel the slope at your feet and take a step.
 
@@ -30,9 +30,9 @@ Now imagine you have a schedule. Start with large steps to descend quickly, then
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Learning rate effects on convergence:
 
     Loss →
@@ -46,9 +46,9 @@ Learning rate effects on convergence:
          │
          │   η just right (smooth descent)
          │      ●────●───●
-         │    ╱         ╲
-         │   ╱           ╲
-         │  ╱             ●
+         │    ╱           ╲
+         │   ╱             ╲
+         │  ╱               ●
          │ ╱
          │╱
          │
@@ -61,12 +61,12 @@ Learning rate schedules:
 
     η ↑
       │
-    1e-3┤           ╱────
-      │          ╱
-      │        ╱
+  1e-3┤        ╱────
+      │       ╱
       │      ╱
+      │     ╱
       │    ╱  Constant
-    1e-4┤  ╱
+  1e-4┤   ╱
       │  ╱
       │ ╱
       │╱
@@ -76,11 +76,11 @@ Learning rate schedules:
     η ↑
       │
     1e-3┤ ╱╲
-      │╱  ╲
-      │    ╲   Step decay
-      │     ╲╱╲
-      │       ╲
-      │        ╲╱╲
+      │  ╱  ╲
+      │      ╲   Step decay
+      │       ╲╱╲
+      │          ╲
+      │           ╲╱╲
       └──────────────────→ Step
 
 
@@ -110,7 +110,7 @@ Learning rate schedules:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **SGD update with learning rate η:**
 
@@ -122,7 +122,7 @@ $$
 
 - **Constant:** η_t = η₀
 
-- **Step decay:** η_t = η₀ × γ^{floor(t / step_size)}
+- #### **Step decay:** η_t = η₀ × γ^{floor(t / step_size)}
 
 - **Exponential decay:** η_t = η₀ × e^{-kt}
 
@@ -160,13 +160,13 @@ For Adam, typical default: η = 0.001 (often works without tuning).
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Simple quadratic function**
+#### **Step 1: Simple quadratic function**
 
 Minimize f(w) = w², minimum at w=0. Start w₀ = 10.
 
-**Step 2: Learning rate η=0.1**
+#### **Step 2: Learning rate η=0.1**
 
 w₁ = 10 - 0.1×(20) = 10 - 2 = 8
 w₂ = 8 - 0.1×(16) = 8 - 1.6 = 6.4
@@ -174,18 +174,18 @@ w₃ = 6.4 - 0.1×(12.8) = 6.4 - 1.28 = 5.12
 
 After 10 steps: w ≈ 1.07, after 20: w ≈ 0.12 (steady convergence)
 
-**Step 3: Learning rate η=0.01 (too low)**
+#### **Step 3: Learning rate η=0.01 (too low)**
 
 w₁ = 10 - 0.01×20 = 10 - 0.2 = 9.8
 After 10 steps: w ≈ 8.1, after 50: w ≈ 3.7, after 200: w ≈ 0.5 (very slow)
 
-**Step 4: Learning rate η=1.0 (too high)**
+#### **Step 4: Learning rate η=1.0 (too high)**
 
 w₁ = 10 - 1.0×20 = 10 - 20 = -10
 w₂ = -10 - 1.0×(-20) = -10 + 20 = 10
 Oscillates between 10 and -10 forever. Never converges.
 
-**Step 5: Cosine schedule example**
+#### **Step 5: Cosine schedule example**
 
 T=100 steps, η_max=0.1, η_min=0.001
 
@@ -193,7 +193,7 @@ At t=0: η = 0.001 + 0.5×(0.099)×(1+cos(0)) = 0.001 + 0.0495×2 = 0.1
 At t=50 (halfway): cos(π/2)=0 → η = 0.001 + 0.0495×1 = 0.0505
 At t=100: cos(π)=-1 → η = 0.001 + 0.0495×0 = 0.001
 
-**Step 6: Warmup example**
+#### **Step 6: Warmup example**
 
 η_max=0.001, warmup_steps=1000
 
@@ -203,7 +203,7 @@ After warmup: decay to 0.0001 over remaining steps.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **LLM training (GPT, Llama, BERT):** Use AdamW with learning rate warmup (typically 2000-5000 steps) followed by cosine decay. Starts at 0, peaks at ~1e-4 to 6e-4, decays to ~1e-5.
 
@@ -223,13 +223,13 @@ After warmup: decay to 0.0001 over remaining steps.
 
 ---
 
-**8. Brain-like connection (neuromodulation of plasticity)**
+### **8. Brain-like connection (neuromodulation of plasticity)**
 
 The brain controls its own "learning rate" through neuromodulators. Acetylcholine and norepinephrine regulate synaptic plasticity, effectively scaling how much neural connections change in response to experience. During novel situations, the brain increases its effective learning rate (higher plasticity). During familiar routines, learning rate decreases (consolidation). Sleep may further consolidate memories with very low effective learning rate, preventing overwriting. The brain's ability to adapt its learning rate is far more sophisticated than current schedules, but the principle—change how much you learn based on context—is deeply analogous to learning rate scheduling in deep learning.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "The learning rate should be as large as possible without diverging. Bigger steps mean faster training."
 
@@ -237,9 +237,9 @@ _Why it is wrong:_ The optimal learning rate for fast convergence is typically s
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -256,7 +256,7 @@ _Why it is wrong:_ The optimal learning rate for fast convergence is typically s
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You are training a neural network. At iteration 100, loss = 2.0. You increase the learning rate by 10×. At iteration 101, loss becomes 5.0 (higher). At iteration 102, loss becomes 12.0 (much higher).
 

@@ -1,22 +1,22 @@
 # What is machine learning?
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: ML Basics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Before you build a mind-like system, you must understand what learning actually means. A program that follows fixed rules is not intelligent—it is just a recipe. A system that improves with experience, that discovers patterns without being explicitly told, that adapts to new data—that is machine learning. It is the difference between a calculator (you tell it exactly what to do) and a child (you show examples and it figures out the pattern). Every modern AI system, from LLMs to self-driving cars, is built on this shift from programming to learning. Understanding machine learning means understanding how to build systems that teach themselves.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Machine learning is the field of study that enables computers to learn from data without being explicitly programmed, by identifying patterns and using them to make predictions or decisions on new examples.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are teaching a child to recognize cats. You do not give the child a rule like "if pointy ears and whiskers and fur, then cat." Instead, you show many pictures: "cat, cat, not cat, cat, not cat." After enough examples, the child forms an internal sense of what makes a cat. Later, when shown a new animal, the child can guess correctly.
 
@@ -24,9 +24,9 @@ Now imagine writing a traditional program to detect cats. You would need to manu
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Traditional programming vs Machine learning:
 
     Traditional Programming:
@@ -70,7 +70,7 @@ Traditional programming vs Machine learning:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **The fundamental setup:**
 
@@ -114,23 +114,23 @@ Expected error = Bias² + Variance + Irreducible error
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a simple learning task**
+#### **Step 1: Define a simple learning task**
 
 Predict house price (y) from house size in square feet (x).
 
 Training data: (500, 100), (1000, 200), (1500, 300), (2000, 400)
 
-**Step 2: Choose model family**
+#### **Step 2: Choose model family**
 
 Linear model: h(x) = w₁x + w₀
 
-**Step 3: Choose loss function**
+#### **Step 3: Choose loss function**
 
 Squared error: L(y_hat, y) = (y_hat - y)²
 
-**Step 4: Find best parameters**
+#### **Step 4: Find best parameters**
 
 We want w₁, w₀ that minimize Σ (w₁x_i + w₀ - y_i)²
 
@@ -140,19 +140,19 @@ Check: 0.2×500 = 100 ✓, 0.2×1000=200 ✓, etc.
 
 w₁ = 0.2, w₀ = 0
 
-**Step 5: Make prediction on new data**
+#### **Step 5: Make prediction on new data**
 
 New house size x = 1200 sq ft
 
 Prediction: h(1200) = 0.2 × 1200 + 0 = 240 (thousand dollars)
 
-**Step 6: Evaluate**
+#### **Step 6: Evaluate**
 
 The model learned the pattern "price = 0.2 × size" from examples. It can now predict prices for sizes not seen in training.
 
 ---
 
-**7. How this appears inside neural networks or LLMs**
+### **7. How this appears inside neural networks or LLMs**
 
 - **Language modeling as supervised learning:** LLMs learn to predict the next token given previous tokens. Each position is a training example.
 
@@ -170,13 +170,13 @@ The model learned the pattern "price = 0.2 × size" from examples. It can now pr
 
 ---
 
-**8. Brain-like connection (learning as synaptic plasticity)**
+### **8. Brain-like connection (learning as synaptic plasticity)**
 
 The brain is the original learning machine. Neurons strengthen connections when they fire together (Hebbian plasticity). This is unsupervised learning at the synaptic level. When you learn a new fact, specific neural pathways become more efficient. When you practice a skill, motor cortex reorganizes. The brain performs supervised learning through error signals (e.g., climbing fibers in cerebellum), unsupervised learning through pattern detection (e.g., visual cortex development), and reinforcement learning through dopamine reward signals. Machine learning algorithms are inspired by—but simplified relative to—the brain's remarkable ability to learn from limited data.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Machine learning is just fancy curve fitting. It doesn't truly 'learn' or 'understand' anything."
 
@@ -184,9 +184,9 @@ _Why it is wrong:_ The statement contains a philosophical assumption about what 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -203,7 +203,7 @@ _Why it is wrong:_ The statement contains a philosophical assumption about what 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You want to build a system that recommends movies to users. You have a database of users, movies they watched, and ratings (1-5 stars). You do not have explicit rules about what makes a movie good for a particular user.
 

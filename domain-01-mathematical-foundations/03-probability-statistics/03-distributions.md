@@ -1,22 +1,22 @@
 # Distributions (normal, binomial, etc.)
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Probability & Statistics**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 A random variable is a number that varies. But how does it vary? Does it cluster around a center? Is it symmetric? Does it produce extreme values rarely or often? The pattern of variation—the distribution—is what turns a random variable into a predictive tool. The normal distribution describes measurement errors and natural variation. The binomial distribution models counts of successes. Understanding distributions lets you choose the right model for your data, set meaningful priors in Bayesian learning, and calibrate uncertainty. Every time you see a confidence interval or a p-value, a distribution is working behind the scenes.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A probability distribution describes how likely each possible value of a random variable is, taking the form of a probability mass function for discrete variables or a probability density function for continuous variables.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you collect data on three different phenomena:
 
@@ -30,9 +30,9 @@ Each phenomenon follows a different distribution. Using the wrong distribution f
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Common distributions visualized:
 
     Binomial (n=10, p=0.5)          Normal (μ=0, σ=1)
@@ -73,7 +73,7 @@ Common distributions visualized:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Binomial Distribution (discrete):** Number of successes in n independent trials with success probability p
 
@@ -123,17 +123,17 @@ Mean = 1/λ, Variance = 1/λ²
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a binomial scenario**
+#### **Step 1: Define a binomial scenario**
 
 You take a multiple choice quiz with 5 questions. Each question has 4 choices, only 1 correct. You guess randomly on every question. Let X = number correct.
 
-**Step 2: Identify parameters**
+#### **Step 2: Identify parameters**
 
 n = 5, p = 1/4 = 0.25
 
-**Step 3: Compute probability of exactly 3 correct**
+#### **Step 3: Compute probability of exactly 3 correct**
 
 C(5,3) = 10
 
@@ -144,7 +144,7 @@ P(X=3) = 10 × (0.25)³ × (0.75)²
 
 Product = 10 × 0.015625 × 0.5625 = 10 × 0.008789 = 0.08789
 
-**Step 4: Compute mean and variance**
+#### **Step 4: Compute mean and variance**
 
 μ = np = 5 × 0.25 = 1.25 correct on average
 
@@ -152,13 +152,13 @@ Product = 10 × 0.015625 × 0.5625 = 10 × 0.008789 = 0.08789
 
 σ = √0.9375 ≈ 0.968
 
-**Step 5: Interpret**
+#### **Step 5: Interpret**
 
 You expect about 1-2 correct guesses. Getting 3 or more correct is unlikely (P(X≥3) = P(3)+P(4)+P(5) ≈ 0.0879 + 0.0146 + 0.0010 = 0.1035, about 10% chance).
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Initialization:** Neural network weights are often initialized from uniform or normal distributions (Xavier, He initialization).
 
@@ -180,13 +180,13 @@ You expect about 1-2 correct guesses. Getting 3 or more correct is unlikely (P(X
 
 ---
 
-**8. Brain-like connection (neural variability and the central limit theorem)**
+### **8. Brain-like connection (neural variability and the central limit theorem)**
 
 Many neural phenomena follow normal distributions due to the central limit theorem: when many independent factors contribute to a measurement, their sum approaches normality. The firing rate of a neuron integrates many synaptic inputs, resulting in approximately normal variability. Reaction times, sensory thresholds, and memory retrieval latencies all show bell-shaped distributions. The brain exploits this structure: it represents uncertainty as variance around a mean, and Bayesian inference in neural circuits often assumes normally distributed variables. Evolution discovered the normal distribution long before Gauss formalized it.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Most real-world data is normally distributed. If it's not normal, something is wrong."
 
@@ -194,7 +194,7 @@ _Why it is wrong:_ Many real-world distributions are not normal. Income follows 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
 ```
 -------------------------------------------------------------
@@ -213,7 +213,7 @@ _Why it is wrong:_ Many real-world distributions are not normal. Income follows 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 A factory produces light bulbs. The lifetime follows an exponential distribution with mean 1000 hours (λ = 0.001).
 

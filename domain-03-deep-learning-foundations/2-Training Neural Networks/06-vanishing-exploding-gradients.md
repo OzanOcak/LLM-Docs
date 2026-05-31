@@ -1,22 +1,22 @@
 # Vanishing/exploding gradients
 
-**DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
+## **DOMAIN: DEEP LEARNING FOUNDATIONS | Sub domain: Training Neural Networks**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Deep networks learn by propagating error signals backward from output to input. In theory, this works for any depth. In practice, gradients shrink to nothing (vanish) or grow to infinity (explode) as they travel through many layers. Vanishing gradients make early layers learn nothing—they receive no useful signal. Exploding gradients make weights fly to infinity—training collapses. This is the fundamental obstacle to deep learning. Understanding vanishing and exploding gradients means understanding why deep networks are hard to train and how modern techniques (skip connections, normalization, careful initialization) overcome these problems.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Vanishing gradients occur when gradients become exponentially small as they backpropagate through many layers, preventing early layers from learning; exploding gradients occur when gradients become exponentially large, causing unstable updates and numerical overflow.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine a chain of 100 people whispering a message from the first person to the last, then back again.
 
@@ -32,9 +32,9 @@ Without these fixes, you cannot train networks deeper than about 10 layers. With
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Vanishing gradients in a deep network:
 
     Output
@@ -77,7 +77,7 @@ Solutions comparison:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Backpropagation through L layers:**
 
@@ -126,9 +126,9 @@ The +I term ensures ∂L/∂x ≈ ∂L/∂y even if ∂F/∂x vanishes.
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Vanishing gradients with sigmoid**
+#### **Step 1: Vanishing gradients with sigmoid**
 
 Network: 10 layers, each with single neuron, weight w=0.5, bias=0, activation sigmoid.
 
@@ -142,7 +142,7 @@ After 10 layers: δ^(1) = δ^(10) × (0.125)^10 = δ^(10) × 9.3e-10
 
 Gradient vanishes to near zero. First layer learns nothing.
 
-**Step 2: Exploding gradients with ReLU**
+#### **Step 2: Exploding gradients with ReLU**
 
 Network: 10 layers, each with weight w=1.5, ReLU activation.
 
@@ -154,7 +154,7 @@ After 10 layers: δ^(1) = δ^(10) × (1.5)^10 = δ^(10) × 57.7
 
 Gradient grows exponentially. Update step: Δw = -η × 57.7 × δ^(10). Too large → loss diverges to infinity.
 
-**Step 3: Fix with He initialization**
+#### **Step 3: Fix with He initialization**
 
 He init: variance = 2/d_in.
 
@@ -162,7 +162,7 @@ For d_in=100, std = √(2/100) = 0.141. Weights ~ N(0, 0.141).
 
 Expected |w| ≈ 0.11, much smaller than 1.5. Prevents explosion.
 
-**Step 4: Gradient clipping**
+#### **Step 4: Gradient clipping**
 
 If gradient norm = 100, threshold = 1.0:
 g_clipped = 1.0 × (100/100)?? Actually clipping: if ‖g‖=100 > 1.0, scale factor = 1.0/100 = 0.01.
@@ -170,7 +170,7 @@ g_clipped = g × 0.01. Effective step is bounded.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Transformers are not immune:** Despite being only ~100 layers deep, transformers still suffer gradient issues. Solutions: Pre-LayerNorm (apply norm before attention), residual connections, and careful initialization (e.g., GPT-3 uses special init).
 
@@ -188,13 +188,13 @@ g_clipped = g × 0.01. Effective step is bounded.
 
 ---
 
-**8. Brain-like connection (spiking and homeostasis)**
+### **8. Brain-like connection (spiking and homeostasis)**
 
 Biological neurons avoid vanishing/exploding activity through homeostasis. If a neuron fires too rarely (vanishing), it becomes more sensitive (upregulates receptors). If it fires too often (exploding), it becomes less sensitive (downregulates). This keeps firing rates in a healthy range. The brain also uses sparse coding (only 1-2% of neurons active at once), which is like ReLU sparsity. Deep networks mimicked these biological mechanisms: batch norm (homeostatic scaling), ReLU (sparse firing), and skip connections (direct pathways that bypass deep integration). Evolution solved gradient problems billions of years ago; deep learning is catching up.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Modern architectures like ResNet and transformers have solved vanishing/exploding gradients completely. I don't need to worry about them."
 
@@ -202,9 +202,9 @@ _Why it is wrong:_ They mitigate the problem but do not eliminate it. Transforme
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -223,7 +223,7 @@ _Why it is wrong:_ They mitigate the problem but do not eliminate it. Transforme
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You are training a 50-layer network with ReLU activations. After 10 epochs, you notice that the gradients for layers 1-10 are extremely close to zero (10⁻⁸). Layers 40-50 have healthy gradients (10⁻²). The network uses standard initialization (Xavier) but no skip connections or normalization.
 

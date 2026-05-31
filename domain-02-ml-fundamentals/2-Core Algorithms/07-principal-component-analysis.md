@@ -1,22 +1,22 @@
 # PCA (Principal Component Analysis)
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 High-dimensional data is everywhere: images with millions of pixels, text with hundred-thousand-word vocabularies, sensor streams with hundreds of channels. But most dimensions are redundant or noisy. Principal Component Analysis finds the directions of maximum variance—the "axes" that matter most—and projects data onto them, reducing dimensions while preserving information. This is the most widely used unsupervised dimensionality reduction technique. It reveals hidden structure, speeds up algorithms, removes noise, and visualizes high-dimensional data in 2D or 3D. Understanding PCA means understanding how to cut through the curse of dimensionality and find what truly matters in your data.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **PCA finds orthogonal directions (principal components) that maximize the variance of projected data, ordered by amount of variance explained, allowing dimensionality reduction by keeping only the top components.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a food critic rating restaurants on 100 different attributes: food quality, service speed, decor, price, location, etc. But many attributes are correlated. Restaurants with good food often have higher prices. Service speed might correlate with how busy the restaurant is.
 
@@ -28,9 +28,9 @@ Each restaurant gets a score on each component. You can now compare restaurants 
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 PCA finds directions of maximum variance:
 
     Original 2D data with correlation          After PCA rotation
@@ -70,8 +70,8 @@ PCA finds directions of maximum variance:
 
          z ↑                           PC2 ↑
            │  ●                            │  ●
-           │ ●  ●                           │ ●  ●
-           │●    ●                          │●    ●
+           │ ●  ●                          │ ●  ●
+           │●    ●                         │●    ●
           ╱                               └────────→ PC1
          ╱
         x → y
@@ -81,11 +81,11 @@ PCA finds directions of maximum variance:
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Given:** Data matrix X of size n × d (n samples, d features)
 
-**Step 1: Standardize (center and optionally scale):**
+#### **Step 1: Standardize (center and optionally scale):**
 
 $$
 \tilde{x}_{ij} = x_{ij} - \mu_j
@@ -93,7 +93,7 @@ $$
 
 (Subtract mean μ_j from each feature j)
 
-**Step 2: Compute covariance matrix:**
+#### **Step 2: Compute covariance matrix:**
 
 $$
 \mathbf{C} = \frac{1}{n-1} \tilde{\mathbf{X}}^T \tilde{\mathbf{X}}
@@ -101,14 +101,14 @@ $$
 
 C is d × d, where C_jk = covariance between feature j and k.
 
-**Step 3: Compute eigenvectors and eigenvalues:**
+#### **Step 3: Compute eigenvectors and eigenvalues:**
 
 Solve C v = λ v
 
 Eigenvectors v₁, v₂, ..., v_d = principal components (directions)
 Eigenvalues λ₁ ≥ λ₂ ≥ ... ≥ λ_d = variance along each component
 
-**Step 4: Explained variance ratio:**
+#### **Step 4: Explained variance ratio:**
 
 $$
 \frac{\lambda_i}{\sum_{j=1}^d \lambda_j}
@@ -116,7 +116,7 @@ $$
 
 (Unicode: λ_i / Σ λ_j)
 
-**Step 5: Project data onto top k components:**
+#### **Step 5: Project data onto top k components:**
 
 Let V_k be d × k matrix with top k eigenvectors as columns.
 
@@ -146,15 +146,15 @@ Then V contains principal components, Σ² contains eigenvalues.
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define 2D data**
+#### **Step 1: Define 2D data**
 
 Points: (1,2), (3,6), (4,5), (5,7), (7,8)
 
 n=5, d=2
 
-**Step 2: Center the data**
+#### **Step 2: Center the data**
 
 Mean of x: (1+3+4+5+7)/5 = 20/5 = 4
 Mean of y: (2+6+5+7+8)/5 = 28/5 = 5.6
@@ -166,7 +166,7 @@ Centered data:
 (5-4, 7-5.6) = (1, 1.4)
 (7-4, 8-5.6) = (3, 2.4)
 
-**Step 3: Compute covariance matrix**
+#### **Step 3: Compute covariance matrix**
 
 C_xx = Σ(x_i - x̄)² / (n-1) = (9+1+0+1+9)/4 = 20/4 = 5.0
 C_yy = Σ(y_i - ȳ)² / (n-1) = (12.96+0.16+0.36+1.96+5.76)/4 = 21.2/4 = 5.3
@@ -174,7 +174,7 @@ C_xy = Σ(x_i - x̄)(y_i - ȳ) / (n-1) = (10.8 -0.4 +0 +1.4 +7.2)/4 = 19.0/4 = 4
 
 C = [[5.0, 4.75], [4.75, 5.3]]
 
-**Step 4: Find eigenvalues**
+#### **Step 4: Find eigenvalues**
 
 Eigenvalues satisfy: det(C - λI) = 0
 
@@ -188,13 +188,13 @@ Eigenvalues satisfy: det(C - λI) = 0
 λ₁ = (10.3 + 9.505)/2 = 19.805/2 = 9.9025
 λ₂ = (10.3 - 9.505)/2 = 0.795/2 = 0.3975
 
-**Step 5: Explained variance**
+#### **Step 5: Explained variance**
 
 Total variance = 9.9025 + 0.3975 = 10.3
 PC1 explains: 9.9025/10.3 = 0.961 (96.1%)
 PC2 explains: 0.3975/10.3 = 0.039 (3.9%)
 
-**Step 6: Find eigenvectors (PC directions)**
+#### **Step 6: Find eigenvectors (PC directions)**
 
 For λ₁ = 9.9025:
 [5.0-9.9025, 4.75; 4.75, 5.3-9.9025] v = 0
@@ -204,13 +204,13 @@ First equation: -4.9025v₁ + 4.75v₂ = 0 → v₂ = (4.9025/4.75)v₁ ≈ 1.03
 
 Normalized: v₁ ≈ [0.696, 0.718] (direction up-right, correlation with x and y)
 
-**Step 7: Project data onto PC1**
+#### **Step 7: Project data onto PC1**
 
 Each point's projection onto first principal component gives a 1D representation that captures 96% of the variance.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Dimensionality reduction for embeddings:** Word embeddings (300-4096 dims) are often PCA-reduced to 2D or 3D for visualization, revealing semantic clusters.
 
@@ -230,13 +230,13 @@ Each point's projection onto first principal component gives a 1D representation
 
 ---
 
-**8. Brain-like connection (receptive field formation)**
+### **8. Brain-like connection (receptive field formation)**
 
 The primary visual cortex's receptive fields—Gabor filters tuned to edges and orientations—emerge from PCA-like principles applied to natural images. When you compute principal components of patches of natural scenes, the top components look remarkably like V1 simple cell receptive fields. Evolution and development seem to have discovered that PCA is an efficient coding strategy: decorrelating visual inputs and representing variance along the most informative directions. The brain reduces high-dimensional sensory data to a lower-dimensional representation that preserves behaviorally relevant information, much like PCA.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "PCA finds the most important features for predicting my target variable."
 
@@ -244,9 +244,9 @@ _Why it is wrong:_ PCA is unsupervised—it ignores the target variable entirely
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -263,7 +263,7 @@ _Why it is wrong:_ PCA is unsupervised—it ignores the target variable entirely
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You perform PCA on a dataset with 10 features. The eigenvalues (variances) of the principal components are: [8.2, 3.1, 1.5, 0.9, 0.5, 0.3, 0.2, 0.1, 0.05, 0.01].
 

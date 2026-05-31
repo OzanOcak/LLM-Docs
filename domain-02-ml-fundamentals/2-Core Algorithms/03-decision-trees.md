@@ -1,22 +1,22 @@
 # Decision trees
 
-**DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
+## **DOMAIN: MACHINE LEARNING FUNDAMENTALS | Sub domain: Core Algorithms**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Linear models draw straight lines. Logistic regression draws smooth curves. But what if the true decision boundary is a rectangle? A checkerboard? A nested set of if-then rules? Decision trees model exactly this: hierarchical, nonlinear, interpretable rules. A decision tree asks a sequence of yes/no questions about the data, each question splitting the data into purer subsets. The result is a model you can explain to a human: "If age > 30 and income > 50K and credit score > 700, then approve loan." Random forests and gradient boosting—among the most powerful practical algorithms—are just collections of decision trees. Understanding decision trees means understanding the logic of human-readable machine learning.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **A decision tree recursively partitions the feature space into regions, assigning the majority class (or average value) to each region, using questions about individual features at each split to maximize the purity of child nodes.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 Imagine you are a doctor diagnosing a patient. You ask a series of questions:
 
@@ -30,9 +30,9 @@ Decision trees automate this process. They find which questions (which features 
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Decision tree for loan approval:
 
                         Is income > 50K?
@@ -95,7 +95,7 @@ Feature space partition (2D):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Setup:** Data with features x and target y (discrete for classification, continuous for regression)
 
@@ -141,9 +141,9 @@ Variance reduction = σ²_parent - weighted average σ²_children
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define small dataset**
+#### **Step 1: Define small dataset**
 
 Predict whether to play tennis (Yes/No) based on weather:
 
@@ -160,13 +160,13 @@ Predict whether to play tennis (Yes/No) based on weather:
 | Sunny    | Normal   | Strong | Yes  |
 | Rainy    | High     | Strong | No   |
 
-**Step 2: Compute root impurity**
+#### **Step 2: Compute root impurity**
 
 Total: 10 examples, 5 Yes (p=0.5), 5 No (p=0.5)
 
 Gini = 1 - (0.5² + 0.5²) = 1 - (0.25+0.25) = 0.5
 
-**Step 3: Evaluate candidate splits**
+#### **Step 3: Evaluate candidate splits**
 
 Split on Outlook:
 
@@ -178,17 +178,17 @@ Weighted Gini = (3/10)×0.444 + (2/10)×0 + (5/10)×0.48 = 0.1332 + 0 + 0.24 = 0
 
 Information gain = 0.5 - 0.3732 = 0.1268
 
-**Step 4: Compare to other splits**
+#### **Step 4: Compare to other splits**
 
 Similar calculation for Humidity, Wind. Outlook gives best gain.
 
-**Step 5: Build tree**
+#### **Step 5: Build tree**
 
 Root splits on Outlook. Overcast branch pure (all Yes) → leaf.
 
 Sunny branch (2 No,1 Yes) needs further splitting.
 
-**Step 6: Split Sunny branch**
+#### **Step 6: Split Sunny branch**
 
 Within Sunny examples:
 
@@ -200,13 +200,13 @@ Within Sunny examples:
 
 Split on Humidity: High → both No (pure), Normal → Yes (pure). Perfect split.
 
-**Step 7: Split Rainy branch**
+#### **Step 7: Split Rainy branch**
 
 Within Rainy examples (3 Yes, 2 No):
 
 Best split is Wind: Weak → 2 Yes (pure), Strong → 2 No (pure). Perfect split.
 
-**Step 8: Final tree**
+#### **Step 8: Final tree**
 
 Outlook:
 
@@ -218,7 +218,7 @@ Perfect classification on training data (100% accuracy).
 
 ---
 
-**7. How this appears inside neural networks or LLMs**
+### **7. How this appears inside neural networks or LLMs**
 
 - **Random Forests:** Ensemble of many decision trees trained on random subsets of data and features. Reduces variance (overfitting) of individual trees.
 
@@ -236,13 +236,13 @@ Perfect classification on training data (100% accuracy).
 
 ---
 
-**8. Brain-like connection (hierarchical decision making)**
+### **8. Brain-like connection (hierarchical decision making)**
 
 The brain makes decisions hierarchically. Visual processing: edges → shapes → objects → categories. Motor planning: reach → grasp → lift → place. This is a decision tree with hundreds of nodes. Each cortical column performs a binary or multi-way classification based on inputs from lower levels. Neurological damage reveals the tree structure: damage to a specific node (e.g., fusiform face area) causes highly specific deficits (can't recognize faces) while leaving other branches intact (can still recognize objects). The brain's decision tree is not learned by greedy impurity minimization, but the hierarchical, conditional structure is remarkably similar.
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Decision trees are obsolete. Neural networks are always better."
 
@@ -250,9 +250,9 @@ _Why it is wrong:_ For tabular data (spreadsheets, databases, feature vectors), 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -269,7 +269,7 @@ _Why it is wrong:_ For tabular data (spreadsheets, databases, feature vectors), 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 You have a node with 10 examples: 7 of class A, 3 of class B.
 

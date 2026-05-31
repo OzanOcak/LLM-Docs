@@ -1,22 +1,22 @@
 # Gradient descent concept
 
-**DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
+## **DOMAIN: MATHEMATICAL FOUNDATIONS | Sub domain: Calculus**
 
 ---
 
-**1. Why this concept matters for building intelligent systems**
+### **1. Why this concept matters for building intelligent systems**
 
 Knowing the gradient tells you which direction is downhill. But knowing direction is not enough—you must actually walk. Gradient descent is the walking algorithm. It is the simplest and most widely used method for making an AI improve. Take a step in the direction of the negative gradient. Repeat. That is it. From this simple loop emerges every learned behavior in every modern neural network: recognizing faces, translating languages, generating text, playing games. Gradient descent is the fundamental learning procedure that turns error into improvement.
 
 ---
 
-**2. Core idea**
+### **2. Core idea**
 
 **Gradient descent is an iterative optimization algorithm that repeatedly takes small steps in the direction of steepest descent (negative gradient) to find a local minimum of a function.**
 
 ---
 
-**3. Concrete analogy**
+### **3. Concrete analogy**
 
 You are blindfolded at the top of a mountain range. You want to reach the lowest valley, but you cannot see. You can feel the slope beneath your feet. Here is your strategy:
 
@@ -28,9 +28,9 @@ After many steps, you reach a valley. You cannot guarantee it is the lowest vall
 
 ---
 
-**4. ASCII diagram**
+### **4. ASCII diagram**
 
-```
+```text
 Gradient descent on a 1D loss function:
 
     Loss
@@ -71,7 +71,7 @@ Gradient descent in 2D (contour view):
 
 ---
 
-**5. Mathematical formulation**
+### **5. Mathematical formulation**
 
 **Update rule for a single parameter:**
 
@@ -129,23 +129,23 @@ $$
 
 ---
 
-**6. Worked example (step-by-step)**
+### **6. Worked example (step-by-step)**
 
-**Step 1: Define a simple loss function**
+#### **Step 1: Define a simple loss function**
 
 L(w) = (w - 3)²
 
 This is a parabola with minimum at w = 3.
 
-**Step 2: Compute the derivative**
+#### **Step 2: Compute the derivative**
 
 dL/dw = 2(w - 3)
 
-**Step 3: Initialize parameters**
+#### **Step 3: Initialize parameters**
 
 Start at w₀ = 8. Learning rate α = 0.1.
 
-**Step 4: Iteration 1**
+#### **Step 4: Iteration 1**
 
 Gradient at w₀ = 2(8 - 3) = 2 × 5 = 10
 
@@ -153,19 +153,19 @@ w₁ = w₀ - α × gradient = 8 - 0.1 × 10 = 8 - 1 = 7
 
 Loss decreased: L(8)=25, L(7)=16 ✓
 
-**Step 5: Iteration 2**
+#### **Step 5: Iteration 2**
 
 Gradient at w₁ = 2(7 - 3) = 2 × 4 = 8
 
 w₂ = 7 - 0.1 × 8 = 7 - 0.8 = 6.2
 
-**Step 6: Iteration 3**
+#### **Step 6: Iteration 3**
 
 Gradient = 2(6.2 - 3) = 2 × 3.2 = 6.4
 
 w₃ = 6.2 - 0.64 = 5.56
 
-**Step 7: Continue until convergence**
+#### **Step 7: Continue until convergence**
 
 | Iteration | w    | Gradient | Loss (w-3)² |
 | --------- | ---- | -------- | ----------- |
@@ -180,7 +180,7 @@ w₃ = 6.2 - 0.64 = 5.56
 
 The parameter approaches 3, the loss approaches 0. Learning succeeded.
 
-**Step 8: Try a learning rate that is too large**
+#### **Step 8: Try a learning rate that is too large**
 
 α = 1.0
 
@@ -191,7 +191,7 @@ Oscillates between 8 and -2 forever. Never converges. Learning rate matters.
 
 ---
 
-**7. How this appears inside neural networks and LLMs**
+### **7. How this appears inside neural networks and LLMs**
 
 - **Training all deep learning models**: Every transformer, CNN, RNN, and LLM (GPT, BERT, LLaMA) is trained with gradient descent variants.
 
@@ -215,7 +215,7 @@ Oscillates between 8 and -2 forever. Never converges. Learning rate matters.
 
 ---
 
-**8. Brain-like connection (trial and error)**
+### **8. Brain-like connection (trial and error)**
 
 Gradient descent is the mathematical formalization of trial-and-error learning. The brain does not compute exact gradients, but it does something analogous: try an action, observe the outcome, adjust future actions in the direction of better outcomes. Dopamine neurons in the basal ganglia encode a reward prediction error—essentially a biological gradient signal. When an outcome is better than expected, dopamine increases, reinforcing recent actions. When worse, dopamine decreases. Over many trials, behavior drifts toward the optimum. This is stochastic gradient descent implemented by evolution.
 
@@ -223,7 +223,7 @@ Motor learning (riding a bike, throwing a ball) also follows gradient descent pr
 
 ---
 
-**9. Common misunderstanding and why it is wrong**
+### **9. Common misunderstanding and why it is wrong**
 
 _Misunderstanding:_ "Gradient descent guarantees finding the absolute best solution (global minimum)."
 
@@ -231,9 +231,9 @@ _Why it is wrong:_ Gradient descent only guarantees finding a local minimum—a 
 
 ---
 
-**10. Why This Matters**
+### **10. Why This Matters**
 
-```
+```text
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -249,7 +249,7 @@ _Why it is wrong:_ Gradient descent only guarantees finding a local minimum—a 
 
 ---
 
-**11. Quick self-check question**
+### **11. Quick self-check question**
 
 Loss function: L(w) = w⁴ - 8w² + 16 (has minima at w = -2 and w = 2, maximum at w = 0)
 
