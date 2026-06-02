@@ -32,7 +32,7 @@ In deep learning, mini-batches (32-512 examples) are the sweet spot. They give r
 
 ### **4. ASCII diagram**
 
-```text
+```
 Batch size effects on gradient noise and convergence:
 
     True gradient direction (downhill):
@@ -42,32 +42,27 @@ Batch size effects on gradient noise and convergence:
         ↙   ↘   ↙   ↓   ↘   ↙   ↓   ↙   ↘
     Path zigzags but moves downhill eventually.
 
-
     Batch size 32 (moderate noise):
         ↙   ↓   ↘   ↓   ↙   ↓
     Smoother path, faster progress per epoch.
-
 
     Batch size 1024 (low noise):
         ↓   ↓   ↓   ↓
     Stable, but updates less frequent.
 
-
 Training time tradeoff:
 
-    Batch size → 1      32      128     1024    Full
-
-    Updates/second:    High    High    Med     Low     Very Low
-    Noise:             High    Med     Low     Very    Low None
-    GPU utilization:   Low     High    High    High    High
-    Generalization:    Best    Good    Med     Poor    Poor
-
+    Batch size →    1       32      128     1024    Full
+    Updates/sec:    High    High    Med     Low     Very Low
+    Noise:          High    Med     Low     Very Low None
+    GPU utilization: Low    High    High    High    High
+    Generalization: Best    Good    Med     Poor    Poor
 
 Loss landscape and batch size:
 
-    Small batch:        Large batch:
-    Finds wide minima   Finds sharp minima
-    (generalizes well)  (generalizes poorly)
+    Small batch:               Large batch:
+    Finds wide minima          Finds sharp minima
+    (generalizes well)         (generalizes poorly)
 
     Loss
       ↑                 ╲
@@ -109,7 +104,7 @@ $$
 
 $$
 \theta_{t+1} = \theta_t - \eta \nabla L_{\text{batch}}(\theta_t)
-\]
+$$
 
 **Epoch:** One complete pass through the entire dataset.
 
@@ -200,15 +195,15 @@ The brain learns online (batch size 1 for each experience). Each sensory event t
 
 ### **9. Common misunderstanding and why it is wrong**
 
-*Misunderstanding:* "Larger batches are always better because they give more accurate gradients and train faster in wall-clock time."
+_Misunderstanding:_ "Larger batches are always better because they give more accurate gradients and train faster in wall-clock time."
 
-*Why it is wrong:* Larger batches often generalize worse. The noise in small batches helps escape sharp minima and find flatter regions that generalize better. Also, the linear scaling rule for learning rate breaks down beyond the critical batch size—gradient estimates are so accurate that the effective learning rate per step becomes too large, causing overshooting. There is a U-curve: very small batches are noisy and slow; very large batches generalize poorly; the sweet spot is in the middle (typically 32-256 for vision, larger for LLMs but still not maximal hardware batch size). Always tune batch size for generalization, not just speed.
+_Why it is wrong:_ Larger batches often generalize worse. The noise in small batches helps escape sharp minima and find flatter regions that generalize better. Also, the linear scaling rule for learning rate breaks down beyond the critical batch size—gradient estimates are so accurate that the effective learning rate per step becomes too large, causing overshooting. There is a U-curve: very small batches are noisy and slow; very large batches generalize poorly; the sweet spot is in the middle (typically 32-256 for vision, larger for LLMs but still not maximal hardware batch size). Always tune batch size for generalization, not just speed.
 
 ---
 
 ### **10. Why This Matters**
 
-```text
+```
 -------------------------------------------------------------
 |  WHY THIS MATTERS                                         |
 |                                                           |
@@ -231,7 +226,7 @@ You have a dataset with 10,000 examples. On your GPU, batch size 32 gives 200 it
 
 **Question:** Which batch size processes more examples per second? Which batch size will likely achieve better generalization? Why?
 
-*(Answer hidden below)*
+_(Answer hidden below)_
 
 ---
 
@@ -253,4 +248,3 @@ Batch 256: 256 × 400 = 102,400 examples/sec
 Batch 256 processes 16× more examples per second.
 
 Generalization: Batch 32 likely generalizes better. The smaller batch adds noise that helps escape sharp minima. Batch 256 may overfit to training data. However, for LLMs with very large datasets, the generalization gap diminishes, and larger batches are used for throughput. For this moderate-sized dataset (10K), smaller batch is likely better for test accuracy despite lower throughput.
-$$
