@@ -1,517 +1,248 @@
-# Decoder-Only Models (GPT-like)
+# Decoder-only (GPT-like)
 
-## The Storyteller Analogy
-
-Imagine a master storyteller spinning a tale. They start with "Once upon a time..." and then continue word by word, each new word building on everything they've said before. They can't jump ahead or peek at the ending—they must create sequentially, one word at a time. That's a decoder-only model like GPT: it generates text left to right, with each new token conditioned on all previous tokens.
-
-In the LLM family, decoder-only models are the stars of generation. GPT, Llama, Mistral, and virtually all modern chat models use this architecture. They've proven that with enough scale, a simple decoder trained only to predict the next word can develop reasoning, follow instructions, and even write poetry.
+## **DOMAIN: LLM-SPECIFIC CONCEPTS | Sub domain: Model Architecture Variants**
 
 ---
 
-## What Is a Decoder-Only Model?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-Decoder-only models use only the decoder part of the transformer, generating text autoregressively from left to right.
-
-```text
-
-Decoder-only (GPT):
-    The → cat → sat → on → the → mat
-     ↓     ↓     ↓     ↓     ↓     ↓
-    [ ] → [ ] → [ ] → [ ] → [ ] → [ ]
-     ↑     ↑     ↑     ↑     ↑     ↑
-    Each step can only see past words!
-
-    "The" predicts "cat"
-    "The cat" predicts "sat"
-    "The cat sat" predicts "on"
-    And so on...
-```
-
-```python
-
-def decoder_only_intro():
-    """
-    The basic concept of decoder-only models
-    """
-    print("Decoder-Only Models: Masters of Generation")
-    print("=" * 60)
-
-    print("""
-    Architecture:
-    • Only the decoder stack (no encoder)
-    • Causal (masked) attention
-    • Each token can only see previous tokens
-
-    Training objective: Next Token Prediction
-    • Given previous tokens, predict next one
-    • Simple but surprisingly powerful
-
-    Output: Generated text, token by token
-    • Can continue prompts, answer questions, write stories
-    """)
-
-decoder_only_intro()
-```
+If you have used ChatGPT, you have used a decoder-only model. This architecture dominates modern LLMs: GPT-3, GPT-4, Llama, Mistral, Claude, Gemini—all decoder-only. Why? Because language is inherently generative. The task of predicting the next token (autoregressive language modeling) is both the pre-training objective and the final use case. Decoder-only models are simpler than encoder-decoder (no cross-attention) and more flexible than encoder-only (they can generate). They scale with data and compute better than any other architecture. Understanding decoder-only means understanding the architecture behind the LLM revolution.
 
 ---
 
-## How Decoder-Only Models Work
+### **2. Core idea**
 
-### Causal Attention Mask
+**A decoder-only model uses a stack of transformer decoder blocks with causal (masked) self-attention, predicting the next token autoregressively given previous tokens, and is trained via next-token prediction on massive text corpora.**
 
-```python
+---
 
-def causal_attention():
-    """
-    How causal attention prevents looking at future
-    """
-    print("Causal Attention: Can't See the Future")
-    print("=" * 60)
+### **3. Concrete analogy**
 
-    print("""
-    Attention mask for "The cat sat":
+Imagine a writer composing a story. They start with the first word, then the second, then the third. Each new word depends on everything written so far. They cannot see the future—only the past. The writer is autoregressive.
 
-    Token:    The  cat  sat
-    The  → [1,   0,   0]  (sees only itself)
-    cat  → [1,   1,   0]  (sees The, cat)
-    sat  → [1,   1,   1]  (sees The, cat, sat)
+Now imagine the writer has an exceptional memory. They remember every word they have written and use that context to decide what comes next. That is a decoder-only model.
 
-    During training, when predicting "sat":
-    • Can attend to "The", "cat" ✓
-    • Cannot attend to future words ✗
+Unlike a translator (encoder-decoder) who sees the full source sentence before starting, or a classifier (encoder-only) who just understands, the decoder-only model's job is to continue. It is a storyteller, not an analyst. This makes it ideal for chat, code generation, creative writing, and any task where the output is a continuation of the input.
 
-    This forces true left-to-right generation!
-    """)
+---
 
-causal_attention()
+### **4. ASCII diagram**
+
 ```
+Decoder-only architecture (GPT):
 
-### Next Token Prediction
+    Input tokens (prompt): "The cat sat"
 
-```python
+    ┌─────────────────────────────────────────────────────────┐
+    │                    Decoder Stack                        │
+    │  ┌───────┐   ┌───────┐   ┌───────┐   ┌───────┐         │
+    │  │ Layer │ → │ Layer │ → │ Layer │ → │ Layer │  (L×)   │
+    │  │   1   │   │   2   │   │   3   │   │   L   │         │
+    │  └───────┘   └───────┘   └───────┘   └───────┘         │
+    │       ↑           ↑           ↑           ↑             │
+    │  Causal self-attention (masked, future not visible)    │
+    │  + Feed-forward network (per token)                    │
+    └─────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    Output logits (vocabulary size, e.g., 50,257)
+    Predict next token: "on" or "down" or "."
+                              │
+                              ▼
+    Sample/greedy decode → "on" → append to input → repeat
 
-def next_token_prediction():
-    """
-    How decoder-only models are trained
-    """
-    print("Training: Next Token Prediction")
-    print("=" * 60)
 
-    sentence = "The cat sat on the mat"
-    words = sentence.split()
+Causal attention mask (sequence length 4):
 
-    print(f"Training sentence: '{sentence}'")
-    print("\nTraining examples (predict next word):")
+    Tokens:    t₁    t₂    t₃    t₄
+    t₁:        ✓     ✗     ✗     ✗    (can only see itself)
+    t₂:        ✓     ✓     ✗     ✗    (can see t₁ and t₂)
+    t₃:        ✓     ✓     ✓     ✗    (can see t₁,t₂,t₃)
+    t₄:        ✓     ✓     ✓     ✓    (can see all up to t₄)
 
-    for i in range(len(words) - 1):
-        context = ' '.join(words[:i+1])
-        target = words[i+1]
-        print(f"  Context: '{context:20}' → Predict: '{target}'")
+    Row = query token, Column = key token
+    ✓ = allowed to attend, ✗ = masked (-∞ in softmax)
 
-    print("\nThe model learns to:")
-    print("• Build language model left-to-right")
-    print("• Capture long-range dependencies")
-    print("• Develop world knowledge and reasoning")
 
-next_token_prediction()
+Training objective (causal language modeling):
+
+    Input:  "The cat sat on"
+    Target: "cat sat on the"
+
+    At each position, predict next token given previous tokens only.
 ```
 
 ---
 
-## GPT Architecture
+### **5. Mathematical formulation**
 
-### Evolution of GPT Models
+**Causal self-attention:**
 
-```python
+For position i, attention only to positions j ≤ i:
 
-def gpt_evolution():
-    """
-    The GPT family evolution
-    """
-    print("The GPT Family Evolution")
-    print("=" * 60)
+$$
+\text{Attention}(Q,K,V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}} + M\right)V
+$$
 
-    models = {
-        "GPT-1 (2018)": {
-            "parameters": "117M",
-            "layers": 12,
-            "innovation": "First generative pre-trained transformer"
-        },
-        "GPT-2 (2019)": {
-            "parameters": "1.5B",
-            "layers": 48,
-            "innovation": "Showed zero-shot learning, too dangerous to release fully"
-        },
-        "GPT-3 (2020)": {
-            "parameters": "175B",
-            "layers": 96,
-            "innovation": "Few-shot learning, in-context learning emerges"
-        },
-        "GPT-3.5/ChatGPT (2022)": {
-            "parameters": "~175B",
-            "layers": 96,
-            "innovation": "RLHF, instruction tuning"
-        },
-        "GPT-4 (2023)": {
-            "parameters": "~1.8T (estimated)",
-            "layers": "~120+",
-            "innovation": "Multimodal, better reasoning"
-        }
-    }
+Where M is the causal mask:
 
-    for model, specs in models.items():
-        print(f"\n{model}:")
-        for key, value in specs.items():
-            print(f"  • {key}: {value}")
+$$
+M_{ij} = \begin{cases} 0 & \text{if } j \leq i \\ -\infty & \text{if } j > i \end{cases}
+$$
 
-gpt_evolution()
+**Training objective (causal language modeling):**
+
+Given sequence x₁...x_T, maximize:
+
+$$
+L_{\text{CLM}} = \sum_{t=1}^{T-1} \log P(x_{t+1} | x_1, ..., x_t)
+$$
+
+**Inference (autoregressive generation):**
+
+Starting with prompt x₁...x_k, for t = k+1 to max_len:
+
+$$
+x_t \sim P(\cdot | x_1, ..., x_{t-1})
+$$
+
+**Positional encodings:**
+
+Decoder-only models use absolute (GPT-2, GPT-3, Llama 1) or rotary (RoPE, Llama 2/3, GPT-NeoX) positional encodings.
+
+**No cross-attention:**
+
+Unlike encoder-decoder, decoder-only has no cross-attention blocks. All attention is self-attention within the sequence.
+
+**Key architectural differences from encoder-only:**
+
+| Feature             | Encoder-only (BERT)  | Decoder-only (GPT)     |
+| ------------------- | -------------------- | ---------------------- |
+| Attention mask      | None (bidirectional) | Causal (future masked) |
+| Pre-training        | MLM + NSP            | Causal LM (next token) |
+| Use case            | Understanding        | Generation             |
+| Positional encoding | Absolute             | Absolute or RoPE       |
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Input prompt**
+
+Prompt: "The capital of France is"
+
+#### **Step 2: Tokenization (simplified)**
+
+Tokens: ["The", "capital", "of", "France", "is"] (5 tokens)
+
+#### **Step 3: Causal attention computation (simplified, first layer)**
+
+For token "is" (position 5):
+
+- Attends to tokens 1-5 (The, capital, of, France, is)
+- Cannot attend to anything beyond (none yet)
+
+For token "France" (position 4):
+
+- Attends to tokens 1-4 (The, capital, of, France)
+- Does NOT attend to "is" (future token, masked)
+
+#### **Step 4: Generate next token**
+
+Model output logits over vocabulary (50,000 words). Highest logits: "Paris" (0.85), "located" (0.10), "a" (0.03), etc.
+
+Sample (or greedy): select "Paris"
+
+#### **Step 5: Append and continue**
+
+New sequence: ["The", "capital", "of", "France", "is", "Paris"]
+
+Repeat: predict next token. Could be "." (end of sentence) or "and" etc.
+
+#### **Step 6: Stop condition**
+
+Model generates end-of-sequence token <|endoftext|> or reaches max length.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **GPT series:** GPT-1 (117M), GPT-2 (1.5B), GPT-3 (175B), GPT-4 (estimated >1T). All decoder-only. GPT-3 showed emergent few-shot learning at scale.
+
+- **Llama (Meta):** Llama 1 (7B-65B), Llama 2 (7B-70B), Llama 3 (8B-70B-400B+). Decoder-only with RoPE positional encodings and SwiGLU activation.
+
+- **Mistral (7B-12B):** Decoder-only with sliding window attention (more efficient for long contexts).
+
+- **Gemini (Google):** Decoder-only (reportedly). Multi-modal (text + images + audio) but decoder-only architecture.
+
+- **Claude (Anthropic):** Decoder-only with RLHF for safety.
+
+- **Why decoder-only dominates:** Simpler architecture than encoder-decoder (no cross-attention), scales well with data, and the pre-training objective (next token prediction) is exactly the inference task. You can also use decoder-only for understanding tasks via prompt engineering (e.g., "Classify this sentiment: ...").
+
+- **Scaling laws:** Decoder-only models exhibit predictable power-law scaling: loss decreases as compute, data, and parameters increase. This predictability is why companies invest billions in scaling.
+
+---
+
+### **8. Brain-like connection (left-to-right language production)**
+
+Human language production is autoregressive. When you speak, you do not plan the entire sentence before starting. You produce one word at a time, with each word conditioned on what you have already said. Broca's area (frontal lobe) is responsible for this sequential production. Damage to Broca's area causes halting, effortful speech—you know what you want to say but cannot produce it fluently. This is analogous to a decoder-only model with a limited context window or faulty attention. The brain's language system is not bidirectional—comprehension is (Wernicke's area), but production is strictly causal. Decoder-only models mirror this: they generate left-to-right, with no future information.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Decoder-only models cannot do bidirectional understanding. They are worse than BERT for all NLP tasks."
+
+_Why it is wrong:_ Decoder-only models can do understanding tasks via prompting. For sentiment analysis: "Classify this review as positive or negative: 'I loved this movie.' Sentiment:" The model generates "positive." With few-shot examples, decoder-only models match or exceed BERT on many understanding benchmarks. More importantly, decoder-only models can do _both_ understanding and generation, while BERT can only understand. This flexibility, combined with scaling laws, is why the industry has converged on decoder-only. For pure understanding tasks with no generation, BERT is still more efficient. But for general-purpose LLMs, decoder-only is the standard.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### Autoregressive Generation
-
-```python
-
-def autoregressive():
-    """
-    How generation works step by step
-    """
-    print("Autoregressive Generation")
-    print("=" * 60)
-
-    prompt = "The capital of France is"
-
-    print(f"Prompt: '{prompt}'")
-    print("\nGeneration process:")
-
-    steps = [
-        ("Step 1", "The capital of France is", " Paris"),
-        ("Step 2", "The capital of France is Paris", ","),
-        ("Step 3", "The capital of France is Paris,", " the"),
-        ("Step 4", "The capital of France is Paris, the", " city"),
-        ("Step 5", "The capital of France is Paris, the city", " of"),
-        ("Step 6", "The capital of France is Paris, the city of", " lights"),
-        ("Step 7", "The capital of France is Paris, the city of lights", ".")
-    ]
-
-    for step, context, next_word in steps:
-        print(f"  {step}: '{context}' → '{next_word}'")
-
-    print("\nEach step feeds back into the next!")
-
-autoregressive()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Decoder-only models are the engine of the generative AI  |
+|  revolution. ChatGPT, Llama, Claude, Gemini—all decoder-  |
+|  only. Their power comes from scaling: more data, more    |
+|  parameters, more compute. The simple objective of next-  |
+|  token prediction, when scaled to trillions of tokens,    |
+|  produces models that can write code, answer questions,   |
+|  and reason. Decoder-only is not just an architecture.    |
+|  It is the architecture that taught machines to speak.    |
+-------------------------------------------------------------
 ```
 
 ---
 
-## What Decoder-Only Models Can Do
+### **11. Quick self-check question**
 
-### 1. Text Generation
+You have a prompt: "The first three prime numbers are 2, 3,"
 
-```python
+**Question:** A decoder-only model continues this prompt. What is the next token likely to be? What information does the model need to have learned during pre-training to answer correctly?
 
-def text_generation():
-    """
-    Creative text generation
-    """
-    print("Text Generation with Decoder-Only Models")
-    print("=" * 60)
-
-    prompts = [
-        "Write a haiku about autumn:",
-        "Once upon a time,",
-        "The recipe for chocolate chip cookies:",
-        "A letter to my future self:"
-    ]
-
-    print("Decoder-only models excel at:")
-    for prompt in prompts:
-        print(f"  • {prompt}")
-
-    print("\nThey can continue in any style they've seen!")
-
-    # Example generation
-    print("\nExample output for 'Write a haiku about autumn:':")
-    print("  Leaves turn red and gold")
-    print("  Crisp air whispers winter's near")
-    print("  Harvest moon hangs high")
-
-text_generation()
-```
-
-### 2. In-Context Learning
-
-```python
-
-def in_context():
-    """
-    Learning from examples in the prompt
-    """
-    print("In-Context Learning")
-    print("=" * 60)
-
-    prompt = """
-    Translate English to French:
-    English: hello
-    French: bonjour
-    English: cat
-    French: chat
-    English: dog
-    French:"""
-
-    print(f"Prompt with examples:\n{prompt}")
-    print("\nModel output: chien")
-
-    print("\nNo fine-tuning needed—just examples in context!")
-    print("This emerges only in large decoder-only models.")
-
-in_context()
-```
-
-### 3. Instruction Following
-
-```python
-
-def instruction_following():
-    """
-    Following instructions (after RLHF)
-    """
-    print("Instruction Following")
-    print("=" * 60)
-
-    instructions = [
-        "Summarize this article in one sentence: ...",
-        "Explain quantum physics to a 5-year-old",
-        "Write a poem about AI",
-        "Give me 3 tips for public speaking"
-    ]
-
-    print("After instruction tuning + RLHF, decoder-only models can:")
-    for inst in instructions:
-        print(f"  • {inst}")
-
-    print("\nThis is what makes ChatGPT so useful!")
-
-instruction_following()
-```
-
-### 4. Code Generation
-
-```python
-
-def code_gen():
-    """
-    Generating code
-    """
-    print("Code Generation")
-    print("=" * 60)
-
-    prompt = """
-    Write a Python function that calculates the factorial of a number:
-    """
-
-    print(f"Prompt: {prompt}")
-    print("""
-    def factorial(n):
-        if n <= 1:
-            return 1
-        else:
-            return n * factorial(n-1)
-    """)
-
-    print("\nDecoder-only models trained on code (like Codex)")
-    print("can generate working code from descriptions!")
-
-code_gen()
-```
+_(Answer hidden below)_
 
 ---
 
-## Decoder-Only vs Other Architectures
+.
 
-| Aspect       | Decoder-Only (GPT)   | Encoder-Only (BERT) | Encoder-Decoder (T5)         |
-| ------------ | -------------------- | ------------------- | ---------------------------- |
-| Attention    | Causal (left only)   | Bidirectional       | Encoder: bi, Decoder: causal |
-| Training     | Next word prediction | Masked LM           | Span corruption              |
-| Best at      | Generation           | Understanding       | Transformation               |
-| Sees future? | No                   | Yes                 | Encoder: Yes                 |
-| Output       | Generated text       | Representations     | Generated text               |
-| Scale        | Up to trillions      | 100M-1B             | 100M-10B                     |
+.
 
-### Why Decoder-Only Won
+.
 
-```python
+.
 
-def why_winner():
-    """
-    Why decoder-only architecture dominates
-    """
-    print("Why Decoder-Now Models Dominate")
-    print("=" * 60)
+.
 
-    reasons = [
-        "Simplicity (one stack, one objective)",
-        "Scales better (proven to trillions)",
-        "Natural for chat/completion",
-        "In-context learning emerges",
-        "Can do understanding tasks too (with prompting)",
-        "Better for RLHF alignment"
-    ]
+**Answer:** The next token is likely "5" (the third prime number).
 
-    print("Reasons decoder-only became dominant:")
-    for r in reasons:
-        print(f"  • {r}")
+The model needs to have learned during pre-training:
 
-why_winner()
-```
+1. The definition of prime numbers (divisible only by 1 and itself)
+2. The sequence of primes: 2, 3, 5, 7, 11, ...
+3. Counting: "first, second, third" → position in sequence
+4. The pattern: after "2, 3," the next is "5"
 
----
-
-## Why This Matters for LLMs
-
-### 1. Powering Modern Chat Models
-
-```python
-
-def chat_models():
-    """
-    Popular decoder-only models
-    """
-    print("Popular Decoder-Only Models")
-    print("=" * 60)
-
-    models = {
-        "GPT-3.5/GPT-4": "OpenAI",
-        "Llama 2/3": "Meta (open weights)",
-        "Mistral/Mixtral": "Mistral AI",
-        "Claude": "Anthropic",
-        "Gemini": "Google",
-        "Qwen": "Alibaba",
-        "DeepSeek": "DeepSeek"
-    }
-
-    for model, company in models.items():
-        print(f"  • {model}: {company}")
-
-    print("\nAll are decoder-only architectures!")
-
-chat_models()
-```
-
-### 2. The Scaling Laws
-
-```python
-
-def scaling():
-    """
-    How decoder-only models scale
-    """
-    print("Scaling Laws for Decoder-Only Models")
-    print("=" * 60)
-
-    print("""
-    Key findings from scaling research:
-
-    • Performance improves predictably with scale
-    • Compute-optimal: scale model AND data together
-    • Emergent abilities appear at certain thresholds
-    • No clear ceiling yet—still scaling!
-
-    Chinchilla optimal for 175B model: ~3T tokens
-    GPT-4 likely trained on ~13T tokens
-
-    Simple architecture + massive scale = intelligence
-    """)
-
-scaling()
-```
-
-### 3. Emergent Abilities
-
-```python
-
-def emergent():
-    """
-    Abilities that appear at scale
-    """
-    print("Emergent Abilities in Large Decoders")
-    print("=" * 60)
-
-    abilities = [
-        "Few-shot learning",
-        "Instruction following",
-        "Chain-of-thought reasoning",
-        "Arithmetic",
-        "Code generation",
-        "Translation (without explicit training)",
-        "Theory of mind"
-    ]
-
-    print("These abilities aren't programmed—they EMERGE:")
-    for ability in abilities:
-        print(f"  • {ability}")
-
-    print("\nThey only appear in very large models!")
-
-emergent()
-```
-
-### 4. The Future: Mixture of Experts
-
-```python
-
-def moe():
-    """
-    Mixture of Experts variant
-    """
-    print("Mixture of Experts (MoE) Decoders")
-    print("=" * 60)
-
-    print("""
-    MoE enhances decoder-only architecture:
-
-    Instead of one huge feed-forward layer,
-    have multiple "expert" layers with router.
-
-    Each token activates only top experts:
-    • More parameters (more knowledge)
-    • Same compute (only activate few)
-    • Best of both worlds
-
-    Examples: Mixtral 8x7B, GPT-4 (rumored)
-    """)
-
-moe()
-```
-
----
-
-## Decoder-Only Cheat Sheet
-
-| Aspect        | Details                       |
-| ------------- | ----------------------------- |
-| Architecture  | Transformer decoder only      |
-| Attention     | Causal (masked)               |
-| Training      | Next token prediction         |
-| Key property  | Autoregressive generation     |
-| Best for      | Generation, chat, completion  |
-| Examples      | GPT, Llama, Mistral, Claude   |
-| Scale         | Up to trillions of parameters |
-| Special sauce | In-context learning emerges   |
-
----
-
-## Quick Recap
-
-• Decoder-only models generate text left-to-right, one token at a time—like a storyteller who builds a tale word by word, each new word based on everything said before
-
-• They're trained on the simple objective of next token prediction—yet with enough scale, this simple task leads to emergent abilities like reasoning, translation, and code generation
-
-• Decoder-only architecture powers virtually all modern chat models—GPT, Llama, Claude, Mistral—and has proven to scale better than other architectures, making it the dominant choice for large language models
-
----
-
-## Mental Hook
-
-> "Decoder-only models are like master storytellers who've read millions of books—give them any opening line, and they'll continue the tale seamlessly, never peeking ahead, just building on what's already been said."
+This is not memorization of a specific sentence (unlikely to appear exactly in training). The model generalizes from multiple examples of prime number sequences in textbooks, articles, and code. Decoder-only models learn these patterns through next-token prediction across trillions of tokens. This is why they can complete sequences correctly without explicit fine-tuning on prime numbers.

@@ -178,19 +178,6 @@ _The LLM's memory and knowledge access_ (19 articles)
 
 ---
 
-## 📚 Domain 07: Practical Aspects
-
-_Making it work in reality_ (31 articles)
-
-### Data Processing
-
-- [Data collection](domain-07-practical-aspects/01-data-processing/01-data-collection.md)
-- [Cleaning and preprocessing](domain-07-practical-aspects/01-data-processing/02-cleaning-and-preprocessing.md)
-- [Data augmentation](domain-07-practical-aspects/01-data-processing/03-data-augmentation.md)
-- [Dataset splits](domain-07-practical-aspects/01-data-processing/04-dataset-splits.md)
-- [Handling imbalanced data](domain-07-practical-aspects/01-data-processing/05-handling-imbalanced-data.md)
-- [Data labeling strategies](domain-07-practical-aspects/01-data-processing/06-data-labeling-strategies.md)
-
 ### Evaluation & Metrics
 
 - [Perplexity](domain-07-practical-aspects/02-evaluation-metrics/01-perplexity.md)
@@ -199,7 +186,6 @@ _Making it work in reality_ (31 articles)
 - [BERTScore](domain-07-practical-aspects/02-evaluation-metrics/04-bertscore.md)
 - [Human evaluation](domain-07-practical-aspects/02-evaluation-metrics/05-human-evaluation.md)
 - [Benchmark datasets](domain-07-practical-aspects/02-evaluation-metrics/06-benchmark-datasets-glue-superglue-mmlu-humaneval-helm.md)
-- [LLM-as-a-judge](domain-07-practical-aspects/02-evaluation-metrics/07-llm-as-judge-evaluation.md)
 
 ### Deployment & Optimization
 
@@ -235,8 +221,7 @@ _Making it work in reality_ (31 articles)
 | 04. Advanced Architectures    | 2          | 13       |
 | 05. LLM-Specific Concepts     | 3          | 16       |
 | 06. Vector Space & Retrieval  | 4          | 19       |
-| 07. Practical Aspects         | 4          | 31       |
-| **Total**                     | **20**     | **121**  |
+| **Total**                     | **16**     | **90**   |
 
 ---
 
@@ -244,7 +229,7 @@ _Making it work in reality_ (31 articles)
 
 1. **Beginner** → Domains 01 → 02 → 03
 2. **Intermediate** → Domains 04 → 05
-3. **Advanced** → Domains 06 → 07
+3. **Advanced** → Domains 06
 
 ---
 

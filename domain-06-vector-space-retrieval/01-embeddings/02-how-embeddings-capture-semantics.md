@@ -1,508 +1,271 @@
-# How Embeddings Capture Semantics
+# How embeddings capture semantics
 
-## The Social Network Analogy
-
-Imagine you're new to a city and you want to understand who's who. You notice that certain people always appear together at the same events—the art crowd, the tech entrepreneurs, the university professors. Without anyone telling you labels, you figure out that people who hang out together share similar interests and professions. That's how embeddings capture semantics: words that appear in similar contexts get similar vectors, purely from observing their "social network" of usage.
-
-In LLMs, this is the magic—semantic meaning emerges automatically from co-occurrence patterns. The model never gets told that "cat" and "kitten" are related; it discovers this because they appear in similar sentences. This is why embeddings can capture nuance, analogy, and even cultural associations.
+## **DOMAIN: VECTOR SPACE & RETRIEVAL | Sub domain: Embeddings: Turning Words into Coordinates**
 
 ---
 
-## The Distributional Hypothesis
+### **1. Why this concept matters**
 
-### Core Principle
+Knowing that embeddings map words to vectors is one thing. Understanding how they capture meaning is another. The magic is not in the representation itself—it is in the geometry. Similar words cluster together. Directions in embedding space correspond to semantic dimensions (gender, tense, plurality). Analogies become vector arithmetic. This structured geometry is learned automatically from raw text, without human labels. Embeddings capture semantics because words that appear in similar contexts have similar meanings. This is the distributional hypothesis: "a word is characterized by the company it keeps."
 
-Words that appear in similar contexts have similar meanings.
+---
 
-```python
+### **2. Core idea**
 
-def distributional_hypothesis():
-    """
-    The fundamental idea behind semantic capture
-    """
-    print("The Distributional Hypothesis")
-    print("=" * 60)
+**Embeddings capture semantics through the distributional hypothesis: words that appear in similar contexts have similar meanings, and this relationship emerges as geometric proximity and linear substructures (analogies) in the learned vector space.**
 
-    print("""
-    "You shall know a word by the company it keeps."
-                                        - J.R. Firth (1957)
+---
 
-    Examples:
+### **3. Concrete analogy**
 
-    Context for "cat":
-    • "The ___ sat on the mat"
-    • "I fed my ___ this morning"
-    • "The ___ chased the mouse"
+Imagine you are an alien trying to understand English without a dictionary. You listen to conversations and notice:
 
-    Context for "dog":
-    • "The ___ slept on the rug"
-    • "I walked my ___ in the park"
-    • "The ___ barked at the mailman"
+- "I ate an apple" and "I ate a banana" appear in similar patterns.
+- "The dog barked" and "The cat meowed" share structure.
 
-    These contexts are SIMILAR → "cat" and "dog" are similar!
-    """)
+You hypothesize: words that appear in the same contexts probably have similar meanings. This is the distributional hypothesis.
 
-distributional_hypothesis()
+Now you create a map. You place words so that words appearing in similar contexts are close together. "Apple" and "banana" end up near each other (fruit cluster). "Dog" and "cat" near each other (pet cluster). But you also notice patterns: the vector from "man" to "woman" is similar to the vector from "king" to "queen". You have discovered the gender dimension.
+
+This map is an embedding space. It was built without anyone telling you what "fruit" or "gender" means—just from observing word patterns.
+
+---
+
+### **4. ASCII diagram**
+
 ```
+Distributional hypothesis visualization:
 
-### Context Vectors
+    Context patterns for "apple" and "banana":
 
-```python
+    "I ate an ___"
+    "She bought a ___"
+    "The ___ was delicious"
 
-def context_vectors():
-    """
-    Building meaning from context
-    """
-    print("Building Context Vectors")
-    print("=" * 60)
+    Similar contexts → similar meaning → nearby in embedding space.
 
-    # Simplified context counts
-    contexts = {
-        "cat": {
-            "sat on": 50,
-            "chased": 30,
-            "meowed": 20,
-            "purred": 15,
-            "scratched": 10
-        },
-        "dog": {
-            "sat on": 45,
-            "chased": 35,
-            "barked": 40,
-            "wagged": 25,
-            "scratched": 8
-        },
-        "car": {
-            "drove": 60,
-            "parked": 40,
-            "fueled": 25,
-            "washed": 20,
-            "scratched": 5
-        }
-    }
 
-    print("Context profiles (simplified):")
-    for word, ctx in contexts.items():
-        print(f"\n  '{word}':")
-        for context, count in list(ctx.items())[:3]:
-            print(f"    • appears with '{context}': {count} times")
+Geometric structure of embedding space:
 
-    print("\n'cat' and 'dog' share many contexts → similar vectors")
-    print("'car' shares fewer contexts → different vector")
+    Dimension: Gender
+         ↑
+         │   (king)  (queen)
+         │     ●─────●
+         │    ╱       ╲
+         │   ╱         ╲
+         │  ╱           ╲
+         │ ●─────────────●
+         │ (man)        (woman)
+         │
+         └────────────────────────→ Dimension: Royalty
 
-context_vectors()
+
+Analogy as vector arithmetic:
+
+    e(king) - e(man) = gender_vector
+    e(queen) - e(woman) = gender_vector (same!)
+
+    Therefore: e(king) - e(man) + e(woman) = e(queen)
+
+
+Semantic dimensions discovered automatically:
+
+    Dimension   |  Examples
+    ------------|-----------------------------------
+    Gender      |  man → woman, king → queen
+    Tense       |  walk → walked, run → ran
+    Plurality   |  cat → cats, child → children
+    Country-capital | France → Paris, Japan → Tokyo
+    Comparative |  fast → faster, good → better
 ```
 
 ---
 
-## How Training Creates Semantic Structure
+### **5. Mathematical formulation**
 
-### Step-by-Step Emergence
+**Distributional hypothesis formalized (Word2vec skip-gram):**
 
-```python
+Maximize the probability of context words given target word w:
 
-def training_process():
-    """
-    How embeddings learn semantics during training
-    """
-    print("The Training Process: Semantics Emerge")
-    print("=" * 60)
+$$
+P(c | w) = \frac{\exp(\mathbf{e}_w \cdot \mathbf{e}_c)}{\sum_{v \in V} \exp(\mathbf{e}_w \cdot \mathbf{e}_v)}
+$$
 
-    print("""
-    Step 1: Random initialization
-    ──────────────────────────────────
-    All words start with random vectors.
-    "cat" and "dog" are far apart (random).
+This forces embeddings to represent words by their contextual co-occurrence.
 
-    Step 2: Prediction task
-    ──────────────────────────────────
-    "The ___ sat on the mat" → predict "cat"
-    Model adjusts "cat" vector to help prediction.
+**Cosine similarity (semantic similarity):**
 
-    Step 3: Shared contexts
-    ──────────────────────────────────
-    "The ___ sat on the mat" also occurs with "dog"
-    Model adjusts "dog" vector similarly.
+$$
+\text{sim}(w_1, w_2) = \frac{\mathbf{e}_{w_1} \cdot \mathbf{e}_{w_2}}{\|\mathbf{e}_{w_1}\| \|\mathbf{e}_{w_2}\|}
+$$
 
-    Step 4: Convergence
-    ──────────────────────────────────
-    After millions of updates,
-    "cat" and "dog" end up close together
-    because they help predict the same contexts.
-    """)
+Words with similar contexts have high cosine similarity.
 
-training_process()
+**Analogy via vector offset:**
+
+Given a:b :: c:d, the embedding satisfies:
+
+$$
+\mathbf{e}_b - \mathbf{e}_a \approx \mathbf{e}_d - \mathbf{e}_c
+$$
+
+Thus:
+
+$$
+\mathbf{e}_d \approx \mathbf{e}_c + (\mathbf{e}_b - \mathbf{e}_a)
+$$
+
+**Principal component analysis (PCA) of embedding space:**
+
+The top principal components correspond to semantic dimensions like gender, tense, formality. These emerge automatically from the data.
+
+**Context window size effect:**
+
+- Small window (2-5 words): captures syntactic relationships (verb tense, pluralization)
+- Large window (10+ words): captures semantic topics (fruit cluster, country cluster)
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Tiny corpus**
+
+Sentences:
+
+- "The cat chased the mouse"
+- "The dog chased the cat"
+- "The mouse ate the cheese"
+
+#### **Step 2: Count contexts (window size 2)**
+
+"cat" appears with: "the", "chased", "the", "dog", "chased", "the" (ignoring stopwords for simplicity)
+
+"dog" appears with: "the", "chased", "the", "cat"
+
+"mouse" appears with: "the", "chased", "the", "the", "ate", "the", "cheese"
+
+#### **Step 3: Context vectors (simplified)**
+
+Cat context: {chased:2, dog:1, cat:1} (self)
+Dog context: {chased:2, cat:1}
+Mouse context: {chased:1, ate:1, cheese:1}
+
+#### **Step 4: Embeddings via matrix factorization**
+
+After training Word2vec on this corpus, vectors might be:
+
+"cat" = [0.8, 0.3, 0.1]
+"dog" = [0.7, 0.4, 0.1]
+"mouse" = [0.2, 0.8, 0.6]
+"cheese" = [0.1, 0.7, 0.9]
+
+#### **Step 5: Compute similarities**
+
+cos(cat, dog) = high (0.95) — both are pets/animals
+cos(cat, mouse) = medium (0.60) — both animals but different roles
+cos(mouse, cheese) = high (0.85) — mouse associated with cheese
+
+#### **Step 6: Analogy discovery**
+
+e(cat) - e(kitten) approximates e(dog) - e(puppy). The vector for "young" emerges from animal pairs.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Word2vec (2013):** Showed that analogies emerge from embeddings: "Paris - France + Italy ≈ Rome". First demonstration of semantic geometry.
+
+- **GloVe (2014):** Global co-occurrence counts produce smoother embedding spaces with better analogy performance.
+
+- **Contextual embeddings (BERT, GPT):** Same word gets different vectors based on context. "Bank" in "river bank" vs "money bank" maps to different regions of embedding space.
+
+- **Sentence embeddings (SBERT, SimCSE):** Pool token embeddings to produce sentence vectors. Semantically similar sentences cluster.
+
+- **Cross-lingual embeddings (MUSE, LASER):** Align embedding spaces across languages. "Dog" (English) and "Chien" (French) near each other.
+
+- **Embedding arithmetic in practice:** Search engines use "query = embed(user_query) - embed(unwanted_concept) + embed(wanted_concept)" for semantic query reformulation.
+
+- **Word analogies as evaluation:** Common benchmark: "man:woman :: king:?" Accuracy of embedding models on analogy tasks measures semantic quality.
+
+- **Bias detection:** Embedding space geometry reveals biases: "doctor" nearer "man" than "woman" in biased corpora. Cosine difference quantifies bias.
+
+---
+
+### **8. Brain-like connection (semantic priming)**
+
+In cognitive psychology, semantic priming shows that hearing "doctor" makes you faster to recognize "nurse" (related) than "table" (unrelated). The brain activates related concepts automatically—they are "near" in neural semantic space. Priming effects are symmetric: "doctor" primes "nurse" as much as "nurse" primes "doctor". This aligns with cosine similarity (symmetric). Moreover, analogical reasoning in the brain (A is to B as C is to D) appears to use vector arithmetic in neural population codes. The geometry of embedding space is not just a mathematical convenience—it mirrors how the human brain organizes semantic memory.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Embeddings capture word meaning directly. The vector for 'doctor' encodes all properties of doctors."
+
+_Why it is wrong:_ Embeddings capture only _distributional_ meaning—similarity based on context. They do not capture entailment, negation, or logical relationships. "Dog" and "animal" are related, but the embedding might not capture that "dog" is a subclass of "animal" (hierarchical). "All dogs are animals" is not encoded as a geometric relationship. Embeddings tell you which words are similar, not which are true. A sentence "dogs can fly" would produce a similar embedding to "dogs can run" if both appear in similar contexts. Embeddings capture statistical patterns, not truth. This is why LLMs need massive scale—statistical patterns approximate truth, but the embedding itself does not represent logical semantics.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### The CBOW and Skip-Gram Models
-
-```python
-
-def word2vec():
-    """
-    Classic word2vec architectures
-    """
-    print("Word2Vec: How It Started")
-    print("=" * 60)
-
-    print("""
-    Two classic architectures:
-
-    1. CBOW (Continuous Bag of Words)
-       Context → Predict target word
-       ["the", "sat", "on", "the"] → "cat"
-
-    2. Skip-gram
-       Target word → Predict context
-       "cat" → ["the", "sat", "on", "the"]
-
-    Both force the model to learn word relationships
-    by making words that appear in similar contexts
-    have similar vectors.
-    """)
-
-word2vec()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Embeddings turn meaning into geometry. In this space,    |
+|  semantic similarity is cosine distance. Analogies are    |
+|  vector sums. Dimensions correspond to features like      |
+|  gender, tense, and topic. This geometry is not designed— |
+|  it emerges from the distributional patterns of words     |
+|  in text. Embeddings capture the subtle, multidimensional |
+|  structure of meaning that eludes hand-coded rules.       |
+|  Understanding this geometry is understanding how AI      |
+|  "knows" what words mean.                                 |
+-------------------------------------------------------------
 ```
 
 ---
 
-## The Geometry of Meaning
+### **11. Quick self-check question**
 
-### Clusters and Neighborhoods
+You have embeddings trained on a corpus. You find that:
 
-```python
+cos(king, queen) = 0.75
+cos(king, man) = 0.65
+cos(queen, woman) = 0.68
+cos(man, woman) = 0.60
 
-def semantic_clusters():
-    """
-    How words form semantic neighborhoods
-    """
-    print("Semantic Neighborhoods")
-    print("=" * 60)
+**Question:** What is the approximate result of the analogy "king : man :: queen : ?" Show the vector arithmetic and explain why the embedding space supports this.
 
-    print("""
-    In embedding space, words naturally cluster:
-
-                    ┌─────────────────┐
-                    │   ANIMALS       │
-                    │  cat───┐        │
-                    │   │    │        │
-                    │  dog───┼──kitten │
-                    │   │    │        │
-                    │  horse─┘        │
-                    └─────────────────┘
-                           │
-           ┌───────────────┴───────────────┐
-           ↓                               ↓
-    ┌─────────────┐                 ┌─────────────┐
-    │   VEHICLES  │                 │   FRUIT     │
-    │ car───truck │                 │ apple─orange│
-    │  │     │    │                 │  │     │    │
-    │ bus───van   │                 │ banana─pear │
-    └─────────────┘                 └─────────────┘
-
-    Each cluster represents a semantic category.
-    The boundaries are fuzzy, but neighborhoods are clear.
-    """)
-
-semantic_clusters()
-```
-
-### Analogies as Vector Arithmetic
-
-```python
-
-def analogies():
-    """
-    How analogies emerge from geometry
-    """
-    print("Analogies: Vector Arithmetic in Meaning Space")
-    print("=" * 60)
-
-    # Simplified 2D embeddings
-    embeddings = {
-        "king": [0.9, 0.8],
-        "queen": [0.9, 0.2],
-        "man": [0.3, 0.8],
-        "woman": [0.3, 0.2],
-        "paris": [0.8, 0.7],
-        "france": [0.8, 0.1],
-        "rome": [0.2, 0.7],
-        "italy": [0.2, 0.1]
-    }
-
-    print("Dimension 1: 'royalty/country' axis")
-    print("Dimension 2: 'gender/capital' axis")
-
-    print("\nAnalogy: king : queen :: man : woman")
-    king = embeddings["king"]
-    man = embeddings["man"]
-    woman = embeddings["woman"]
-    queen = embeddings["queen"]
-
-    print(f"  king - man + woman = {[king[0]-man[0]+woman[0], king[1]-man[1]+woman[1]]}")
-    print(f"  queen = {queen}")
-    print("  → They match! The gender direction is consistent.")
-
-    print("\nAnalogy: paris : france :: rome : italy")
-    paris = embeddings["paris"]
-    france = embeddings["france"]
-    rome = embeddings["rome"]
-    italy = embeddings["italy"]
-
-    result = [paris[0] - france[0] + rome[0],
-              paris[1] - france[1] + rome[1]]
-    print(f"  paris - france + rome = {result}")
-    print(f"  italy = {italy}")
-    print("  → The 'capital-country' direction is consistent!")
-
-analogies()
-```
+_(Answer hidden below)_
 
 ---
 
-## Beyond Words: Sentences and Documents
+.
 
-### Sentence Embeddings
+.
 
-```python
+.
 
-def sentence_embeddings():
-    """
-    Embedding entire sentences
-    """
-    print("Sentence Embeddings: Meaning of Phrases")
-    print("=" * 60)
+.
 
-    sentences = [
-        "The cat sat on the mat",
-        "A kitten rested on the rug",
-        "The dog chased the ball",
-        "I love eating pizza"
-    ]
+.
 
-    print("Sentences with similar meaning have similar vectors:")
-    print(f"\n  '{sentences[0]}'")
-    print(f"  '{sentences[1]}' → SIMILAR (both about cats on surfaces)")
-    print(f"  '{sentences[2]}' → LESS similar (dogs, not cats)")
-    print(f"  '{sentences[3]}' → DIFFERENT (food topic)")
+**Answer:** The analogy is "king is to man as queen is to woman". Vector arithmetic:
 
-    print("\nHow it works:")
-    print("• Average of word embeddings (simple but works)")
-    print("• Pooling from transformer [CLS] token (BERT)")
-    print("• Specialized models (Sentence-BERT)")
+e(queen) ≈ e(woman) + (e(king) - e(man))
 
-sentence_embeddings()
-```
+Compute difference vector: e(king) - e(man) = gender_offset (man→king adds royalty)
 
-### Compositionality
+e(queen) should equal e(woman) + gender_offset
 
-```python
+The embedding space supports this because:
 
-def compositionality():
-    """
-    How meaning combines
-    """
-    print("Compositionality: Building Complex Meaning")
-    print("=" * 60)
+1. The gender dimension (man→woman) is approximately parallel to the gender dimension in royalty (king→queen)
+2. The royalty offset (man→king) is parallel to woman→queen
 
-    print("""
-    Embeddings can capture compositional meaning:
+Given cosine similarities, we can infer that:
 
-    "good" + "movie" ≈ "good movie" (different from both!)
-    "not" + "good" ≈ "bad" (opposite direction!)
+- e(king) - e(man) and e(queen) - e(woman) are approximately the same vector (royalty addition)
+- Therefore, e(king) - e(man) + e(woman) ≈ e(queen)
 
-    The embedding of a phrase is not just the sum
-    of its parts—the transformer creates new
-    contextualized representations that capture
-    how words modify each other.
-
-    "bank" (river) + "money" context → financial meaning
-    "bank" (river) + "water" context → river meaning
-    """)
-
-compositionality()
-```
-
----
-
-## A Complete Example
-
-```python
-
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
-
-def semantic_demo():
-    """
-    Complete demo of semantic capture
-    """
-    print("Complete Example: Semantics in Action")
-    print("=" * 60)
-
-    # Simulated 5D embeddings for words
-    words = {
-        "cat": [0.8, 0.7, 0.2, 0.1, 0.3],
-        "dog": [0.8, 0.6, 0.3, 0.1, 0.4],
-        "kitten": [0.9, 0.7, 0.2, 0.1, 0.2],
-        "puppy": [0.9, 0.6, 0.3, 0.1, 0.3],
-        "car": [0.1, 0.2, 0.9, 0.8, 0.1],
-        "truck": [0.1, 0.2, 0.9, 0.9, 0.1],
-        "apple": [0.2, 0.8, 0.1, 0.2, 0.8],
-        "orange": [0.2, 0.7, 0.1, 0.2, 0.9]
-    }
-
-    def similarity(w1, w2):
-        return cosine_similarity([words[w1]], [words[w2]])[0][0]
-
-    print("Semantic Similarities:")
-    print("-" * 40)
-
-    # Animal cluster
-    print(f"\nAnimals:")
-    print(f"  cat vs dog:    {similarity('cat', 'dog'):.3f}")
-    print(f"  cat vs kitten: {similarity('cat', 'kitten'):.3f}")
-    print(f"  dog vs puppy:  {similarity('dog', 'puppy'):.3f}")
-
-    # Vehicle cluster
-    print(f"\nVehicles:")
-    print(f"  car vs truck:  {similarity('car', 'truck'):.3f}")
-    print(f"  car vs cat:    {similarity('car', 'cat'):.3f}")
-
-    # Fruit cluster
-    print(f"\nFruits:")
-    print(f"  apple vs orange: {similarity('apple', 'orange'):.3f}")
-    print(f"  apple vs car:    {similarity('apple', 'car'):.3f}")
-
-    print("\n" + "=" * 40)
-    print("What this shows:")
-    print("• Words in same category have HIGH similarity")
-    print("• Words in different categories have LOW similarity")
-    print("• The geometry captures semantic relationships")
-    print("• This emerges from training, not manual labeling")
-
-semantic_demo()
-```
-
----
-
-## Why This Matters for LLMs
-
-### 1. Contextualized Embeddings
-
-```python
-
-def contextualized():
-    """
-    Modern LLMs have contextual embeddings
-    """
-    print("Contextualized Embeddings in LLMs")
-    print("=" * 60)
-
-    print("""
-    Unlike static word2vec embeddings,
-    modern LLMs create DIFFERENT embeddings
-    for the same word in different contexts:
-
-    "I went to the bank to deposit money"
-           ↓
-    bank = [0.8, 0.2, 0.7, ...]  (financial)
-
-    "I sat on the bank of the river"
-           ↓
-    bank = [0.2, 0.9, 0.3, ...]  (river)
-
-    Each layer of the transformer refines
-    the embedding based on surrounding words.
-    """)
-
-contextualized()
-```
-
-### 2. Semantic Search and RAG
-
-```python
-
-def semantic_search_rag():
-    """
-    Embeddings enable semantic search
-    """
-    print("Embeddings Enable RAG and Semantic Search")
-    print("=" * 60)
-
-    print("""
-    How RAG works:
-
-    1. Convert all documents to embeddings
-    2. Store in vector database
-    3. Convert user query to embedding
-    4. Find nearest document embeddings
-    5. Use those documents as context
-
-    This works because embeddings capture
-    semantic meaning, not just keywords.
-
-    Query: "cute feline pets"
-    Matches: "Kitten care guide" (semantic match)
-    Not: "Cute shoes for sale" (keyword match only)
-    """)
-
-semantic_search_rag()
-```
-
-### 3. Multilingual Semantics
-
-```python
-
-def multilingual():
-    """
-    Cross-lingual semantic alignment
-    """
-    print("Multilingual Embeddings")
-    print("=" * 60)
-
-    print("""
-    In multilingual models, embeddings align across languages:
-
-    English: "cat" → [0.8, 0.7, 0.2]
-    French:  "chat" → [0.8, 0.7, 0.2]  (almost identical!)
-    German:  "Katze" → [0.8, 0.7, 0.2]
-
-    Japanese: "猫" → [0.8, 0.7, 0.2]  (same meaning, same vector!)
-
-    This enables:
-    • Cross-lingual transfer learning
-    • Translation without parallel data
-    • Multilingual semantic search
-    """)
-
-multilingual()
-```
-
----
-
-## Semantic Capture Cheat Sheet
-
-| Aspect                    | How It Captures Meaning                        |
-| ------------------------- | ---------------------------------------------- |
-| Distributional hypothesis | Words in similar contexts have similar vectors |
-| Clustering                | Related words form neighborhoods               |
-| Directions                | Relationships become vector arithmetic         |
-| Composition               | Phrases combine word meanings                  |
-| Contextualization         | Same word changes meaning based on context     |
-| Cross-lingual             | Same meaning aligns across languages           |
-
----
-
-## Quick Recap
-
-• Embeddings capture semantics through the distributional hypothesis—words that appear in similar contexts get similar vectors, purely from observing usage patterns, not manual labeling
-
-• Semantic relationships become geometric—clusters form for categories (animals, vehicles), directions encode relationships (gender, plural), and analogies become vector arithmetic
-
-• Modern LLMs create contextualized embeddings—the same word gets different vectors in different contexts (bank as river vs financial), capturing nuance and polysemy
-
----
-
-## Mental Hook
-
-> "Embeddings capture meaning like a social network captures people—you understand who someone is by who they hang out with, and words understood by the company they keep, forming neighborhoods of meaning that emerge naturally from billions of conversations."
+The analogy holds if the embedding space has linear substructure for the gender and royalty dimensions. The high cosine similarities between king/queen and man/woman indicate this structure exists. The answer is "woman".

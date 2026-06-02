@@ -1,474 +1,268 @@
-# Chunking Strategies for RAG
+# Chunking strategies for RAG
 
-## The Pizza Slicing Analogy
-
-Imagine you have a large pizza (your document) and you need to serve it to guests who will each only eat a few slices (your LLM's context window). How do you slice it? Too big, and a slice won't fit on a plate. Too small, and guests lose the context of what's on adjacent slices. Some slices should overlap so you don't miss the pepperoni that straddles two slices. That's chunking—deciding how to split your documents into pieces that are useful for retrieval.
-
-In RAG, chunking is arguably the most important design decision. Get it right, and your retrievals are relevant and complete. Get it wrong, and you either miss crucial information or overwhelm the LLM with irrelevant context. Different documents need different slicing strategies.
+## **DOMAIN: VECTOR SPACE & RETRIEVAL | Sub domain: RAG (Retrieval-Augmented Generation)**
 
 ---
 
-## What Is Chunking and Why It Matters
+### **1. Why this concept matters**
 
-### The Core Problem
-
-```python
-
-def chunking_intro():
-    """
-    Why we need to chunk documents
-    """
-    print("Chunking: Slicing Documents for Retrieval")
-    print("=" * 60)
-
-    print("""
-    Constraints we're working with:
-
-    1. LLM context windows are limited (4K-200K tokens)
-    2. Embedding models work best on focused text
-    3. Retrieval finds SIMILAR chunks, not whole docs
-    4. We need chunks that are self-contained
-
-    A single document might be:
-    • A 100-page PDF (too big for context)
-    • A 5000-word article (too big for one embedding)
-    • A book (definitely needs splitting!)
-
-    Chunking turns one document into many searchable pieces.
-    """)
-
-chunking_intro()
-```
-
-### The Goldilocks Problem
-
-```python
-
-def goldilocks():
-    """
-    Finding the right chunk size
-    """
-    print("The Goldilocks Problem: Not Too Big, Not Too Small")
-    print("=" * 60)
-
-    print("""
-    Chunks TOO SMALL (50-100 tokens):
-    • ✅ Focused, specific
-    • ✅ High precision retrieval
-    • ❌ Lose context (sentence fragments)
-    • ❌ May miss relationships
-    • ❌ Many chunks to search
-
-    Chunks TOO LARGE (2000+ tokens):
-    • ✅ Full context preserved
-    • ✅ Fewer chunks overall
-    • ❌ Embedding becomes diluted
-    • ❌ May contain irrelevant info
-    • ❌ May exceed context window
-
-    Chunks JUST RIGHT (300-800 tokens):
-    • ✅ Focused enough for similarity
-    • ✅ Complete enough for context
-    • ✅ Fits in most context windows
-    • ✅ Good balance of precision/recall
-    """)
-
-goldilocks()
-```
+You have a 500-page PDF. You cannot feed it whole into an LLM—context window too small. You split it into chunks, embed each, retrieve relevant chunks at query time. But how do you split? Too small → each chunk misses context; answers span multiple chunks. Too large → each chunk has irrelevant information; retrieval precision drops. Chunking is the silent killer of RAG systems. Bad chunking breaks retrieval. Good chunking is invisible. This section covers chunking strategies: fixed-size, semantic, recursive, and document-structure aware.
 
 ---
 
-## Common Chunking Strategies
+### **2. Core idea**
 
-### 1. Fixed-Size Chunking
+**Chunking splits documents into smaller pieces for embedding and retrieval. Optimal chunk size balances context preservation (larger chunks) against retrieval precision (smaller chunks), with overlap preventing information loss at boundaries.**
 
-The simplest approach: split by character or token count.
+---
 
-```python
+### **3. Concrete analogy**
 
-def fixed_size():
-    """
-    Fixed-size chunking
-    """
-    print("Strategy 1: Fixed-Size Chunking")
-    print("=" * 60)
+Imagine you are cutting a long sausage into pieces for a sandwich.
 
-    text = """
-    The company remote work policy has been updated for 2024.
-    Employees may work remotely up to three days per week.
-    This requires manager approval. A home office stipend of
-    $500 is available. Equipment must be returned if leaving
-    the company. Security guidelines must be followed.
-    VPN access is required. Regular team meetings must be
-    attended in person at least twice per month.
-    """
+- **Too small (10mm):** You get many tiny slices. The flavor of each slice is incomplete. You lose the big picture (context).
+- **Too large (100mm):** You get a few huge chunks. Each chunk has too much, making it hard to pick the right flavor for your sandwich (low precision).
+- **Just right (50mm):** Each slice captures a complete section of flavor. You can pick the right slices for your sandwich.
 
-    chunk_size = 100
-    chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
+Now imagine the sausage has natural boundaries (knots). Cutting at knots preserves structure (sections, paragraphs). This is semantic chunking.
 
-    print(f"Original text length: {len(text)} chars")
-    print(f"Chunk size: {chunk_size} chars")
-    print(f"Number of chunks: {len(chunks)}")
+Overlap: When you cut, you leave a 10mm overlap between slices. If a sentence straddles a cut, it appears in both slices. No information lost.
 
-    print("\nChunk 1:")
-    print(f"  {chunks[0][:50]}...")
-    print("\nChunk 2:")
-    print(f"  {chunks[1][:50]}...")
+---
 
-    print("\n✅ Pros: Simple, fast, predictable")
-    print("❌ Cons: May cut sentences mid-thought")
+### **4. ASCII diagram**
 
-fixed_size()
 ```
+Chunking strategies comparison:
 
-### 2. Overlapping Chunks
+    Document text (continuous):
+    "Paragraph 1. This is the first paragraph. It contains multiple sentences.
+     Paragraph 2. This is the second paragraph. It discusses chunking.
+     Paragraph 3. This is the third paragraph. The conclusion."
 
-Add overlap to prevent cutting off context.
 
-```python
+    Fixed-size (L=50 chars, O=10):
+    ┌────────────────────────────────────┐
+    │ Chunk1: "Paragraph 1. This is the  │
+    │ first paragraph. It contains"      │
+    ├────────────────────────────────────┤
+    │ Chunk2: "It contains multiple      │
+    │ sentences. Paragraph 2. This is"   │ (overlap "It contains")
+    ├────────────────────────────────────┤
+    │ Chunk3: "is the second paragraph.  │
+    │ It discusses chunking. Paragraph"  │
+    └────────────────────────────────────┘
 
-def overlapping():
-    """
-    Overlapping chunks
-    """
-    print("Strategy 2: Overlapping Chunks")
-    print("=" * 60)
 
-    text = "The quick brown fox jumps over the lazy dog. " * 10
+    Semantic (split at sentence boundaries):
+    ┌────────────────────────────────────┐
+    │ Chunk1: "Paragraph 1. This is the  │
+    │ first paragraph."                  │
+    ├────────────────────────────────────┤
+    │ Chunk2: "It contains multiple      │
+    │ sentences."                        │
+    ├────────────────────────────────────┤
+    │ Chunk3: "Paragraph 2. This is the  │
+    │ second paragraph."                 │
+    └────────────────────────────────────┘
 
-    chunk_size = 50
-    overlap = 20
 
-    chunks = []
-    start = 0
-    while start < len(text):
-        end = min(start + chunk_size, len(text))
-        chunks.append(text[start:end])
-        start += chunk_size - overlap
+    Recursive (document structure):
 
-    print(f"Chunk size: {chunk_size}, Overlap: {overlap}")
-    print(f"Number of chunks: {len(chunks)}")
+    Document
+    ├── Section 1
+    │   ├── Paragraph 1
+    │   └── Paragraph 2
+    └── Section 2
+        ├── Paragraph 3
+        └── Paragraph 4
 
-    print("\nChunk 1 and 2 show the overlap:")
-    print(f"  1: {chunks[0][:40]}...")
-    print(f"  2: {chunks[1][:40]}...")
-    print(f"  Shared content: '{chunks[0][-20:]}' appears in both")
+    Chunk = Section if small, else Paragraph.
+    Preserves hierarchy. Metadata: section title, subsection.
 
-    print("\n✅ Pros: Preserves context across boundaries")
-    print("❌ Cons: More chunks, some redundancy")
 
-overlapping()
-```
+Overlap prevents boundary loss:
 
-### 3. Recursive Character Text Splitting
-
-Split intelligently trying to keep paragraphs/sentences intact.
-
-```python
-
-def recursive():
-    """
-    Recursive character text splitting
-    """
-    print("Strategy 3: Recursive Character Text Splitting")
-    print("=" * 60)
-
-    print("""
-    LangChain's recursive splitter works like this:
-
-    1. Try to split by paragraphs ("\n\n")
-       If chunks still too big →
-    2. Try to split by sentences (". " or "?\n")
-       If chunks still too big →
-    3. Try to split by phrases (", " or "; ")
-       If chunks still too big →
-    4. Split by words (" ")
-       If chunks still too big →
-    5. Split by characters
-
-    This keeps semantic units intact when possible!
-    """)
-
-    separators = ["\n\n", "\n", ". ", "? ", "! ", ", ", "; ", " "]
-    print(f"Separators in order: {separators}")
-
-recursive()
-```
-
-### 4. Semantic Chunking
-
-Use embeddings to find natural boundaries.
-
-```python
-
-def semantic():
-    """
-    Semantic chunking
-    """
-    print("Strategy 4: Semantic Chunking")
-    print("=" * 60)
-
-    print("""
-    Idea: Use embeddings to detect topic boundaries
-
-    1. Slide a window across the document
-    2. Compute embeddings for each window
-    3. When similarity drops sharply → topic change
-    4. Split at topic boundaries
-
-    Example:
-
-    [Topic A window]──[Topic A window]──[Topic A window]
-           │                  │                  │
-    similarity: 0.95      0.94           0.45 ← Topic change!
-                                            ↓
-                                      Split here
-
-    This creates chunks that are semantically coherent!
-    """)
-
-semantic()
-```
-
-### 5. Document Structure-Aware Chunking
-
-Use the document's natural structure.
-
-```python
-
-def structure_aware():
-    """
-    Document structure-aware chunking
-    """
-    print("Strategy 5: Structure-Aware Chunking")
-    print("=" * 60)
-
-    print("""
-    Different document types have natural chunk boundaries:
-
-    📄 MARKDOWN:
-    • Split by headers (#, ##, ###)
-    • Keep sections intact
-
-    📊 HTML:
-    • Split by <section>, <div>, <p> tags
-    • Preserve heading structure
-
-    📚 PDFs:
-    • Split by pages (with metadata)
-    • Keep tables together
-
-    💻 CODE:
-    • Split by functions/classes
-    • Keep imports with usage
-
-    🗂️ JSON/XML:
-    • Split by logical objects
-    • Preserve nested structure
-    """)
-
-structure_aware()
-```
-
-### 6. Agentic Chunking (Advanced)
-
-Use an LLM to decide where to split.
-
-```python
-
-def agentic():
-    """
-    Agentic chunking (using LLM)
-    """
-    print("Strategy 6: Agentic Chunking")
-    print("=" * 60)
-
-    print("""
-    Use an LLM to find optimal chunk boundaries:
-
-    1. Feed document to LLM with prompt:
-       "Split this document into coherent chunks.
-        Each chunk should be self-contained and
-        focused on a single topic or concept."
-
-    2. LLM returns split points
-
-    3. Split at those points
-
-    This is expensive but can be optimal for complex docs.
-    Often used for initial indexing, not real-time.
-    """)
-
-agentic()
+    No overlap:            With overlap:
+    [A][B][C]              [A][AB][B][BC][C]
+    Sentence at boundary   Sentence appears in both chunks
+    lost.                  preserved.
 ```
 
 ---
 
-## Chunk Size Comparison
+### **5. Mathematical formulation**
 
-| Size       | Tokens    | Use Case                   | Pros             | Cons                 |
-| ---------- | --------- | -------------------------- | ---------------- | -------------------- |
-| Very small | 50-100    | FAQ items, definitions     | High precision   | Loses context        |
-| Small      | 200-300   | Paragraphs, short sections | Good focus       | May miss connections |
-| Medium     | 500-800   | Document sections          | Balanced         | Most common choice   |
-| Large      | 1000-2000 | Full pages                 | Complete context | Embedding dilution   |
-| Very large | 2000+     | Whole small docs           | Max context      | May exceed limits    |
+**Fixed-size chunking (most common):**
+
+Given document text as token sequence t₁...tₙ, chunk size L (tokens), overlap O (tokens).
+
+Chunk i: tokens t*{i\*(L-O)+1} to t*{i\*(L-O)+L}
+
+Number of chunks: ⌈(n - L)/(L - O)⌉ + 1
+
+**Semantic chunking:**
+
+Split at sentence boundaries (., !, ?, \n\n). Group sentences until chunk size ≈ L. Preserves linguistic units.
+
+**Recursive chunking:**
+
+Use document structure (headings, sections). If section size < L, keep whole section. Else, split section by paragraphs. If paragraph too large, fall back to fixed-size.
+
+**Optimal chunk size heuristic:**
+
+- For dense embeddings (general text): 200-500 tokens
+- For code: 50-200 tokens (functions, classes)
+- For legal/medical: 500-1000 tokens (long contexts)
+- For question-answering: smaller chunks (100-200) for precise retrieval
+- For summarization: larger chunks (500-1000) for complete context
+
+**Overlap recommendation:** 10-20% of chunk size (e.g., 50 tokens overlap for 500 token chunks).
 
 ---
 
-## Chunking Strategy Decision Tree
+### **6. Worked example (step-by-step)**
 
-```python
+#### **Step 1: Input document**
 
-def decision_tree():
-    """
-    How to choose a chunking strategy
-    """
-    print("Chunking Strategy Decision Tree")
-    print("=" * 60)
+```
+Section 1: Introduction
+RAG is retrieval-augmented generation. It combines LLMs with vector search.
+RAG reduces hallucinations.
 
-    print("""
-    START HERE
-        ↓
-    What type of document?
-    ├─► MARKDOWN/HTML → Use structure-aware (headers/tags)
-    ├─► CODE → Use function/class boundaries
-    ├─► PDF/Scanned → Use recursive with overlap
-    ├─► Long prose → Try semantic chunking
-    └─► Mixed/Unknown → Start with recursive (LangChain default)
-        ↓
-    How important is boundary accuracy?
-    ├─► Critical → Try agentic chunking (expensive)
-    └─► Normal → Recursive is fine
-        ↓
-    Test and iterate!
-    """)
+Section 2: Chunking
+Chunking splits documents into pieces. Fixed-size chunking uses tokens.
+Overlap prevents information loss. Semantic chunking uses sentences.
+```
 
-decision_tree()
+#### **Step 2: Fixed-size (L=50 chars, O=10)**
+
+Chunk1: "Section 1: IntroductionRAG is retrieval-augmented gene" (cuts word)
+Chunk2: "ted generation. It combines LLMs with vector search. " (overlap "gene"?? This is messy)
+
+**Problem:** Cuts words, loses section boundaries.
+
+#### **Step 3: Semantic chunking (split at \n\n, then sentences)**
+
+Chunk1: "Section 1: Introduction\nRAG is retrieval-augmented generation. It combines LLMs with vector search. RAG reduces hallucinations."
+
+Chunk2: "Section 2: Chunking\nChunking splits documents into pieces. Fixed-size chunking uses tokens. Overlap prevents information loss. Semantic chunking uses sentences."
+
+**Better:** Preserves section headers, complete sentences.
+
+#### **Step 4: Recursive chunking**
+
+Check section 1 size (150 chars) < L (500) → keep whole section as chunk.
+Same for section 2.
+Result: two chunks (one per section). Perfect.
+
+#### **Step 5: Overlap for safety**
+
+If a paragraph spans two sections (rare), overlap captures it. For semantic/recursive, overlap often unnecessary because boundaries are natural.
+
+#### **Step 6: Metadata**
+
+Store with each chunk: source document, section title, page number, chunk index.
+
+Query retrieves chunk, user sees citation.
+
+---
+
+### **7. How this appears inside neural networks or LLMs**
+
+- **Fixed-size chunking (LangChain default):** `RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)`. Simple, works for general text.
+
+- **Semantic chunking:** `SemanticChunker` (LangChain experimental). Uses embedding similarity between sentences. Split when similarity drops.
+
+- **Document structure aware:** `MarkdownHeaderTextSplitter` (headers), `PythonCodeSplitter` (functions), `RecursiveJsonSplitter`.
+
+- **Small chunks (100-200 tokens):** Better for question-answering (retrieve exact answer sentence). Risk: missing context.
+
+- **Large chunks (500-1000 tokens):** Better for summarization (complete sections). Risk: retrieval includes irrelevant text.
+
+- **Overlap tuning:** 10-20%. Too low → boundary loss. Too high → duplicated content, wasted context window.
+
+- **Metadata propagation:** When chunking, propagate metadata (filename, page, section title) to each chunk. Critical for citation.
+
+- **Chunk size and embedding model:** Embedding models have max sequence length (SBERT: 512 tokens, OpenAI ada: 8191 tokens). Chunk size must fit.
+
+---
+
+### **8. Brain-like connection (episodic memory segmentation)**
+
+The brain does not store memories as continuous video. It segments experience into events (chunks) at boundaries: scene changes, topic shifts, temporal gaps. This is chunking. Each event is stored as a separate memory (chunk). When recalling, the brain retrieves relevant events (chunks), not raw sensory data. Overlap: adjacent events share context (e.g., leaving a room and entering another). The brain's event boundaries are semantic (topic change), not fixed-size. Patients with hippocampal damage cannot segment experience into events—they remember continuous, undifferentiated streams (no chunks). This impairs retrieval. RAG chunking mimics this cognitive segmentation.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Chunk size is a hyperparameter you set once and forget. 500 tokens works for everything."
+
+_Why it is wrong:_ Optimal chunk size depends on document type, query type, and embedding model. Code needs small chunks (functions). Legal contracts need larger chunks (clauses). Question-answering needs small chunks (100-200). Summarization needs large chunks (500-1000). Chunking for RAG over PDFs (extracted text may have broken sentences) requires different strategy than HTML (structured). Always experiment. Evaluate retrieval recall@k for your use case. Change chunk size; measure. Do not assume default works.
+
+---
+
+### **10. Why This Matters**
+
+```
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Bad chunking breaks RAG. Chunks too small: answers       |
+|  straddle chunks, never retrieved. Chunks too large:      |
+|  irrelevant text dilutes similarity, wrong chunks         |
+|  retrieved. Overlap too low: boundary sentences lost.     |
+|  Overlap too high: context wasted, duplicates. Chunking   |
+|  is not a detail—it is the foundation of retrieval.       |
+|  Get it wrong and your RAG fails silently. Get it right   |
+|  and retrieval just works. Test your chunking.            |
+-------------------------------------------------------------
 ```
 
 ---
 
-## A Complete Chunking Example
+### **11. Quick self-check question**
 
-```python
+You are building RAG for a codebase with 10,000 Python functions. Each function is 50-200 lines. You need to answer questions like "Which function handles user authentication?" and "What does `validate_token()` do?"
 
-def chunking_demo():
-    """
-    Complete chunking example with different strategies
-    """
-    print("Chunking Strategies in Action")
-    print("=" * 60)
+**Question:** What chunking strategy would you use? What chunk size? Would you use overlap? What metadata would you store with each chunk?
 
-    # Sample document
-    doc = """
-    CHAPTER 1: INTRODUCTION
-
-    Remote work has become increasingly common since 2020.
-    Many companies have adopted hybrid models. This document
-    outlines our company's remote work policy.
-
-    SECTION 1.1: ELIGIBILITY
-
-    All full-time employees are eligible for remote work.
-    Part-time employees may request consideration.
-    Probationary period must be completed first.
-
-    SECTION 1.2: SCHEDULE
-
-    Employees may work remotely up to 3 days per week.
-    Core hours are 10am-3pm in employee's timezone.
-    Team meetings require in-person attendance twice monthly.
-
-    CHAPTER 2: EQUIPMENT
-
-    Company provides laptop and monitor.
-    Employees are responsible for internet connection.
-    $500 home office stipend available after 6 months.
-    """
-
-    print("Original document has clear structure (chapters/sections)")
-
-    # Strategy 1: Fixed-size (ignores structure)
-    print("\n" + "=" * 40)
-    print("STRATEGY 1: Fixed-size (100 chars)")
-    print("=" * 40)
-    fixed = [doc[i:i+100] for i in range(0, len(doc), 100)]
-    for i, chunk in enumerate(fixed[:3]):
-        print(f"Chunk {i+1}: {chunk[:50]}...")
-
-    # Strategy 2: Structure-aware
-    print("\n" + "=" * 40)
-    print("STRATEGY 2: Structure-aware (by sections)")
-    print("=" * 40)
-    sections = doc.split("\n\n")
-    for i, section in enumerate(sections[:3]):
-        if section.strip():
-            print(f"Section {i+1}: {section[:50]}...")
-
-chunking_demo()
-```
+_(Answer hidden below)_
 
 ---
 
-## Best Practices by Document Type
+.
 
-| Document Type      | Recommended Strategy                 | Chunk Size | Notes                        |
-| ------------------ | ------------------------------------ | ---------- | ---------------------------- |
-| News articles      | Recursive by paragraphs              | 300-500    | Keep bylines with articles   |
-| Academic papers    | Section-aware (Intro, Methods, etc.) | 500-800    | Keep citations with content  |
-| Legal documents    | Clause-based with overlap            | 400-600    | Critical to preserve context |
-| Code repos         | Function/class boundaries            | 200-400    | Include imports per file     |
-| Conversations/chat | By turn/message                      | 200-300    | Keep threads together        |
-| Product docs       | Feature-based sections               | 300-500    | Link related features        |
-| Books              | Chapter + subsection                 | 800-1000   | May need hierarchical        |
+.
 
----
+.
 
-## Why This Matters (The Callout Box)
+.
 
-```text
+.
 
-╔══════════════════════════════════════════════════════════════╗
-║                   WHY THIS MATTERS                           ║
-╠══════════════════════════════════════════════════════════════╣
-║                                                              ║
-║  Chunking is the most underrated factor in RAG quality:     ║
-║                                                              ║
-║  • Bad chunking = bad retrieval = bad answers               ║
-║    No matter how good your embedding model or LLM is         ║
-║                                                              ║
-║  • Different documents need different strategies            ║
-║    A recipe collection chunks differently than legal docs    ║
-║                                                              ║
-║  • Chunk size affects EVERYTHING                            ║
-║    Too small → lose context, miss connections               ║
-║    Too large → noisy embeddings, waste context window       ║
-║                                                              ║
-║  • Overlap prevents information falling through cracks      ║
-║    Critical sentences that span chunk boundaries get kept    ║
-║                                                              ║
-║  • Structure-aware chunking preserves document logic        ║
-║    Headers, lists, and tables need to stay together          ║
-║                                                              ║
-║  Get chunking right, and your RAG sings. Get it wrong,      ║
-║  and you'll be debugging retrieval failures forever.         ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-```
+**Answer:**
 
----
+**Chunking strategy:** Use a code-aware splitter (e.g., LangChain's `PythonCodeSplitter` or tree-sitter). Split at function/class boundaries, not fixed token count. Each chunk = one function (including docstring, signature, body). For very long functions (>500 tokens), split into logical blocks (but rare).
 
-## Quick Recap
+**Chunk size:** Not fixed token size; use structural units (functions). However, for embedding, truncate to model's max length (e.g., 512 tokens for SBERT). Most Python functions fit.
 
-• Chunking is how we slice documents into pieces for retrieval—like cutting a pizza into slices that are small enough to handle but big enough to be satisfying
+**Overlap:** Minimal or none. Functions are semantically independent. Overlap would duplicate code across chunks (waste). However, for class methods, consider including class name in each method's metadata (not chunk overlap).
 
-• Different strategies suit different documents—fixed-size for simplicity, overlapping to preserve context, recursive to respect structure, semantic for topic boundaries
+**Metadata per chunk:**
 
-• The right chunking strategy can make or break your RAG application—it affects retrieval quality, context utilization, and ultimately the accuracy of your LLM's answers
+- `file_path`: where function lives
+- `function_name`: `validate_token`
+- `class_name` (if method)
+- `docstring` (first line for description)
+- `parameters` and `return_type` (parsed from signature)
+- `line_start`, `line_end` (for citation)
+- `dependencies` (functions called within)
 
----
+**Additional strategies:**
 
-## Mental Hook
+- For queries like "function that handles X", also index natural language descriptions of each function (synthetic queries).
+- For code search, use code-specific embedding models (`codebert`, `graphcodebert`, OpenAI `text-embedding-3-small`).
+- Hybrid search: vector similarity + exact symbol name matching (keyword).
 
-> "Chunking is like slicing a pizza—cut it wrong and someone gets just crust or just toppings, but slice it right and everyone gets a perfect piece with context of what's next to it."
+**Evaluation:** Test retrieval recall@5 on a held-out set of function queries. Adjust chunking based on results. For code, function-level chunking is standard and effective. Avoid fixed-size chunking (breaks functions in half).

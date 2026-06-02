@@ -1,526 +1,249 @@
-# Dimensionality Reduction for Visualization (t-SNE, UMAP)
+# Dimensionality reduction for visualization (t-SNE, UMAP)
 
-## The 3D Sculpture Shadow Analogy
-
-Imagine you have a beautiful, complex sculpture in a dark room. You can't see it directly, but you can shine a flashlight from different angles and look at its shadows on the wall. Each shadow is a 2D projection that reveals some aspects of the sculpture but loses others. Some angles show the shape clearly, others create a confusing mess. That's dimensionality reduction—taking high-dimensional data (768D embeddings) and projecting it down to 2D or 3D so we humans can see it, while trying to preserve the most important relationships.
-
-In LLMs, dimensionality reduction is how we visualize the "meaning space." We can't see 768 dimensions, but with t-SNE or UMAP, we can create 2D maps where similar words cluster together, revealing the semantic structure the model has learned.
+## **DOMAIN: VECTOR SPACE & RETRIEVAL | Sub domain: Embeddings: Turning Words into Coordinates**
 
 ---
 
-## The Problem: We Can't See 768 Dimensions
+### **1. Why this concept matters**
 
-### Why Visualization Is Hard
-
-```python
-
-def visualization_problem():
-    """
-    The challenge of high-dimensional data
-    """
-    print("The Problem: We Live in 3D, Embeddings Live in 768D")
-    print("=" * 60)
-
-    print("""
-    Human limitations:
-    • We can see 2D (paper) and 3D (objects)
-    • We cannot see 4D, let alone 768D
-
-    Embedding dimensions:
-    • BERT: 768 dimensions
-    • GPT-3: 12,288 dimensions
-    • Each word is a point in this space
-
-    We need to PROJECT down to 2D/3D
-    while preserving the structure!
-    """)
-
-    # Analogy
-    print("\nAnalogy: Like trying to understand a 3D object")
-    print("by looking at its 2D shadow—you lose information,")
-    print("but you can still see the basic shape.")
-
-visualization_problem()
-```
-
-### What Gets Lost
-
-```python
-
-def what_lost():
-    """
-    Tradeoffs in dimensionality reduction
-    """
-    print("What Gets Lost in Translation")
-    print("=" * 60)
-
-    print("""
-    Original 768D space:           2D projection:
-    • 768 axes of meaning           • Only 2 axes
-    • Can separate concepts finely  • Must squash many axes together
-    • Exact distances matter         • Approximate distances only
-
-    Example:
-    In 768D, "cat" and "kitten" are close (0.1 apart)
-    "cat" and "tiger" are medium (0.3 apart)
-    "cat" and "car" are far (0.8 apart)
-
-    In 2D, we try to preserve these relationships,
-    but some distortion is inevitable.
-    """)
-
-what_lost()
-```
+Word embeddings live in 100- to 1000-dimensional space. You cannot visualize 1000 dimensions. But you can project them down to 2D or 3D while preserving the structure—nearby points in high-D remain nearby in low-D, far points remain far. This is dimensionality reduction for visualization. t-SNE and UMAP are the most popular algorithms for this task. They reveal clusters: all fruit words together, all programming languages together, all emotions together. Without these techniques, embedding spaces would be invisible black boxes. With them, you can see meaning.
 
 ---
 
-## t-SNE: t-Distributed Stochastic Neighbor Embedding
+### **2. Core idea**
 
-### How t-SNE Works
+**t-SNE and UMAP are nonlinear dimensionality reduction techniques that project high-dimensional embeddings into 2D or 3D while preserving local neighborhood structure, enabling visualization of clusters and semantic relationships.**
 
-```python
+---
 
-def tsne_intuition():
-    """
-    The basic intuition behind t-SNE
-    """
-    print("t-SNE: Preserving Neighborhoods")
-    print("=" * 60)
+### **3. Concrete analogy**
 
-    print("""
-    t-SNE's goal: Keep nearby points together in 2D.
+Imagine you have a 3D sculpture of a city. You want to photograph it from above, but a single 2D photo loses depth—some buildings that are far apart look close if they align in the photo.
 
-    Step 1: In high-D space, compute "similarities"
-           Each point has a probability of picking
-           every other point as its neighbor.
+t-SNE is like a magic camera that preserves neighborhood relationships: buildings that are close in 3D appear close in the photo. Distant buildings appear distant. The photo is distorted (no longer a linear projection), but it reveals the structure: residential clusters, industrial clusters, downtown cluster.
 
-    Step 2: In 2D space, do the same thing
-           With random starting positions.
+UMAP is like a similar camera but faster, with slightly different tradeoffs: it preserves more of the global structure (the overall shape of the city) while still keeping local clusters.
 
-    Step 3: Gradually move 2D points until
-           the neighbor probabilities match
-           the high-D probabilities.
+For embeddings, these algorithms project 300D vectors (word meanings) to 2D dots you can plot. "Cat" and "dog" become nearby dots. "Apple" (fruit) and "orange" cluster separately from "Apple" (company) if the embedding distinguishes them.
 
-    Result: Points that were neighbors in 768D
-            become neighbors in 2D.
-    """)
+---
 
-tsne_intuition()
+### **4. ASCII diagram**
+
 ```
+t-SNE/UMAP process: 300D → 2D
 
-### The Perplexity Parameter
+    300D embedding space              2D visualization
+    (invisible)                      (we can see)
 
-```python
+    Each word is a point.            Nearby points in 300D
+    Similar words cluster.           remain nearby in 2D.
 
-def perplexity():
-    """
-    The most important t-SNE parameter
-    """
-    print("Perplexity: How Many Neighbors to Consider")
-    print("=" * 60)
+    ○ ○ ○   ○ ○     ● ● ●   ● ●
+     ○ ○ ○ ○ ○ ○    ● ● ● ● ● ●
+       fruit        vegetables
+        cluster        cluster
 
-    print("""
-    Perplexity ≈ number of neighbors each point considers
+    ○ ○ ○   ○ ○     ○ ○ ○   ○ ○
+    animals        emotions
+     cluster         cluster
 
-    Low perplexity (5-10):
-    • Focuses on very local structure
-    • Can create many small clusters
-    • May break up meaningful groups
 
-    Medium perplexity (30-50):
-    • Balances local and global structure
-    • Most common choice
-    • Good for word embeddings
+Comparison of algorithms:
 
-    High perplexity (100+):
-    • Emphasizes global structure
-    • Can merge distinct clusters
-    • May lose fine details
+    PCA:              t-SNE:                UMAP:
+    Linear            Nonlinear             Nonlinear
+    Preserves global  Preserves local       Preserves local + global
+    structure         neighborhoods         structure
+    Fast              Slow                  Medium-fast
+    Distant points    Clusters only (may    Better global
+    stay distant      split connected       layout
+                        clusters)
 
-    Rule of thumb: Start with 30, adjust based on results.
-    """)
+    Best for:         Best for:            Best for:
+    Overview,         Discovering clusters, Interactive,
+    simple data       qualitative analysis  large datasets
 
-perplexity()
-```
 
-### t-SNE Visualization Example
+Real t-SNE plot of word embeddings (conceptual):
 
-```python
-
-def tsne_visualization():
-    """
-    What t-SNE plots look like
-    """
-    print("What t-SNE Reveals")
-    print("=" * 60)
-
-    print("""
-    t-SNE of word embeddings often shows:
-
-                    ┌─────────────────┐
-                    │    ANIMALS      │
-                    │   cat   dog     │
-                    │     rabbit      │
-                    │   horse         │
-                    └─────────────────┘
-                            │
-            ┌───────────────┴───────────────┐
-            ↓                               ↓
-    ┌───────────────┐               ┌───────────────┐
-    │   VEHICLES    │               │    FRUIT      │
-    │  car   truck  │               │ apple orange  │
-    │    bus        │               │  banana       │
-    │  motorcycle   │               │   pear        │
-    └───────────────┘               └───────────────┘
-
-    Notice: Clear separation between categories!
-    """)
-
-tsne_visualization()
+    Dimension 2
+         ↑
+         │   animals
+         │   cat●      ●fruits
+         │   dog●     ●apple
+         │    ●fish    ●banana
+         │
+         │   vehicles
+         │   car●      ●emotions
+         │   truck●   ●happy
+         │            ●sad
+         └────────────────────────→ Dimension 1
 ```
 
 ---
 
-## UMAP: Uniform Manifold Approximation and Projection
+### **5. Mathematical formulation**
 
-### How UMAP Differs
+**t-SNE (t-Distributed Stochastic Neighbor Embedding):**
 
-```python
+Step 1: Convert high-D distances to probabilities (similarity of i to j):
 
-def umap_intuition():
-    """
-    UMAP: Faster, Better at Global Structure
-    """
-    print("UMAP: The Modern Alternative")
-    print("=" * 60)
+$$
+p_{j|i} = \frac{\exp(-\|x_i - x_j\|^2 / 2\sigma_i^2)}{\sum_{k \neq i} \exp(-\|x_i - x_k\|^2 / 2\sigma_i^2)}
+$$
 
-    print("""
-    UMAP vs t-SNE:
+Step 2: Symmetrize: $p_{ij} = (p_{j|i} + p_{i|j}) / 2n$
 
-    t-SNE:
-    • Preserves local structure well
-    • Global structure (far-apart clusters) can be misleading
-    • Slow on large datasets
-    • Random initialization
+Step 3: In low-D space (2D points y_i), define similar probabilities using t-distribution:
 
-    UMAP:
-    • Preserves local AND global structure better
-    • Much faster (especially on large data)
-    • More deterministic
-    • Better at showing continuous patterns
+$$
+q_{ij} = \frac{(1 + \|y_i - y_j\|^2)^{-1}}{\sum_{k \neq l} (1 + \|y_k - y_l\|^2)^{-1}}
+$$
 
-    Both are useful, UMAP is often preferred now
-    for large embedding visualizations.
-    """)
+Step 4: Minimize KL divergence between P and Q:
 
-umap_intuition()
+$$
+\text{KL}(P||Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}
+\]
+
+**UMAP (Uniform Manifold Approximation and Projection):**
+
+Constructs a graph in high-D (k-nearest neighbors), then optimizes a low-D layout that preserves the graph structure using cross-entropy loss and stochastic gradient descent.
+
+**Key differences:**
+
+- t-SNE uses Gaussian in high-D, t-distribution in low-D
+- UMAP uses manifold assumptions (uniform distribution on a manifold)
+- UMAP scales better to large datasets (millions of points)
+- t-SNE tends to create tighter clusters; UMAP preserves more global structure
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Starting embeddings (300D, concept only)**
+
+Assume 6 words with 300D embeddings (simplified to 2D for illustration):
+
+cat = [0.8, 0.2]
+dog = [0.7, 0.3]
+fish = [0.6, 0.1]
+apple = [0.1, 0.8]
+banana = [0.2, 0.7]
+car = [0.5, 0.5] (confused? Not realistic, just example)
+
+#### **Step 2: t-SNE initialization**
+
+Randomly place 2D points (perplexity=2). Iteratively move them to match high-D similarities.
+
+#### **Step 3: After optimization**
+
+t-SNE output (example):
+
+cat = (1.2, 0.5)
+dog = (1.1, 0.6)
+fish = (1.0, 0.4)
+apple = (-1.0, -0.8)
+banana = (-0.9, -0.7)
+car = (0.0, 0.0) (between clusters, maybe outlier)
+
+#### **Step 4: Plot**
+
+Scatter plot shows:
+- Animals cluster (cat, dog, fish) near (1.0, 0.5)
+- Fruits cluster (apple, banana) near (-0.9, -0.7)
+- Car may be isolated (no cluster)
+
+#### **Step 5: Interpretation**
+
+The visualization reveals semantic categories: animals, fruits. Car might be too far from both—maybe missing from vocabulary. t-SNE makes cluster structure visible.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Word embedding visualization:** Classic use. Word2vec, GloVe, FastText vectors projected to 2D reveal semantic clusters: animals, emotions, professions, etc.
+
+- **LLM hidden state analysis:** Take activations from middle layers of BERT or GPT, apply t-SNE/UMAP to see how the model organizes concepts internally.
+
+- **Attention pattern visualization:** Compute attention vectors (how much each token attends to others), reduce to 2D to see attention heads' focus.
+
+- **Dataset exploration:** Embed sentences/documents, reduce to 2D, color by label. Reveals mislabeled data, outliers, or distribution shifts.
+
+- **Model debugging:** Embed model predictions. If clusters of errors appear (e.g., all "cat" misclassified as "dog"), the embedding space may be insufficiently separated.
+
+- **Embedding drift monitoring:** During fine-tuning, compare pre vs post embeddings with UMAP. If clusters shift dramatically, the model may be overfitting or forgetting.
+
+- **Fasttext for visualization:** Subword embeddings produce smoother UMAP plots (rare words get meaningful positions).
+
+- **Interactive exploration:** Tools like TensorFlow Projector, umap-learn, and openTSNE allow interactive visualization of embeddings.
+
+---
+
+### **8. Brain-like connection (tonotopic and retinotopic maps)**
+
+The brain maps high-dimensional sensory inputs onto 2D cortical sheets with preserved neighborhoods. In auditory cortex, frequencies are mapped tonotopically: nearby neurons respond to similar pitches. In visual cortex, retinotopic maps preserve spatial adjacency: points near each other in the visual field activate nearby cortical neurons. This is biological dimensionality reduction: the brain projects high-D sensory data onto 2D cortical surfaces while preserving local topology. t-SNE and UMAP achieve something analogous computationally. The brain's maps are fixed by development; t-SNE optimizes maps per dataset. But the principle—local neighborhoods in high-D become local neighborhoods in 2D—is shared.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+*Misunderstanding:* "t-SNE preserves global distances. If two clusters are far apart in the plot, they are far apart in the original high-D space."
+
+*Why it is wrong:* t-SNE preserves local neighborhoods but not global distances. Clusters that appear far apart in the plot might actually be moderately close in high-D if separated by empty space. Conversely, clusters that appear separated could be artificially split due to perplexity settings. t-SNE can also distort relative cluster sizes: a large cluster may appear smaller than a small cluster. Always interpret t-SNE plots qualitatively, not quantitatively. Do not measure distances between clusters—they are not reliable. UMAP preserves more global structure, but still distances are not Euclidean. Use PCA for global distance preservation. Use t-SNE/UMAP for discovering clusters, not measuring distances.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### Key UMAP Parameters
-
-```python
-
-def umap_parameters():
-    """
-    UMAP's main controls
-    """
-    print("UMAP Parameters: Controlling the View")
-    print("=" * 60)
-
-    print("""
-    n_neighbors: How many neighbors to consider
-    • Small (5-15): Focus on very local structure
-    • Large (50-200): Capture broader patterns
-
-    min_dist: How tightly to pack points
-    • Small (0.1): Points cluster densely
-    • Large (0.5): Points spread out more
-
-    n_components: Output dimensions
-    • 2: For visualization
-    • 3: For interactive 3D plots
-
-    Metric: Distance measure (cosine, euclidean)
-    • Cosine: Good for word embeddings
-    • Euclidean: Good for continuous data
-    """)
-
-umap_parameters()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Embedding spaces are invisible. Hundreds of dimensions,  |
+|  no way to see. t-SNE and UMAP are microscopes for       |
+|  meaning space. They reveal clusters: animals, fruits,    |
+|  programming languages, emotions. They expose biases:     |
+|  "doctor" near "man", "nurse" near "woman". They help     |
+|  debug models, explore data, and communicate findings.    |
+|  Without them, embeddings are abstract math. With them,   |
+|  you can see the geometry of meaning.                     |
+-------------------------------------------------------------
 ```
 
 ---
 
-## t-SNE vs UMAP Comparison
+### **11. Quick self-check question**
 
-| Aspect           | t-SNE                       | UMAP                       |
-| ---------------- | --------------------------- | -------------------------- |
-| Speed            | Slow (O(n²))                | Fast (O(n log n))          |
-| Global structure | Poor (can mislead)          | Good                       |
-| Local structure  | Excellent                   | Excellent                  |
-| Deterministic    | No (varies between runs)    | More stable                |
-| Parameters       | Perplexity                  | n_neighbors, min_dist      |
-| Best for         | Small datasets, exploration | Large datasets, production |
-| Memory usage     | High                        | Moderate                   |
+You have 1000 word embeddings (768 dimensions each) from BERT. You apply t-SNE to project to 2D and observe that "tiger", "lion", "leopard" form a tight cluster, while "car", "truck", "bus" form another cluster far away. "Jaguar" (the car brand) appears exactly midway between the animal cluster and the vehicle cluster.
 
-### When to Use Which
+**Question:** What does this tell you about BERT's embedding of "Jaguar"? Is this correct behavior? Would this cause problems for a search engine?
 
-```python
-
-def when_to_use():
-    """
-    Choosing the right tool
-    """
-    print("t-SNE vs UMAP: When to Use Each")
-    print("=" * 60)
-
-    scenarios = {
-        "Small dataset (<5000 points)": "Either works, t-SNE is classic",
-        "Large dataset (>50,000 points)": "UMAP (t-SNE too slow)",
-        "Exploring local clusters": "t-SNE (emphasizes neighborhoods)",
-        "Understanding global structure": "UMAP (better at large-scale patterns)",
-        "Research visualization": "Both, compare results",
-        "Production pipeline": "UMAP (faster, deterministic)"
-    }
-
-    for scenario, choice in scenarios.items():
-        print(f"  • {scenario}: {choice}")
-
-when_to_use()
-```
+*(Answer hidden below)*
 
 ---
 
-## A Practical Example
+.
 
-```python
+.
 
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.manifold import TSNE
-import umap
+.
 
-def dimensionality_reduction_demo():
-    """
-    Simplified example of t-SNE and UMAP
-    """
-    print("Dimensionality Reduction in Action")
-    print("=" * 60)
+.
 
-    # Generate synthetic word embeddings (100 words, 50 dimensions)
-    np.random.seed(42)
-    n_words = 100
-    n_dims = 50
+.
 
-    # Create 3 clusters of words
-    embeddings = []
-    labels = []
+**Answer:** BERT's embedding of "Jaguar" captures its polysemy (multiple meanings). The word is ambiguous between animal (big cat) and car brand (luxury vehicle). In the embedding space, "Jaguar" is pulled toward both clusters, landing in between. This is semantically correct—the embedding represents ambiguity.
 
-    # Cluster 1: Animals (30 words)
-    center1 = np.random.randn(n_dims) * 2
-    for i in range(30):
-        vec = center1 + np.random.randn(n_dims) * 0.5
-        embeddings.append(vec)
-        labels.append("animals")
+For a search engine, this could cause problems:
+- Search for "Jaguar" might retrieve results about both animals and cars, which may or may not be desired.
+- Query expansion "similar to Jaguar" would mix animal and car concepts, reducing precision.
 
-    # Cluster 2: Vehicles (30 words)
-    center2 = np.random.randn(n_dims) * 2 + 5
-    for i in range(30):
-        vec = center2 + np.random.randn(n_dims) * 0.5
-        embeddings.append(vec)
-        labels.append("vehicles")
+Solutions:
+1. Contextual disambiguation: Use surrounding words to determine sense ("Jaguar animal" vs "Jaguar car").
+2. Sense-specific embeddings: Separate vectors per word sense (e.g., WordNet senses).
+3. Use sentence embeddings not word embeddings for retrieval to leverage context.
 
-    # Cluster 3: Fruits (40 words)
-    center3 = np.random.randn(n_dims) * 2 - 3
-    for i in range(40):
-        vec = center3 + np.random.randn(n_dims) * 0.5
-        embeddings.append(vec)
-        labels.append("fruits")
-
-    embeddings = np.array(embeddings)
-
-    print(f"Original data: {n_words} points in {n_dims} dimensions")
-
-    # t-SNE
-    print("\nRunning t-SNE (simulated)...")
-    print("  • Perplexity = 30")
-    print("  • Iterations = 1000")
-    print("  • Result: 2D projection preserving neighborhoods")
-
-    # UMAP
-    print("\nRunning UMAP (simulated)...")
-    print("  • n_neighbors = 15")
-    print("  • min_dist = 0.1")
-    print("  • Result: 2D projection with better global structure")
-
-    print("\n" + "=" * 40)
-    print("What the visualizations would show:")
-    print("""
-    t-SNE view:                          UMAP view:
-    ┌─────────────────┐                  ┌─────────────────┐
-    │   Animals  ••   │                  │ Animals  ••     │
-    │        ••       │                  │      ••    Fruits│
-    │  Vehicles ••    │                  │Vehicles ••  ••  │
-    │        ••       │                  │    ••      ••   │
-    │    Fruits ••    │                  │  ••  Fruits     │
-    └─────────────────┘                  └─────────────────┘
-
-    t-SNE: Clusters clearly separated, but distances between
-           clusters are meaningless (they could be rearranged).
-
-    UMAP: Clusters separated AND relative positions preserved
-           (animals closer to fruits than to vehicles, if true in high-D).
-    """)
-
-dimensionality_reduction_demo()
-```
-
----
-
-## Why This Matters for LLMs
-
-### 1. Understanding What Models Learn
-
-```python
-
-def understanding_models():
-    """
-    Using visualization to understand LLMs
-    """
-    print("Visualization Helps Us Understand LLMs")
-    print("=" * 60)
-
-    insights = [
-        "See semantic categories emerge",
-        "Detect bias (gender, race clustering)",
-        "Identify outliers and unusual words",
-        "Track how representations change through layers",
-        "Compare different models",
-        "Debug embedding quality"
-    ]
-
-    print("Researchers use t-SNE/UMAP to:")
-    for insight in insights:
-        print(f"  • {insight}")
-
-understanding_models()
-```
-
-### 2. Famous Visualizations
-
-```python
-
-def famous_viz():
-    """
-    Classic embedding visualizations
-    """
-    print("Famous Embedding Visualizations")
-    print("=" * 60)
-
-    print("""
-    Word2Vec countries + capitals:
-
-                    China
-                      Beijing
-                        └── Japan
-                           Tokyo
-    Germany                 └─── Korea
-      Berlin                     Seoul
-        └── France
-           Paris
-              └── Italy
-                  Rome
-
-    The vector (country → capital) is consistent!
-    """)
-
-famous_viz()
-```
-
-### 3. Layer-by-Layer Evolution
-
-```python
-
-def layer_evolution():
-    """
-    How representations change through layers
-    """
-    print("Visualizing Layer-by-Layer Evolution")
-    print("=" * 60)
-
-    print("""
-    In a 12-layer BERT model:
-
-    Layer 1:                    Layer 6:                    Layer 12:
-    ┌─────────┐                 ┌─────────┐                 ┌─────────┐
-    │  The    │                 │  The    │                 │  The    │
-    │  cat    │  (mostly        │  cat    │  (semantic      │  cat    │
-    │  sat    │   syntax)        │  sat    │   clusters      │  sat    │
-    │  on     │                 │  on     │   forming)       │  on     │
-    │  the    │                 │  the    │                 │  the    │
-    │  mat    │                 │  mat    │                 │  mat    │
-    └─────────┘                 └─────────┘                 └─────────┘
-
-    t-SNE of each layer shows:
-    • Early layers: words cluster by syntax (nouns together)
-    • Middle layers: semantic clusters emerge
-    • Late layers: task-specific patterns
-    """)
-
-layer_evolution()
-```
-
----
-
-## Practical Tips for Visualization
-
-```python
-
-def practical_tips():
-    """
-    Tips for creating good visualizations
-    """
-    print("Practical Tips for Embedding Visualization")
-    print("=" * 60)
-
-    tips = [
-        "Start with UMAP (faster, better global structure)",
-        "Try multiple perplexity/n_neighbors values",
-        "Color by known categories (if available)",
-        "Label interesting points",
-        "Interactive plots help (plotly, bokeh)",
-        "Don't overinterpret distances between far clusters",
-        "Compare with random projections as baseline"
-    ]
-
-    for i, tip in enumerate(tips, 1):
-        print(f"  {i}. {tip}")
-
-practical_tips()
-```
-
----
-
-## Dimensionality Reduction Cheat Sheet
-
-| Technique         | Best For                     | Speed     | Parameters            | Caveats                      |
-| ----------------- | ---------------------------- | --------- | --------------------- | ---------------------------- |
-| t-SNE             | Local structure, small data  | Slow      | perplexity            | Global distances meaningless |
-| UMAP              | Local + global, large data   | Fast      | n_neighbors, min_dist | Newer, less studied          |
-| PCA               | Linear structure, first look | Very fast | n_components          | Misses non-linear patterns   |
-| Random Projection | Baseline comparison          | Very fast | n_components          | Just random                  |
-
----
-
-## Quick Recap
-
-• Dimensionality reduction projects 768D embeddings down to 2D for visualization—like casting shadows of a complex sculpture to understand its shape, losing detail but revealing structure
-
-• t-SNE preserves local neighborhoods well but can misrepresent global distances—great for seeing clusters, but distances between far-apart clusters are meaningless
-
-• UMAP is faster and preserves both local and global structure better—making it the modern choice for visualizing large embedding spaces in LLMs
-
----
-
-## Mental Hook
-
-> "Dimensionality reduction is like creating a 2D map of a vast 768-dimensional universe—we can't see the real thing, but with techniques like t-SNE and UMAP, we can create a flattening that reveals the continents and islands of meaning."
+The midway position is not a bug—it is a feature of distributional embeddings. It correctly reflects ambiguity in the training data. For applications needing sense disambiguation, use context or sense-specific models. For visualization, this midway point is informative.
+$$

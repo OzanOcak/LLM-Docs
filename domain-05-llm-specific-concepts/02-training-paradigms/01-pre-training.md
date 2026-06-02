@@ -1,567 +1,250 @@
-# Pre-Training
+# Pre-training
 
-## The Medical School Analogy
-
-Imagine a doctor's education. First, they spend years in medical school learning general medicine—anatomy, physiology, biochemistry (pre-training). They read thousands of textbooks and research papers, building a broad understanding of medicine. Later, they specialize in cardiology (fine-tuning), applying their general knowledge to a specific domain. That's pre-training: teaching a model general language understanding on massive amounts of text before specializing it for specific tasks.
-
-In LLMs, pre-training is the massive first phase where models learn language—grammar, facts, reasoning patterns, and world knowledge—by predicting words on internet-scale data. This is why models like GPT-3 can do so many things: they've already learned the fundamentals during pre-training.
+## **DOMAIN: LLM-SPECIFIC CONCEPTS | Sub domain: Training Paradigms**
 
 ---
 
-## What Is Pre-Training?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-Pre-training is the initial phase where a model learns general language patterns from large amounts of unlabeled text.
-
-```text
-
-Raw internet text (trillions of tokens):
-"The cat sat on the mat"
-"Paris is the capital of France"
-"2 + 2 = 4"
-"Once upon a time..."
-
-            ↓
-    [PRE-TRAINING]
-    (Self-supervised learning)
-            ↓
-
-Base Model with general language understanding
-(Knows grammar, facts, reasoning, patterns)
-            ↓
-    Can be fine-tuned for specific tasks
-```
-
-```python
-
-def pretraining_intro():
-    """
-    The basic concept of pre-training
-    """
-    print("Pre-Training: Learning the Fundamentals")
-    print("=" * 60)
-
-    print("""
-    Pre-training objectives:
-
-    • GPT-style: Predict next word
-      "The cat sat on the [???]" → "mat"
-
-    • BERT-style: Predict masked words
-      "The [MASK] sat on the mat" → "cat"
-
-    The model learns:
-    • Grammar and syntax
-    • Word meanings
-    • World knowledge
-    • Reasoning patterns
-    • Common sense
-    """)
-
-    print("\nAll from raw text, no labels needed!")
-
-pretraining_intro()
-```
+You cannot learn a language from a few examples. You need millions of books, billions of web pages, trillions of tokens. Pre-training is the phase where the model consumes this massive corpus, learning grammar, facts, reasoning patterns, and world knowledge—all from the simple objective of predicting the next word (or masked word). This phase costs millions of dollars and weeks of compute. But it produces a base model that already understands language. Pre-training is why GPT-3 knows the capital of France without ever being explicitly taught. It is the foundation upon which all other capabilities are built.
 
 ---
 
-## Pre-Training Objectives
+### **2. Core idea**
 
-### 1. Causal Language Modeling (GPT-style)
+**Pre-training is the initial phase of LLM training where the model learns general language understanding from massive, diverse, unlabeled text data using self-supervised objectives such as next-token prediction or masked language modeling.**
 
-The model predicts the next word, seeing only previous words.
+---
 
-```python
+### **3. Concrete analogy**
 
-def causal_lm():
-    """
-    Causal Language Modeling (GPT-style)
-    """
-    print("Causal Language Modeling (Decoder-Only)")
-    print("=" * 60)
+Imagine you want to train a world-class chef. You do not start with teaching specific dishes. Instead, you send them to culinary school for two years. They learn knife skills, flavor combinations, cooking techniques, ingredient properties. They cook thousands of dishes, not for customers, but for practice. They taste everything, learning what works and what does not.
 
-    sentence = "The cat sat on the mat"
-    words = sentence.split()
+After culinary school, they can cook anything. You give them a new recipe (fine-tuning) and they excel. But without that foundational training, they would struggle.
 
-    print(f"Sentence: '{sentence}'")
-    print("\nTraining examples (predict next word):")
+Pre-training is culinary school for LLMs. The model reads billions of sentences, learning to predict the next word. It learns grammar, vocabulary, common sense, reasoning. This phase requires no human labels—just raw text. After pre-training, the model is a "foundation model": it understands language but does not yet follow instructions or answer questions. Those come later (fine-tuning, instruction tuning). But without pre-training, there is no foundation to build on.
 
-    for i in range(len(words) - 1):
-        context = ' '.join(words[:i+1])
-        target = words[i+1]
-        print(f"  Context: '{context:20}' → Target: '{target}'")
+---
 
-    print("\nThe model learns to:")
-    print("• Build language understanding left-to-right")
-    print("• Develop next-word prediction skills")
-    print("• Capture long-range dependencies")
+### **4. ASCII diagram**
 
-causal_lm()
 ```
+Two-stage LLM training pipeline:
 
-### 2. Masked Language Modeling (BERT-style)
+    Stage 1: Pre-training (costly, once)
 
-The model predicts randomly masked words, seeing full context.
+    Massive unlabeled text (trillions of tokens)
+    ┌────────────────────────────────────────┐
+    │ Wikipedia, books, web pages, code,     │
+    │ scientific papers, social media, ...   │
+    └────────────────────────────────────────┘
+                      │
+                      ▼
+    Self-supervised objective:
+    • Causal LM (GPT): predict next token
+    • MLM (BERT): predict masked tokens
+                      │
+                      ▼
+    Base model (understands language,
+    but does not follow instructions)
 
-```python
 
-def masked_lm():
-    """
-    Masked Language Modeling (BERT-style)
-    """
-    print("Masked Language Modeling (Encoder-Only)")
-    print("=" * 60)
+    Stage 2: Fine-tuning / Alignment (cheaper, task-specific)
 
-    sentence = "The cat sat on the mat"
-    words = sentence.split()
+    Labeled / curated data
+    ┌────────────────────────────────────────┐
+    │ Question-answer pairs, instructions,   │
+    │ human preferences, chat conversations  │
+    └────────────────────────────────────────┘
+                      │
+                      ▼
+    Supervised / RL objective
+                      │
+                      ▼
+    Deployable model (can answer questions,
+    follow instructions, chat)
 
-    print(f"Original: '{sentence}'")
-    print("\nMasked examples (predict masked words):")
 
-    # Simulate masking different words
-    masked_examples = [
-        ("[MASK] cat sat on the mat", "The"),
-        ("The [MASK] sat on the mat", "cat"),
-        ("The cat [MASK] on the mat", "sat"),
-        ("The cat sat [MASK] the mat", "on"),
-        ("The cat sat on [MASK] mat", "the"),
-        ("The cat sat on the [MASK]", "mat")
-    ]
+Pre-training objectives comparison:
 
-    for masked, target in masked_examples:
-        print(f"  Input: '{masked:30}' → Target: '{target}'")
+    GPT (Causal Language Modeling):
+    Input:  "The cat sat on the"
+    Target: "mat"
 
-    print("\nAdvantages:")
-    print("• Uses context from both sides")
-    print("• Learns bidirectional understanding")
-    print("• Better for classification tasks")
+    Masked LM (BERT):
+    Input:  "The [MASK] sat on the mat"
+    Target: "cat"
 
-masked_lm()
-```
-
-### 3. Permutation Language Modeling (XLNet)
-
-A hybrid approach that predicts words in random order.
-
-```python
-
-def permutation_lm():
-    """
-    Permutation Language Modeling (XLNet)
-    """
-    print("Permutation Language Modeling")
-    print("=" * 60)
-
-    print("""
-    XLNet combines both approaches:
-
-    Original: "The cat sat"
-
-    Different prediction orders:
-    Order 1: [The] → [cat] → [sat]
-    Order 2: [cat] → [sat] → [The]
-    Order 3: [sat] → [The] → [cat]
-
-    Model must predict in ALL orders!
-
-    Benefits:
-    • Sees all context like BERT
-    • Generates like GPT
-    • Best of both worlds
-    """)
-
-permutation_lm()
+    Prefix LM (UniLM, some T5 variants):
+    Input (prefix): "Translate English to French:"
+    Output (generation): "The cat sat on the mat"
 ```
 
 ---
 
-## The Scale of Pre-Training
+### **5. Mathematical formulation**
 
-### Data and Compute
+**Causal Language Modeling (GPT, Llama):**
 
-```python
+Given sequence x₁, x₂, ..., x_T, maximize log-likelihood of next token:
 
-def pretraining_scale():
-    """
-    The massive scale of pre-training
-    """
-    print("The Scale of Pre-Training")
-    print("=" * 60)
+$$
+L_{\text{CLM}} = \sum_{t=1}^{T-1} \log P(x_{t+1} | x_1, ..., x_t)
+$$
 
-    models = {
-        "GPT-2": {
-            "data": "40 GB (8M documents)",
-            "tokens": "10B",
-            "compute": "petaflop-days"
-        },
-        "GPT-3": {
-            "data": "570 GB",
-            "tokens": "300B",
-            "compute": "3,640 petaflop-days"
-        },
-        "Llama 3": {
-            "data": "15T tokens",
-            "tokens": "15T",
-            "compute": "~10⁷ GPU hours"
-        },
-        "GPT-4": {
-            "data": "Unknown (estimated 13T tokens)",
-            "tokens": "13T+",
-            "compute": "$100M+ estimated"
-        }
-    }
+(Unicode: L = Σ log P(x\_{t+1} | x_1...x_t))
 
-    for model, stats in models.items():
-        print(f"\n{model}:")
-        for key, value in stats.items():
-            print(f"  • {key}: {value}")
+**Masked Language Modeling (BERT):**
 
-pretraining_scale()
+Sample 15% of positions to mask. Replace with [MASK] (80%), random token (10%), unchanged (10%). Predict original token:
+
+$$
+L_{\text{MLM}} = \sum_{i \in M} \log P(x_i | x_{\setminus M})
+$$
+
+Where M is set of masked positions.
+
+**Pre-training dataset scale:**
+
+| Model             | Tokens | Years (approx) |
+| ----------------- | ------ | -------------- |
+| GPT-1             | 0.5B   | 2018           |
+| BERT              | 3.3B   | 2018           |
+| GPT-3             | 300B   | 2020           |
+| Llama 1           | 1.4T   | 2023           |
+| Llama 3           | 15T    | 2024           |
+| GPT-4 (estimated) | 13T+   | 2023           |
+
+**Scaling laws:**
+
+Test loss L scales as power law with compute C, dataset size D, and parameters N:
+
+$$
+L(N, D) \propto N^{-0.05} + D^{-0.095}
+$$
+
+Optimal training uses compute-optimal ratio (Chinchilla: 20 tokens per parameter). GPT-4 estimated ~25-30 tokens per parameter.
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Training example (Causal LM)**
+
+Input sequence: "The capital of France is Paris"
+
+At position 1: input "The" → predict "capital"
+At position 2: input "The capital" → predict "of"
+At position 3: input "The capital of" → predict "France"
+At position 4: input "The capital of France" → predict "is"
+At position 5: input "The capital of France is" → predict "Paris"
+
+Loss = sum of cross-entropy over all predictions.
+
+#### **Step 2: What the model learns**
+
+From this single sentence, the model learns:
+
+- Word order (capital follows The)
+- Relationship (France and Paris are linked)
+- Grammar (is follows France)
+- Factual knowledge (Paris is capital of France)
+
+From billions of sentences, these patterns aggregate into robust knowledge.
+
+#### **Step 3: Data source composition (Llama 3 example)**
+
+Llama 3 pre-training data (15T tokens):
+
+- 50% web pages (Common Crawl)
+- 25% books and academic papers
+- 15% code (GitHub)
+- 10% multilingual data (non-English)
+
+The model learns to code from the code portion, to reason from scientific papers, and to converse from web text.
+
+#### **Step 4: Compute cost estimate (GPT-3 scale)**
+
+175B parameters, 300B tokens.
+
+Floating point operations (FLOPs) ≈ 6 × N × D = 6 × 175e9 × 300e9 ≈ 3.15e23 FLOPs.
+
+On 10,000 A100 GPUs (312 TFLOPS each), theoretical time = 3.15e23 / (312e12 × 1e4) ≈ 1e7 seconds ≈ 115 days.
+
+In practice, with overhead, ~30-60 days.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Base model availability:** Pre-trained models are released as "base" or "foundation" models (e.g., Llama-2-7b, GPT-3-175B). Users then fine-tune on specific tasks.
+
+- **Pre-training data quality matters more than quantity:** Llama 3 used 15T tokens but heavily filtered for quality. Clean data beats more data.
+
+- **De-duplication:** Removing duplicate text prevents memorization and improves generalization.
+
+- **Causal mask for autoregressive models:** During pre-training, GPT uses causal mask (future positions not visible). BERT uses no mask (bidirectional).
+
+- **Mixed precision training:** Pre-training uses FP16 or BF16 to reduce memory. Loss scaling prevents underflow.
+
+- **Gradient accumulation:** Simulates larger batch sizes than GPU memory allows.
+
+- **Checkpointing:** Saves model state every N steps. If training crashes, resume from last checkpoint.
+
+- **Warmup and learning rate schedule:** Linear warmup from 0 to peak (e.g., 2000 steps), then cosine decay.
+
+---
+
+### **8. Brain-like connection (infant language acquisition)**
+
+Human infants pre-train on language before they can speak. For the first 12-18 months, they listen to speech (input) without producing output. They learn phonemes, word boundaries, and simple grammar through statistical learning—detecting which sounds co-occur frequently (like subword tokenization), which sequences predict others (like next-word prediction). This is pre-training. Then, around 12-18 months, they begin to produce words (fine-tuning). The brain's language acquisition follows the same two-stage pattern: massive passive exposure, then active production. Damage to language areas before age 5 can cause permanent deficits—the pre-training window is critical. After that, the brain can still learn new languages but never as natively. LLMs show similar critical periods: pre-training data composition determines final capabilities.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Pre-training is just unsupervised learning. It is cheap because it does not require labels."
+
+_Why it is wrong:_ Pre-training is "self-supervised" (labels come from the data itself, e.g., the next word is the label), but it is not cheap. Pre-training requires massive compute (millions of dollars), terabytes of data, and engineering expertise. It is the most expensive phase of LLM development. The "self-supervised" label is misleading: predicting the next token is a task with a ground-truth label (the actual next token). The model gets immediate feedback on every single token. This is not unsupervised—it is supervised with automatically generated labels. The cost is not in labeling but in computation.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### What the Model Sees
-
-```python
-
-def pretraining_data():
-    """
-    Types of data in pre-training
-    """
-    print("What Models Learn During Pre-Training")
-    print("=" * 60)
-
-    data_sources = {
-        "Books": "Grammar, narrative structure, long-range dependencies",
-        "Wikipedia": "Facts, encyclopedia knowledge, formal writing",
-        "Web pages": "Diverse styles, opinions, current information",
-        "Code": "Logical structure, programming syntax",
-        "Scientific papers": "Technical vocabulary, formal reasoning",
-        "Social media": "Informal language, dialogue patterns"
-    }
-
-    for source, knowledge in data_sources.items():
-        print(f"  • {source}: {knowledge}")
-
-pretraining_data()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Pre-training is where LLMs learn almost everything:      |
+|  grammar, world facts, reasoning, code, multilingual      |
+|  understanding. The months of compute, billions of        |
+|  parameters, trillions of tokens—all for the simple       |
+|  task of predicting the next word. This deceptively       |
+|  simple objective forces the model to learn the hidden    |
+|  structure of language. Pre-training is the slow,         |
+|  expensive miracle that makes LLMs possible. Without it,  |
+|  your model cannot even form a grammatical sentence.      |
+-------------------------------------------------------------
 ```
 
 ---
 
-## The Pre-Training Process
+### **11. Quick self-check question**
 
-### Step-by-Step
+You have 10 billion tokens of high-quality text and 1 billion parameters. According to the Chinchilla scaling laws, should you pre-train a larger model (more parameters) or collect more data? Why?
 
-```python
-
-def pretraining_process():
-    """
-    The pre-training pipeline
-    """
-    print("The Pre-Training Pipeline")
-    print("=" * 60)
-
-    steps = [
-        "Step 1: Data Collection",
-        "  • Crawl web, books, papers",
-        "  • Clean and filter",
-        "  • Remove duplicates, personal info",
-
-        "Step 2: Tokenization",
-        "  • Train tokenizer on corpus",
-        "  • Convert text to token IDs",
-
-        "Step 3: Model Initialization",
-        "  • Random weights",
-        "  • Set architecture (layers, heads, dims)",
-
-        "Step 4: Training Loop",
-        "  • For each batch of text:",
-        "    - Forward pass (predict words)",
-        "    - Calculate loss",
-        "    - Backward pass (gradients)",
-        "    - Update weights",
-
-        "Step 5: Validation",
-        "  • Check loss on held-out data",
-        "  • Adjust hyperparameters",
-
-        "Step 6: Save Checkpoints",
-        "  • Save model periodically",
-        "  • Final pre-trained model"
-    ]
-
-    for step in steps:
-        print(f"\n{step}")
-
-pretraining_process()
-```
-
-### The Loss Curve
-
-```python
-
-def loss_curve():
-    """
-    How loss decreases during pre-training
-    """
-    print("Pre-Training Loss Curve")
-    print("=" * 60)
-
-    print("""
-    Loss
-    ↑
-    │    ███
-    │   █   ██
-    │  █      ██
-    │ █         ██
-    │█            ██
-    │                ██
-    │                   ██
-    │                      ███
-    └──────────────────────────→ Training steps
-
-    Phase 1: Rapid learning (basic patterns)
-    Phase 2: Slower improvement (refinement)
-    Phase 3: Diminishing returns
-    """)
-
-    print("\nTraining stops when:")
-    print("• Compute budget exhausted")
-    print("• Loss plateau")
-    print("• Validation metrics stop improving")
-
-loss_curve()
-```
+_(Answer hidden below)_
 
 ---
 
-## Why Pre-Training Works
+.
 
-### Transfer Learning
+.
 
-```python
+.
 
-def transfer_learning():
-    """
-    The magic of transfer learning
-    """
-    print("Transfer Learning: Standing on Shoulders of Giants")
-    print("=" * 60)
+.
 
-    print("""
-    Without pre-training (training from scratch):
+.
 
-    Task A: Need 1M labeled examples
-    Task B: Need another 1M labeled examples
-    Task C: Need another 1M labeled examples
-
-    With pre-training:
-
-    Pre-train on 1B unlabeled examples
-        ↓
-    Task A: Need 1,000 labeled examples
-    Task B: Need 1,000 labeled examples
-    Task C: Need 1,000 labeled examples
-
-    The model already knows language!
-    """)
-
-    print("\nThis is why modern AI is so powerful.")
-
-transfer_learning()
-```
-
-### Emergent Abilities
-
-```python
-
-def emergent_abilities():
-    """
-    Abilities that emerge during pre-training
-    """
-    print("Emergent Abilities During Pre-Training")
-    print("=" * 60)
-
-    print("""
-    As models scale, new abilities appear:
-
-    • Small models (100M): Basic grammar, word meanings
-    • Medium models (1B): Sentence structure, simple reasoning
-    • Large models (10B): Translation, summarization
-    • Very large (100B+): Few-shot learning, arithmetic, code
-    • GPT-3 scale: In-context learning, chain-of-thought
-
-    These aren't programmed—they EMERGE from scale!
-    """)
-
-emergent_abilities()
-```
-
----
-
-## Pre-Training vs Fine-Tuning
-
-| Aspect   | Pre-Training             | Fine-Tuning          |
-| -------- | ------------------------ | -------------------- |
-| Data     | Massive, unlabeled       | Small, labeled       |
-| Goal     | Learn language generally | Learn specific task  |
-| Time     | Weeks to months          | Hours to days        |
-| Cost     | Millions of dollars      | Thousands of dollars |
-| Model    | Base model               | Specialized model    |
-| Examples | GPT-3 base               | ChatGPT (fine-tuned) |
-
-### The Two-Stage Process
-
-```text
-
-Stage 1: Pre-training
-[Internet text] → [Base Model] → General language understanding
-                      ↓
-Stage 2: Fine-tuning
-[Task-specific data] → [Fine-tuned Model] → Specialized for task
-                      ↓
-Final: Deployment
-[User queries] → [Fine-tuned Model] → Task outputs
-```
-
----
-
-## Why This Matters for LLMs
-
-### 1. It's What Makes LLMs "Large"
-
-```python
-
-def why_large():
-    """
-    Why pre-training needs scale
-    """
-    print("Why Pre-Training Needs Scale")
-    print("=" * 60)
-
-    reasons = [
-        "More data → broader knowledge",
-        "More parameters → more capacity",
-        "Longer training → deeper patterns",
-        "Diverse sources → robust understanding"
-    ]
-
-    print("Scale enables:")
-    for reason in reasons:
-        print(f"  • {reason}")
-
-why_large()
-```
-
-### 2. The Chinchilla Law
-
-```python
-
-def chinchilla():
-    """
-    Optimal pre-training scale
-    """
-    print("The Chinchilla Law: Optimal Pre-Training")
-    print("=" * 60)
-
-    print("""
-    DeepMind's Chinchilla found:
-
-    For optimal performance, model size and training tokens
-    should scale together:
-
-    Old approach: Make model bigger, same data
-    Chinchilla approach: Scale both proportionally
-
-    Example: If you double model size,
-             double training tokens too!
-
-    This changed how everyone pre-trains LLMs.
-    """)
-
-chinchilla()
-```
-
-### 3. Pre-Training Costs
-
-```python
-
-def pretraining_costs():
-    """
-    The real costs of pre-training
-    """
-    print("The Real Costs of Pre-Training")
-    print("=" * 60)
-
-    costs = {
-        "GPT-3": "~$4.6M",
-        "Llama 3 70B": "~$15-20M",
-        "GPT-4": "~$100M+",
-        "Google's Gemini": "~$200M+"
-    }
-
-    for model, cost in costs.items():
-        print(f"  • {model}: {cost}")
-
-    print("\nThis is why only big tech companies")
-    print("pre-train large models from scratch.")
-
-pretraining_costs()
-```
-
-### 4. Environmental Impact
-
-```python
-
-def environmental():
-    """
-    Environmental considerations
-    """
-    print("Environmental Impact of Pre-Training")
-    print("=" * 60)
-
-    print("""
-    Pre-training a large model:
-
-    • Energy: Gigawatt-hours of electricity
-    • CO2: Equivalent to lifetime of 5 cars
-    • Water: Millions of liters for cooling
-
-    This has led to:
-    • More efficient architectures
-    • Smaller models (Llama 3 8B)
-    • Distillation techniques
-    """)
-
-environmental()
-```
-
----
-
-## Pre-Training Cheat Sheet
-
-| Aspect      | Details                                        |
-| ----------- | ---------------------------------------------- |
-| Objective   | Next word prediction (GPT) or masked LM (BERT) |
-| Data        | Trillions of tokens from internet              |
-| Time        | Weeks to months on thousands of GPUs           |
-| Cost        | Millions of dollars                            |
-| Output      | Base model with general language understanding |
-| Key insight | Scale is all you need                          |
-
----
-
-## Quick Recap
-
-• Pre-training is the massive first phase where models learn general language from internet-scale data—like a doctor's medical school education, building broad knowledge before specializing
-
-• Models learn through simple objectives like next-word prediction or masked word prediction—no labels needed, just raw text, yet they absorb grammar, facts, reasoning, and world knowledge
-
-• Pre-training is why LLMs are so powerful and versatile—the base model can then be fine-tuned for specific tasks with minimal data, transferring all that general knowledge to new domains
-
----
-
-## Mental Hook
-
-> "Pre-training is like sending a model to school for years, reading millions of books, learning everything about language—by the time it graduates, it's ready to tackle almost any task with just a little specialized training."
+**Answer:** According to Chinchilla scaling laws (Hoffmann et al., 2022), the optimal training uses 20 tokens per parameter. For 1 billion parameters, you need 20 billion tokens. You have only 10 billion tokens (half the optimal). You should collect more data (another 10 billion tokens) before increasing model size. If you increase model size without adding data, you will under-train the model—it will memorize but not generalize. The optimal compute point balances parameters and data. With 10B tokens, the optimal model size is 500M parameters (20 tokens/parameter). Your 1B model is over-parameterized for your data. Train a smaller model or collect more data. This is why modern LLMs (Llama 3) are trained on 15T tokens with large models—they balance data and parameters for optimal compute.

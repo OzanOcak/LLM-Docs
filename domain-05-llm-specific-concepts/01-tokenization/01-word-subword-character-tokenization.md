@@ -1,531 +1,233 @@
-# Tokenization: Word vs Subword vs Character
+# Word vs subword vs character tokenization
 
-## The LEGO Analogy
-
-Imagine you have three ways to build with LEGOs. You could use pre-built houses (whole words)—fast but limited because you can't make new combinations. You could use individual bricks (characters)—flexible but slow to build anything complex. Or you could use a mix of bricks and pre-built sections (subwords)—the sweet spot that gives you both speed and flexibility. That's tokenization: deciding how to break text into pieces for the model to process.
-
-In LLMs, tokenization is the crucial first step that converts raw text into numbers the model can understand. The choice of tokenization affects vocabulary size, handling of unknown words, model size, and even performance on different languages. It's the foundation everything else builds on.
+## **DOMAIN: LLM-SPECIFIC CONCEPTS | Sub domain: Tokenization**
 
 ---
 
-## What Is Tokenization?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-Tokenization is the process of splitting text into smaller pieces (tokens) and mapping them to numbers.
-
-```text
-
-Raw text: "The cat sat"
-              ↓
-    Tokenization (splitting)
-              ↓
-    ["The", "cat", "sat"]   (word tokens)
-              ↓
-    Mapping to IDs
-              ↓
-    [464, 5432, 8912]       (what the model sees)
-```
-
-```python
-
-def tokenization_intro():
-    """
-    The basic concept of tokenization
-    """
-    print("Tokenization: Turning Text into Numbers")
-    print("=" * 60)
-
-    text = "The cat sat on the mat"
-
-    print(f"Raw text: '{text}'")
-    print("\nStep 1: Split into tokens")
-    print("Step 2: Map each token to an ID")
-    print("Step 3: Model processes IDs")
-
-    print("\nAnalogy: Like converting ingredients to")
-    print("recipe codes before cooking.")
-
-tokenization_intro()
-```
+Language models do not see letters or words. They see numbers—integers mapped to tokens. But what counts as a token? A whole word? A single character? Something in between? This decision, seemingly low-level, profoundly affects everything: vocabulary size, handling of unknown words, misspellings, and multilingual support. Word tokenization is intuitive but fails on rare words. Character tokenization handles everything but creates long sequences. Subword tokenization (BPE, WordPiece) is the Goldilocks solution—used by every modern LLM. Understanding tokenization means understanding the very first step that turns raw text into numbers a model can process.
 
 ---
 
-## Three Levels of Tokenization
+### **2. Core idea**
 
-### 1. Character Tokenization
+**Tokenization splits text into atomic units: word tokenization uses whole words (large vocabulary, many unknowns), character tokenization uses individual letters (small vocabulary, long sequences), and subword tokenization balances both by splitting rare words into common fragments.**
 
-Character tokenization splits text into individual characters.
+---
 
-```python
+### **3. Concrete analogy**
 
-def character_tokenization():
-    """
-    Character-level tokenization
-    """
-    print("Character Tokenization: Individual Letters")
-    print("=" * 60)
+Imagine you are packing a suitcase for a trip.
 
-    text = "cat"
+- **Word tokenization:** You pack whole outfits—complete shirts, pants, dresses. Efficient if you have exactly the right outfits. But if you encounter an unfamiliar clothing item (a "kilt"), you cannot pack it. You are stuck. Vocabulary size = every word you might ever need (millions).
 
-    # Character tokens
-    chars = list(text)
+- **Character tokenization:** You pack individual threads. You can assemble any garment from scratch, but packing 100 threads for one shirt is ridiculous. Your suitcase overflows. Sequence length explodes.
 
-    print(f"Text: '{text}'")
-    print(f"Character tokens: {chars}")
+- **Subword tokenization:** You pack LEGO bricks: "un-", "-break-", "-able." You can build "unbreakable" by snapping bricks together. Common bricks are stored; rare words are built. This is what modern LLMs do. The vocabulary size is ~50,000 "bricks"—enough to build most English words efficiently.
 
-    # Vocabulary size
-    vocab_size = len(set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,!?;:"))
+---
 
-    print(f"\nVocabulary size: ~{vocab_size} characters")
-    print("(plus punctuation, numbers, special tokens)")
+### **4. ASCII diagram**
 
-    print("\nPros:")
-    print("  • Tiny vocabulary (≈ 100-200 tokens)")
-    print("  • Can handle any word (even misspellings)")
-    print("  • No unknown tokens")
-
-    print("\nCons:")
-    print("  • Very long sequences (every letter is a token)")
-    print("  • Harder to learn word meanings")
-    print("  • Computationally inefficient")
-
-    # Example
-    sentence = "The cat sat"
-    char_count = len(sentence)
-    word_count = len(sentence.split())
-    print(f"\nExample: '{sentence}'")
-    print(f"  Word count: {word_count} tokens")
-    print(f"  Char count: {char_count} tokens ({char_count/word_count:.1f}x longer)")
-
-character_tokenization()
 ```
+Three tokenization levels on "unbreakable":
 
-### 2. Word Tokenization
+Word tokenization:
+    ["unbreakable"] → 1 token
 
-Word tokenization splits text into whole words.
+Character tokenization:
+    ["u", "n", "b", "r", "e", "a", "k", "a", "b", "l", "e"] → 11 tokens
 
-```python
+Subword tokenization (BPE):
+    ["un", "break", "able"] → 3 tokens
 
-def word_tokenization():
-    """
-    Word-level tokenization
-    """
-    print("Word Tokenization: Complete Words")
-    print("=" * 60)
 
-    text = "The cat sat on the mat"
+How subword handles rare vs common words:
 
-    # Word tokens (simplified)
-    words = text.lower().split()
+Common word "the": stays as ["the"] → 1 token
 
-    print(f"Text: '{text}'")
-    print(f"Word tokens: {words}")
+Rare word "flibbertigibbet":
+    Might split as ["flib", "bert", "igib", "bet"] → 4 tokens
+    (Still more efficient than 16 character tokens)
 
-    # Vocabulary size (English has many words!)
-    print(f"\nVocabulary size needed: 50,000 - 500,000+")
-    print("(English has hundreds of thousands of words)")
 
-    print("\nPros:")
-    print("  • Short sequences (one token per word)")
-    print("  • Semantically meaningful units")
-    print("  • Efficient for common words")
+Vocabulary coverage:
 
-    print("\nCons:")
-    print("  • Huge vocabulary")
-    print("  • Can't handle unknown words (UNK tokens)")
-    print("  • Misses relationships between word forms")
-    print("  • Different languages need different vocabularies")
+Word-level (50K words):    covers ~95% of English text
+Subword (50K pieces):       covers 100% (can build any word)
+Character (26+):             covers 100% (but sequence length 5-10× longer)
 
-    # Unknown word problem
-    print("\nUnknown word problem:")
-    print("  Training: sees 'cat', 'cats'")
-    print("  Inference: sees 'caten' (unknown) → [UNK]")
-    print("  Model loses all information!")
 
-word_tokenization()
-```
+Example: "I love NLP!"
 
-### 3. Subword Tokenization (The Sweet Spot)
-
-Subword tokenization splits words into common pieces—frequent words stay whole, rare words break down.
-
-```python
-
-def subword_intro():
-    """
-    Subword tokenization: Best of both worlds
-    """
-    print("Subword Tokenization: The Sweet Spot")
-    print("=" * 60)
-
-    print("""
-    Common words stay whole:   "the", "cat", "sat"
-
-    Rare words break down:     "caten" → ["cat", "en"]
-    "unhappiness" → ["un", "happiness"] or ["un", "happy", "ness"]
-
-    New words can be built from pieces!
-    """)
-
-    print("\nVocabulary size: 30,000 - 50,000 (typical for LLMs)")
-    print("• Smaller than word vocab")
-    print("• Larger than character vocab")
-
-    print("\nPros:")
-    print("  • No unknown words (can always break down)")
-    print("  • Efficient for common words")
-    print("  • Shares pieces across words (learns morphology)")
-    print("  • Works across languages")
-
-    print("\nUsed in: All modern LLMs (GPT, BERT, Llama, Claude)")
-
-subword_intro()
+Word:     ["I", "love", "NLP", "!"] → 4 tokens
+Subword:  ["I", "love", "NL", "P", "!"] → 5 tokens (if "NLP" not in vocab)
+Character:["I", " ", "l", "o", "v", "e", " ", "N", "L", "P", "!"] → 11 tokens
 ```
 
 ---
 
-## Subword Tokenization Algorithms
+### **5. Mathematical formulation**
 
-### Byte-Pair Encoding (BPE)
+**Vocabulary size V and sequence length L tradeoff:**
 
-BPE starts with characters and merges the most frequent pairs.
+For a text of N characters:
 
-```python
+- Word tokenization: V_word ~ 500,000 (English), L_word ~ N / 5 (words)
+- Character tokenization: V_char ~ 128 (ASCII), L_char = N (characters)
+- Subword tokenization: V_subword ~ 50,000, L_subword ~ N / 3-4
 
-def bpe_demo():
-    """
-    How Byte-Pair Encoding works
-    """
-    print("Byte-Pair Encoding (BPE)")
-    print("=" * 60)
+**Compression ratio:**
 
-    # Training corpus
-    corpus = ["low", "lower", "lowest", "high", "higher", "highest"]
+$$
+\text{Ratio} = \frac{L_{\text{char}}}{L_{\text{subword}}} \approx 3 \text{ to } 5
+$$
 
-    print(f"Training corpus: {corpus}")
-    print("\nStep 1: Start with characters")
+**Out-of-vocabulary (OOV) rate (word-level):**
 
-    # Count character frequencies
-    from collections import Counter
-    import re
+$$
+\text{OOV} = \frac{\text{Number of unseen words in test}}{\text{Total test words}}
+$$
 
-    # Initial vocabulary (characters)
-    chars = Counter()
-    for word in corpus:
-        chars.update(list(word))
+For a 50K word vocabulary on general text, OOV ≈ 3-5%.
 
-    print(f"Initial vocab: {sorted(chars.keys())}")
+**Subword coverage:**
 
-    print("\nStep 2: Find most frequent pair and merge")
-    print("  'l' + 'o' appears often → merge to 'lo'")
-    print("  'o' + 'w' appears often → merge to 'ow'")
-    print("  'er' appears often → merge to 'er'")
+Subword tokenization has OOV = 0% by definition—any text can be represented as a sequence of subword pieces.
 
-    print("\nStep 3: Repeat until desired vocab size")
+**Maximum sequence length for transformer (with fixed context window C):**
 
-    # Final subwords might look like:
-    final_vocab = ["low", "er", "est", "high", "lo", "ow"]
-    print(f"\nFinal subwords: {final_vocab}")
+Maximum characters the model can process = C × (average characters per token)
 
-    print("\nTokenizing new word: 'lowest'")
-    print("  Greedy algorithm: 'low' + 'est' → ['low', 'est']")
+For C=2048, subword (3 chars/token) → ~6000 chars. Character (1 char/token) → 2048 chars only.
 
-bpe_demo()
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: The sentence**
+
+"Tokenization is cool!"
+
+#### **Step 2: Word tokenization**
+
+Split by spaces and punctuation:
+["Tokenization", "is", "cool", "!"]
+
+If vocabulary contains these words: 4 tokens. If "Tokenization" is rare, it becomes <UNK> (unknown token). Model loses information.
+
+Vocabulary size needed: 500,000+ words to cover most English.
+
+#### **Step 3: Character tokenization**
+
+["T", "o", "k", "e", "n", "i", "z", "a", "t", "i", "o", "n", " ", "i", "s", " ", "c", "o", "o", "l", "!"]
+
+21 tokens. Sequence is 5× longer than word tokens. Context window of 2048 tokens can only see ~2048 characters (a short paragraph). Model loses long-range context.
+
+Vocabulary size: 128 (ASCII) or smaller. Compact but inefficient.
+
+#### **Step 4: Subword tokenization (BPE, typical vocabulary ~50K)**
+
+Assume learned merges:
+"Token" is common → "Token"
+"ization" is common suffix → "ization"
+"is" is common → "is"
+"cool" is common → "cool"
+"!" is punctuation → "!"
+
+But "Tokenization" may split as ["Token", "ization"] (2 tokens)
+
+Result: ["Token", "ization", "is", "cool", "!"] → 5 tokens
+
+Compromise: 5 tokens vs word's 4 (slightly longer), vs character's 21 (much shorter). No unknown tokens. "Tokenization" handled even if not in vocabulary.
+
+#### **Step 5: Compare across languages**
+
+English word: "unhappiness" → subword: ["un", "happiness"] (2 tokens)
+German compound word: "Donaudampfschifffahrtsgesellschaftskapitän" (Danube steamship company captain)
+
+Word tokenization: 1 token (if in vocab) or <UNK>
+Character: 57 tokens!
+Subword: splits into known pieces like ["Donau", "dampf", "schiff", "fahrt", "gesellschafts", "kapitän"] → ~6 tokens
+
+Subword handles long compound words gracefully.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Word tokenization (pre-2018):** Used in early RNN language models. Required huge vocabularies (200K-500K) and still had OOV issues.
+
+- **Character tokenization (rare in LLMs):** Used in some specialized models (CANINE, ByT5). Context window inefficiency limits adoption.
+
+- **Subword tokenization (all modern LLMs):** GPT uses BPE. BERT uses WordPiece. T5 uses SentencePiece (unicode-aware). All have vocab size ~30K-100K.
+
+- **Bytes as tokens (GPT-4, Llama 3):** Treat each byte (0-255) as a token. Handles any text, any language, even binary data. Vocabulary size 256. But long sequences—mitigated by efficient architectures and large context windows (128K tokens).
+
+- **Multilingual support:** Subword tokenization works across languages because common substrings (e.g., "tion", "ung", "ing") appear in many languages. Character-level also works but inefficiently.
+
+- **Digits and numbers:** Subword tokenization often splits numbers into individual digits ("123" → ["1","2","3"]). This is intentional—helps arithmetic reasoning. Some models (GPT-4) handle numbers specially.
+
+- **Special tokens:** All tokenizers add special tokens: [CLS] (classification), [SEP] (separator), <|im_start|> (chat roles), <|endoftext|> (document boundary).
+
+---
+
+### **8. Brain-like connection (morphemes and lexical access)**
+
+The human brain processes language at multiple levels simultaneously. Morphemes (smallest meaning-carrying units: "un-", "-break-", "-able") are the cognitive equivalent of subword tokens. Children learn common morphemes and combine them to understand novel words ("un-happy-ness"). This is subword tokenization. Patients with certain aphasias can understand morphemes but cannot combine them correctly, or vice versa—suggesting separable neural representations. The brain's mental lexicon organizes words by morphemic structure, exactly as subword tokenization organizes vocabulary by common substrings. Evolution arrived at subword efficiency because storing every possible word is impossible; storing morphemes and rules to combine them is optimal.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Subword tokenization is just a preprocessing detail. It does not affect model quality much."
+
+_Why it is wrong:_ Tokenization dramatically affects model behavior. BPE merges based on frequency—common sequences like "ing" become tokens, while rare sequences split. This creates biases: misspellings ("ingg") split differently, harming robustness. Numbers split into digits impair arithmetic (model sees "12" as ["1","2"] not "12"). Multilingual fairness: languages with more common substrings (English, German) get shorter sequences than morphologically rich languages (Turkish, Finnish), penalizing them. Changing tokenization changes the inductive bias. The choice of tokenizer is a model design decision, not a trivial detail.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### WordPiece (BERT)
-
-Similar to BPE but uses likelihood instead of frequency.
-
-```python
-
-def wordpiece_demo():
-    """
-    WordPiece tokenization (used in BERT)
-    """
-    print("WordPiece Tokenization")
-    print("=" * 60)
-
-    print("""
-    WordPiece is like BPE but smarter:
-
-    Instead of just counting frequency,
-    it merges pairs that maximize likelihood of training data.
-
-    Special marker: '##' indicates continuation
-
-    "unhappiness" → ["un", "##happiness"]
-    "playing"     → ["play", "##ing"]
-    """)
-
-    examples = {
-        "unhappiness": ["un", "##happiness"],
-        "playing": ["play", "##ing"],
-        "tokenization": ["token", "##ization"],
-        "running": ["run", "##ning"]
-    }
-
-    for word, tokens in examples.items():
-        print(f"  {word}: {tokens}")
-
-wordpiece_demo()
-```
-
-### SentencePiece (Used in Llama, T5)
-
-```python
-
-def sentencepiece_demo():
-    """
-    SentencePiece tokenization
-    """
-    print("SentencePiece")
-    print("=" * 60)
-
-    print("""
-    SentencePiece treats text as raw bytes/Unicode:
-
-    Key features:
-    • No need for pre-tokenization (works on raw text)
-    • Handles any language
-    • Includes whitespace as tokens
-    • Used in Llama, T5, many modern models
-
-    Example: "Hello world" might tokenize as:
-    ["▁Hello", "▁world"]  (▁ represents space)
-    """)
-
-    print("\nAdvantage: Truly language-agnostic")
-    print("Works for languages without spaces (Chinese, Japanese)")
-
-sentencepiece_demo()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Every LLM begins with tokenization. It is the lens       |
+|  through which the model sees text. Word tokens are       |
+|  too rigid; character tokens are too verbose. Subword     |
+|  strikes the balance—common words are single tokens,      |
+|  rare words are built from fragments. This tiny           |
+|  engineering choice enables 50K vocabularies to cover     |
+|  the infinite variety of human language. Tokenization     |
+|  is not glamorous, but without it, there is no LLM.       |
+-------------------------------------------------------------
 ```
 
 ---
 
-## Comparison Table
+### **11. Quick self-check question**
 
-| Aspect              | Character         | Word             | Subword               |
-| ------------------- | ----------------- | ---------------- | --------------------- |
-| Vocabulary size     | Tiny (100-200)    | Huge (50k-500k+) | Medium (30k-50k)      |
-| Sequence length     | Very long         | Short            | Medium                |
-| Unknown words       | Never (can spell) | Frequent [UNK]   | Rare (can break down) |
-| Language dependent  | No                | Yes              | Moderate              |
-| Semantic meaning    | Lost              | Preserved        | Partial               |
-| Training efficiency | Slow              | Fast             | Balanced              |
-| Used in modern LLMs | No                | Rarely           | Yes (all)             |
+A model uses subword tokenization with vocabulary of 50,000 pieces. It sees the training sentence "The flibbertigibbet jumped." The word "flibbertigibbet" is not in the vocabulary. It is split into ["flib", "bert", "igi", "bbet"].
+
+**Question:** What would happen with word-level tokenization (50K vocab) on this sentence? What about character-level?
+
+_(Answer hidden below)_
 
 ---
 
-## A Complete Tokenization Example
+.
 
-```python
+.
 
-def tokenization_comparison():
-    """
-    Compare all three approaches on real text
-    """
-    print("Tokenization Comparison")
-    print("=" * 60)
+.
 
-    text = "The cats are playing unhappily"
+.
 
-    print(f"Text: '{text}'\n")
+.
 
-    # Character tokenization
-    chars = list(text)
-    print(f"Character ({len(chars)} tokens):")
-    print(f"  {chars}\n")
+**Answer:**
 
-    # Word tokenization (simplified)
-    words = text.split()
-    print(f"Word ({len(words)} tokens):")
-    print(f"  {words}\n")
+Word-level tokenization: "flibbertigibbet" is out-of-vocabulary (OOV). The tokenizer would replace it with a special token like <UNK>. The model loses all information about that word—cannot tell if it's a name, a nonsense word, or a rare noun. The sentence becomes "The <UNK> jumped." Meaning is lost.
 
-    # Subword tokenization (simulated BPE)
-    subwords = ["The", "cat", "s", "are", "play", "ing", "un", "happy", "ly"]
-    print(f"Subword ({len(subwords)} tokens):")
-    print(f"  {subwords}")
-
-    print("\nSubword advantages:")
-    print("  • 'cats' → 'cat' + 's' (learns plural)")
-    print("  • 'playing' → 'play' + 'ing' (learns -ing form)")
-    print("  • 'unhappily' → 'un' + 'happy' + 'ly' (learns morphology)")
-
-tokenization_comparison()
-```
-
----
-
-## Why This Matters for LLMs
-
-### 1. All Modern LLMs Use Subword Tokenization
-
-```python
-
-def llm_tokenizers():
-    """
-    Tokenizers used by popular LLMs
-    """
-    print("Tokenizers in Popular LLMs")
-    print("=" * 60)
-
-    models = {
-        "GPT-2": "BPE (Byte-Pair Encoding)",
-        "GPT-3/4": "BPE",
-        "BERT": "WordPiece",
-        "RoBERTa": "BPE",
-        "T5": "SentencePiece",
-        "Llama": "SentencePiece (BPE variant)",
-        "Claude": "Likely SentencePiece or BPE",
-        "Gemini": "SentencePiece"
-    }
-
-    for model, tokenizer in models.items():
-        print(f"  • {model}: {tokenizer}")
-
-llm_tokenizers()
-```
-
-### 2. Vocabulary Size Matters
-
-```python
-
-def vocab_sizes():
-    """
-    Vocabulary sizes of popular models
-    """
-    print("Vocabulary Sizes of Popular Models")
-    print("=" * 60)
-
-    vocabs = {
-        "GPT-2": "50,257",
-        "GPT-3": "50,257",
-        "BERT-base": "30,000",
-        "BERT-large": "30,000",
-        "T5": "32,000",
-        "Llama 1": "32,000",
-        "Llama 2/3": "32,000",
-        "GPT-4": "~50,000 (estimated)"
-    }
-
-    for model, vocab in vocabs.items():
-        print(f"  • {model}: {vocab} tokens")
-
-vocab_sizes()
-```
-
-### 3. Tokenization Affects Model Behavior
-
-```python
-
-def tokenization_effects():
-    """
-    How tokenization impacts model performance
-    """
-    print("How Tokenization Affects LLMs")
-    print("=" * 60)
-
-    effects = {
-        "Vocabulary size": "Larger vocab = more parameters, better coverage",
-        "Subword units": "Affects how model handles morphology",
-        "Language coverage": "Good tokenizer works for many languages",
-        "Sequence length": "Shorter sequences = faster inference",
-        "Special tokens": "[CLS], [SEP], etc. enable specific tasks"
-    }
-
-    for aspect, effect in effects.items():
-        print(f"  • {aspect}: {effect}")
-
-tokenization_effects()
-```
-
-### 4. The "Token" Economy
-
-```python
-
-def token_economy():
-    """
-    Practical implications of tokenization
-    """
-    print("The Token Economy")
-    print("=" * 60)
-
-    print("""
-    Tokenization has real-world impact:
-
-    1. Cost: APIs charge by token
-    2. Context window: Limited by tokens, not words
-    3. Speed: More tokens = slower processing
-    4. Language bias: Some languages tokenize inefficiently
-
-    Example (GPT-3 tokenizer):
-    English: "Hello" → 1 token
-    Spanish: "Hola" → 1 token
-    Thai: "สวัสดี" → 4-5 tokens (costs more!)
-
-    This creates bias toward languages with efficient tokenization.
-    """)
-
-token_economy()
-```
-
----
-
-## Special Tokens
-
-LLMs use special tokens to understand structure.
-
-```python
-
-def special_tokens():
-    """
-    Special tokens in LLMs
-    """
-    print("Special Tokens")
-    print("=" * 60)
-
-    special = {
-        "[CLS]": "Classification token (BERT)",
-        "[SEP]": "Separator between sentences",
-        "[MASK]": "Masked token for training (BERT)",
-        "<s>": "Start of sequence (Llama, T5)",
-        "</s>": "End of sequence",
-        "<|endoftext|>": "GPT's end token",
-        "[UNK]": "Unknown word (older models)",
-        "[PAD]": "Padding for batches"
-    }
-
-    for token, purpose in special.items():
-        print(f"  • {token}: {purpose}")
-
-special_tokens()
-```
-
----
-
-## Tokenization Cheat Sheet
-
-| Algorithm     | Used In      | How It Works                         |
-| ------------- | ------------ | ------------------------------------ |
-| BPE           | GPT, RoBERTa | Merge most frequent character pairs  |
-| WordPiece     | BERT         | Merge pairs that maximize likelihood |
-| SentencePiece | T5, Llama    | Works on raw text, includes spaces   |
-| Unigram       | Some models  | Start with big vocab, prune unlikely |
-
----
-
-## Quick Recap
-
-• Character tokenization uses individual letters—tiny vocabulary but long sequences, can handle any text but inefficient and loses word meaning
-
-• Word tokenization uses whole words—short sequences but huge vocabulary and can't handle unknown words, leading to information loss
-
-• Subword tokenization (used in all modern LLMs) is the sweet spot—common words stay whole, rare words break into pieces, giving both efficiency and the ability to handle any text
-
----
-
-## Mental Hook
-
-> "Tokenization is like choosing between building with individual bricks (characters), pre-built houses (words), or a mix of bricks and pre-built sections (subwords)—the last gives you both flexibility and efficiency."
+Character-level tokenization: Would produce ~18 tokens for "flibbertigibbet" (one per letter). The model would see the full spelling and could theoretically learn patterns, but the sequence length is much longer. For a 2048-token context window, this sentence consumes 18 tokens instead of 1 (word-level) or ~4 (subword). Over many rare words, the effective context window shrinks dramatically. This is why LLMs use subword, not character, tokenization.

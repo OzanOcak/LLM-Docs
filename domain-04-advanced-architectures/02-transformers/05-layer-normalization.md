@@ -1,604 +1,271 @@
-# Layer Normalization
+# Layer normalization
 
-## The Orchestra Tuner Analogy
-
-Imagine an orchestra before a concert. Each musician tunes their instrument—not to the same note, but to a standard pitch so they can play together harmoniously. The violinist doesn't tune to match the cellist; they both tune to a reference. That's layer normalization: it normalizes the activations of each neuron across the features, giving each layer a consistent scale so training remains stable.
-
-In LLMs, layer normalization is essential for training deep transformers. It's applied after each sub-layer (attention and feed-forward), keeping values in a reasonable range and preventing the model from falling into chaos. Without it, training 100+ layer models would be nearly impossible.
+## **DOMAIN: ADVANCED ARCHITECTURES | Sub domain: Transformers (The LLM Revolution)**
 
 ---
 
-## What Is Layer Normalization?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-Layer normalization normalizes the activations across the feature dimension for each individual sample.
-
-```text
-
-Batch Normalization:             Layer Normalization:
-Normalizes across batch          Normalizes across features
-for each feature                 for each sample
-
-[Batch]                          [Features]
-   ↓                                 ↓
-Sample1: a b c                    Sample1: a b c → normalize across a,b,c
-Sample2: d e f       → norm        Sample2: d e f → normalize across d,e,f
-Sample3: g h i        across       Sample3: g h i → normalize across g,h,i
-                    batch for
-                    each column
-```
-
-```python
-
-def layer_norm_intro():
-    """
-    The basic concept of layer normalization
-    """
-    print("Layer Normalization: Individual Sample Tuning")
-    print("=" * 60)
-
-    print("""
-    For each sample (e.g., one word's representation):
-
-    Original: [0.5,  -2.0,   3.0,   1.5,  -1.0]
-               ↑      ↑      ↑      ↑      ↑
-              dim1   dim2   dim3   dim4   dim5
-
-    Step 1: Calculate mean and variance ACROSS these 5 dimensions
-            μ = (0.5 - 2.0 + 3.0 + 1.5 - 1.0) / 5 = 0.4
-            σ² = variance around 0.4
-
-    Step 2: Normalize: (x - μ) / σ
-
-    Step 3: Scale and shift with learned parameters γ and β
-
-    Result: Each word gets its own normalized representation!
-    """)
-
-layer_norm_intro()
-```
+Transformers are deep—dozens or hundreds of layers. Without normalization, activations grow or shrink uncontrollably, gradients vanish or explode, and training collapses. Batch normalization works for CNNs but fails for transformers because sequence lengths vary and batch sizes are often small. Layer normalization is the solution: it normalizes across features for each token independently, not across the batch. This stabilizes training, enables much deeper networks, and is essential to every modern LLM. Without layer norm, there is no transformer.
 
 ---
 
-## Layer Norm Step by Step
+### **2. Core idea**
 
-### A Concrete Example
+**Layer normalization normalizes the activations of a single example across all features, computing mean and variance per token, then applying learned scale and shift parameters, making training stable regardless of batch size or sequence length.**
 
-```python
+---
 
-import numpy as np
+### **3. Concrete analogy**
 
-def layer_norm_step_by_step():
-    """
-    Detailed walkthrough of layer normalization
-    """
-    print("Layer Normalization: Step by Step")
-    print("=" * 60)
+Imagine you are a teacher grading essays. Each student (token) submits an essay with 100 dimensions (grammar, vocabulary, argument strength, etc.). The raw scores vary wildly: one student scores 90 in grammar but 10 in creativity; another scores 50 in everything.
 
-    # One sample (e.g., a word's representation)
-    x = np.array([2.0, -1.0, 3.0, 0.5, -2.5])
+Grading is hard because the scales are inconsistent. Your solution: for each student individually, you rescale their scores to have average 0 and standard deviation 1, then apply a personalized curve (learned scale and shift). Now you can compare fairly across dimensions.
 
-    print(f"Original input vector: {x}")
-    print(f"Shape: {x.shape}")
+This is layer norm. Each token (student) is normalized independently using its own statistics (mean and variance across its feature dimensions). This works for any sequence length, any batch size, and does not require other tokens for statistics.
 
-    # Step 1: Calculate mean and variance
-    mean = np.mean(x)
-    variance = np.var(x)
-    std = np.sqrt(variance + 1e-5)  # Add small epsilon for numerical stability
+---
 
-    print(f"\nStep 1: Calculate statistics across features")
-    print(f"  Mean (μ): {mean:.3f}")
-    print(f"  Variance (σ²): {variance:.3f}")
-    print(f"  Std dev (σ): {std:.3f}")
+### **4. ASCII diagram**
 
-    # Step 2: Normalize
-    x_norm = (x - mean) / std
-
-    print(f"\nStep 2: Normalize (x - μ) / σ")
-    for orig, norm in zip(x, x_norm):
-        print(f"  {orig:5.1f} → {norm:7.3f}")
-
-    # Verify normalized stats
-    new_mean = np.mean(x_norm)
-    new_std = np.std(x_norm)
-    print(f"\n  After norm - mean: {new_mean:.3f} (should be ~0)")
-    print(f"  After norm - std:  {new_std:.3f} (should be ~1)")
-
-    # Step 3: Scale and shift with learned parameters
-    gamma = np.array([1.5, 1.0, 2.0, 0.5, 1.2])  # Scale
-    beta = np.array([0.1, -0.1, 0.2, 0.0, 0.3])   # Shift
-
-    y = gamma * x_norm + beta
-
-    print(f"\nStep 3: Scale and shift (learned parameters)")
-    print(f"  gamma (γ): {gamma}")
-    print(f"  beta  (β): {beta}")
-    print(f"  y = γ·x̂ + β")
-    for norm, final in zip(x_norm, y):
-        print(f"  {norm:7.3f} → {final:7.3f}")
-
-layer_norm_step_by_step()
 ```
+Layer normalization (applied to one token):
 
-### Visualizing the Transformation
+    Input token x (d_model dimensions)
 
-```text
+    x = [x₁, x₂, x₃, ..., x_d]
 
-Before Layer Norm:    After Layer Norm:      After Scale/Shift:
-   ↑                     ↑                       ↑
-   │                     │                       │
-   │   x x               │   x x x x x           │   x x x x x
-   │ x     x x           │                       │
-   │x       x            │                       │
-   └─────────→          └─────────→             └─────────→
+    Step 1: Compute mean μ across dimensions
+    μ = (x₁ + x₂ + ... + x_d) / d
 
-Wildly different        Centered at 0,          Adapted to optimal
-scales across           unit variance           range for this layer
-dimensions              (consistent)
+    Step 2: Compute variance σ² across dimensions
+    σ² = ((x₁-μ)² + (x₂-μ)² + ... + (x_d-μ)²) / d
+
+    Step 3: Normalize
+    x̂ᵢ = (xᵢ - μ) / √(σ² + ε)  for all i
+
+    Step 4: Scale and shift (learned parameters γ, β)
+    yᵢ = γᵢ × x̂ᵢ + βᵢ  for all i
+
+    Output: normalized token y (same shape as x)
+
+
+Comparison of normalization types:
+
+    Batch Norm (CNNs)          Layer Norm (Transformers)
+
+    Normalize across batch     Normalize across features
+    for each feature           for each example
+
+    x: [batch, features]       x: [batch, features]
+    μ over batch dim           μ over features dim
+    Requires large batch       Works with batch size 1
+    Broken for variable length Works for any sequence length
+
+
+Placement in transformer block (two variants):
+
+    Post-LN (original):        Pre-LN (modern, more stable):
+
+    x → Attn → Add → Norm      x → Norm → Attn → Add
+         ↓                            ↓
+         Norm → FFN → Add             x (residual)
+              ↓                         ↓
+              Norm                      Norm → FFN → Add
+                                       (repeat pattern)
+
+    Pre-LN has better gradient flow for deep transformers.
 ```
 
 ---
 
-## Layer Norm vs Batch Norm
+### **5. Mathematical formulation**
 
-### Why Transformers Use Layer Norm
+**Layer normalization for a single token x ∈ ℝ^d:**
 
-```python
+Mean:
 
-def layer_vs_batch():
-    """
-    Comparing layer norm and batch norm
-    """
-    print("Layer Normalization vs Batch Normalization")
-    print("=" * 60)
+$$
+\mu = \frac{1}{d} \sum_{i=1}^d x_i
+$$
 
-    comparison = {
-        "Normalizes across": {
-            "Batch Norm": "Batch dimension (samples)",
-            "Layer Norm": "Feature dimension (channels)"
-        },
-        "Depends on batch size": {
-            "Batch Norm": "Yes - statistics vary with batch",
-            "Layer Norm": "No - per sample, independent"
-        },
-        "Works for variable length": {
-            "Batch Norm": "No - fixed dimensions",
-            "Layer Norm": "Yes - can handle variable sequences"
-        },
-        "Training vs inference": {
-            "Batch Norm": "Different behavior",
-            "Layer Norm": "Same behavior"
-        },
-        "Used in": {
-            "Batch Norm": "CNNs, some MLPs",
-            "Layer Norm": "Transformers, RNNs"
-        }
-    }
+(Unicode: μ = (1/d) Σ x_i)
 
-    for aspect, values in comparison.items():
-        print(f"\n{aspect}:")
-        print(f"  Batch Norm: {values['Batch Norm']}")
-        print(f"  Layer Norm: {values['Layer Norm']}")
+Variance:
 
-layer_vs_batch()
+$$
+\sigma^2 = \frac{1}{d} \sum_{i=1}^d (x_i - \mu)^2
+$$
+
+(Unicode: σ² = (1/d) Σ (x_i - μ)²)
+
+Normalize:
+
+$$
+\hat{x}_i = \frac{x_i - \mu}{\sqrt{\sigma^2 + \epsilon}}
+$$
+
+(Unicode: x̂_i = (x_i - μ) / √(σ² + ε))
+
+Scale and shift (learnable per-dimension parameters):
+
+$$
+y_i = \gamma_i \hat{x}_i + \beta_i
+$$
+
+(Unicode: y_i = γ_i × x̂_i + β_i)
+
+Where:
+
+- γ, β ∈ ℝ^d are learned (different per feature dimension)
+- ε is a small constant (e.g., 1e-5) for numerical stability
+- No batch statistics. Statistics computed per token.
+
+**For a batch of tokens (shape: n × d):**
+
+Compute independently for each token. No interaction across tokens.
+
+**Pre-LN vs Post-LN residual connection:**
+
+Post-LN (original transformer):
+
+$$
+\mathbf{x} = \text{LayerNorm}(\mathbf{x} + \text{Attention}(\mathbf{x}))
+$$
+
+Pre-LN (modern, more stable):
+
+$$
+\mathbf{x} = \mathbf{x} + \text{Attention}(\text{LayerNorm}(\mathbf{x}))
+$$
+
+Pre-LN ensures gradients flow through the skip connection without passing through normalization, enabling much deeper transformers.
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Input token**
+
+A token with d=4 dimensions:
+x = [2.0, -1.0, 3.0, 0.5]
+
+#### **Step 2: Compute mean**
+
+μ = (2.0 + (-1.0) + 3.0 + 0.5) / 4 = (4.5) / 4 = 1.125
+
+#### **Step 3: Compute variance**
+
+(x - μ): [0.875, -2.125, 1.875, -0.625]
+Squares: [0.7656, 4.5156, 3.5156, 0.3906]
+Sum = 0.7656 + 4.5156 + 3.5156 + 0.3906 = 9.1874
+σ² = 9.1874 / 4 = 2.29685
+σ = √2.29685 ≈ 1.5155
+
+#### **Step 4: Normalize (ε=0 for simplicity)**
+
+x̂₁ = (2.0 - 1.125) / 1.5155 = 0.875 / 1.5155 = 0.577
+x̂₂ = (-1.0 - 1.125) / 1.5155 = -2.125 / 1.5155 = -1.402
+x̂₃ = (3.0 - 1.125) / 1.5155 = 1.875 / 1.5155 = 1.237
+x̂₄ = (0.5 - 1.125) / 1.5155 = -0.625 / 1.5155 = -0.412
+
+x̂ = [0.577, -1.402, 1.237, -0.412]
+
+Check: mean ≈ 0, variance ≈ 1 ✓
+
+#### **Step 5: Scale and shift (learned γ, β)**
+
+Assume learned: γ = [1.0, 0.5, 2.0, 0.8], β = [0.1, 0.0, -0.2, 0.05]
+
+y₁ = 1.0×0.577 + 0.1 = 0.677
+y₂ = 0.5×(-1.402) + 0.0 = -0.701
+y₃ = 2.0×1.237 + (-0.2) = 2.474 - 0.2 = 2.274
+y₄ = 0.8×(-0.412) + 0.05 = -0.330 + 0.05 = -0.280
+
+Final normalized token: y = [0.677, -0.701, 2.274, -0.280]
+
+#### **Step 6: Interpret**
+
+The token's activations now have controlled scale (~range -0.7 to 2.3) instead of original range (-1 to 3). The γ parameters have learned to emphasize dimension 3 (γ=2.0) and de-emphasize dimension 2 (γ=0.5). The network learns which features matter.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Every transformer block:** Contains at least two layer norms (one after attention, one after feed-forward). Pre-LN transformers (most modern) have norm before each sub-layer.
+
+- **Pre-LN vs Post-LN:** Original BERT used Post-LN (norm after residual addition). Modern LLMs (GPT-3, Llama, PaLM) use Pre-LN (norm before). Pre-LN has better gradient flow, enables deeper networks, and requires no learning rate warmup.
+
+- **RMSNorm (Root Mean Square Normalization):** Simplified variant used in Llama, PaLM. Removes mean centering (only scales by RMS). Computationally cheaper and performs similarly.
+
+$$
+\text{RMSNorm}(\mathbf{x}) = \frac{\mathbf{x}}{\sqrt{\frac{1}{d} \sum x_i^2 + \epsilon}} \odot \gamma
+$$
+
+- **No bias after layer norm:** Since layer norm already centers activations, the subsequent linear layers often omit bias terms (saves parameters).
+
+- **Stable training:** Layer norm keeps activations in a reasonable range regardless of initialization or depth. Without it, 100-layer transformers would be impossible.
+
+- **Position independence:** Each token normalized independently. Same token at different positions gets different normalization (because other features differ), preserving positional information.
+
+---
+
+### **8. Brain-like connection (homeostatic plasticity)**
+
+The brain maintains stable firing rates through homeostatic plasticity. When a neuron fires too frequently, synaptic strengths are scaled down; when too rarely, scaled up. This keeps neural activity within a dynamic range despite varying inputs. Layer normalization is the artificial analogue: it rescales activations to have stable mean and variance, preventing saturation or vanishing. The brain's homeostatic mechanisms operate on longer timescales (hours to days), while layer norm operates instantly per token. Both solve the same problem: maintaining stable information flow through a processing system with many layers.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Layer normalization and batch normalization are interchangeable. Either works for transformers."
+
+_Why it is wrong:_ Batch normalization fails for transformers. Reasons:
+
+- Sequence lengths vary; batch norm statistics become noisy or invalid.
+- Small batches (common in LLM training due to memory constraints) produce unstable statistics.
+- During autoregressive generation (decoding), tokens are processed one at a time—batch norm would have no batch to compute statistics over.
+- Layer norm works with any batch size (including 1) and any sequence length.
+
+Layer norm is not just as good—it is the _only_ choice that works robustly for transformers. This is why every LLM uses layer norm or its variants (RMSNorm), never batch norm.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### Why Batch Norm Doesn't Work for Transformers
-
-```python
-
-def why_not_batch_norm():
-    """
-    Why transformers need layer norm
-    """
-    print("Why Transformers Can't Use Batch Norm")
-    print("=" * 60)
-
-    print("""
-    Batch Norm problems for transformers:
-
-    1. Variable sequence lengths
-       Different samples have different lengths
-       Can't compute stable batch statistics
-
-    2. Small batches in training
-       Language models often use small batches
-       Batch statistics are noisy
-
-    3. Dependency between samples
-       Each sample's normalization depends on others
-       Not ideal for autoregressive generation
-
-    4. Training vs inference mismatch
-       Different behavior causes instability
-
-    Layer norm solves all these!
-    """)
-
-why_not_batch_norm()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Deep networks are unstable by nature. Activations drift, |
+|  gradients vanish, training collapses. Layer normalization|
+|  is the stabilizer. It anchors each token's activations   |
+|  to a consistent scale, independent of other tokens.      |
+|  Without it, transformers would be too fragile to train.  |
+|  With it, we can stack 100 layers, 1 trillion parameters, |
+|  and train on the entire internet. Layer norm is the      |
+|  silent enabler of the LLM revolution.                    |
+-------------------------------------------------------------
 ```
 
 ---
 
-## Layer Norm in Transformers
+### **11. Quick self-check question**
 
-### Where It Appears
+You have a transformer with 32 layers using Post-LN (norm after residual addition). Training is unstable—gradients vanish in early layers. A colleague suggests switching to Pre-LN. Why would this help?
 
-```python
-
-def transformer_layer_norm():
-    """
-    Layer norm in transformer architecture
-    """
-    print("Layer Normalization in Transformers")
-    print("=" * 60)
-
-    print("""
-    Each transformer layer has two layer norms:
-
-    Input
-      ↓
-    ┌─────────────────────┐
-    │ Multi-Head Attention│
-    └─────────────────────┘
-      ↓
-      + ←── Residual connection
-      ↓
-    Layer Normalization  ←── 1st Layer Norm
-      ↓
-    ┌─────────────────────┐
-    │ Feed-Forward Network│
-    └─────────────────────┘
-      ↓
-      + ←── Residual connection
-      ↓
-    Layer Normalization  ←── 2nd Layer Norm
-      ↓
-    Output to next layer
-    """)
-
-    print("\nSome models use 'Pre-LN' (norm before sub-layers)")
-    print("Others use 'Post-LN' (norm after)")
-
-transformer_layer_norm()
-```
-
-### Pre-Norm vs Post-Norm
-
-```python
-
-def pre_vs_post():
-    """
-    Different placement of layer norm
-    """
-    print("Pre-Norm vs Post-Norm Architecture")
-    print("=" * 60)
-
-    print("""
-    Post-Norm (original Transformer):
-    x → Attention → + → Norm → FFN → + → Norm → next
-
-    Pre-Norm (modern LLMs):
-    x → Norm → Attention → + → Norm → FFN → + → next
-
-    Pre-Norm advantages:
-    • Easier to train very deep models
-    • More stable gradients
-    • Used in GPT, BERT, most modern LLMs
-    """)
-
-    print("\nThe residual connections become 'clean' paths")
-    print("for gradients to flow through.")
-
-pre_vs_post()
-```
+_(Answer hidden below)_
 
 ---
 
-## A Complete Layer Norm Implementation
+.
 
-```python
+.
 
-class LayerNorm:
-    """
-    Complete layer normalization implementation
-    """
-    def __init__(self, d_model, eps=1e-5):
-        self.d_model = d_model
-        self.eps = eps
+.
 
-        # Learnable parameters
-        self.gamma = np.ones(d_model)  # scale
-        self.beta = np.zeros(d_model)   # shift
+.
 
-    def forward(self, x):
-        """
-        x: (..., d_model) - any shape, last dimension is features
-        """
-        # Store original shape
-        original_shape = x.shape
+.
 
-        # Calculate mean and variance along last dimension
-        mean = np.mean(x, axis=-1, keepdims=True)
-        variance = np.var(x, axis=-1, keepdims=True)
-
-        # Normalize
-        x_norm = (x - mean) / np.sqrt(variance + self.eps)
-
-        # Scale and shift
-        out = self.gamma * x_norm + self.beta
-
-        return out
-
-    def set_params(self, gamma, beta):
-        """Set learned parameters (normally done during training)"""
-        self.gamma = gamma
-        self.beta = beta
-
-def layer_norm_demo():
-    """
-    Demonstrate layer norm on different inputs
-    """
-    print("Layer Normalization Demo")
-    print("=" * 60)
-
-    # Create layer norm for 4-dimensional features
-    ln = LayerNorm(d_model=4)
-
-    # Set some example learned parameters
-    ln.set_params(
-        gamma=np.array([1.5, 1.0, 2.0, 0.8]),
-        beta=np.array([0.1, -0.1, 0.2, 0.0])
-    )
-
-    # Example 1: Single vector (one word)
-    x1 = np.array([2.0, -1.0, 3.0, 0.5])
-    y1 = ln.forward(x1)
-
-    print("\n1. Single word (vector):")
-    print(f"  Input:  {x1}")
-    print(f"  Output: {[round(v,3) for v in y1]}")
-
-    # Example 2: Multiple words (sequence)
-    x2 = np.array([
-        [2.0, -1.0, 3.0, 0.5],   # word 1
-        [1.0, 2.0, -2.0, 1.5],   # word 2
-        [-1.0, 0.5, 2.5, -1.5]   # word 3
-    ])
-    y2 = ln.forward(x2)
-
-    print("\n2. Sequence of 3 words (matrix):")
-    for i, (in_vec, out_vec) in enumerate(zip(x2, y2)):
-        print(f"  Word {i+1}: {[round(v,3) for v in in_vec]} → {[round(v,3) for v in out_vec]}")
-
-    # Verify normalization per word
-    print("\nVerification (each word should have ~0 mean, ~1 std after norm):")
-    y2_norm_only = (x2 - np.mean(x2, axis=-1, keepdims=True)) / np.std(x2, axis=-1, keepdims=True)
-    for i, vec in enumerate(y2_norm_only):
-        mean = np.mean(vec)
-        std = np.std(vec)
-        print(f"  Word {i+1}: mean={mean:.3f}, std={std:.3f}")
-
-layer_norm_demo()
-```
-
----
-
-## Why Layer Norm Helps
-
-### Benefits
-
-```python
-
-def layer_norm_benefits():
-    """
-    The advantages of layer normalization
-    """
-    print("Benefits of Layer Normalization")
-    print("=" * 60)
-
-    benefits = {
-        "Stabilizes training": "Prevents activations from exploding or vanishing",
-        "Faster convergence": "Each layer sees well-behaved inputs",
-        "Less sensitive to initialization": "Weights can start in wider range",
-        "Works with variable lengths": "Each sample normalized independently",
-        "Smooths gradients": "Helps information flow through deep networks"
-    }
-
-    for benefit, desc in benefits.items():
-        print(f"  • {benefit}: {desc}")
-
-layer_norm_benefits()
-```
-
-### Without Layer Norm
-
-````text
-
-Layer 1 output:  [0.1, -0.2, 0.3]  (nice)
-       ↓
-Layer 2 output:  [5.0, -10.0, 15.0] (wild!)
-       ↓
-Layer 3 output:  [100, -500, 1000]  (exploding!)
-       ↓
-Layer 4:  NaN (training crashes)
-```
-
-Without normalization, values can spiral out of control.
-
-### With Layer Norm
-
-```text
-
-Layer 1:  [0.1, -0.2, 0.3] → Norm → [0.2, -0.9, 0.7]
-       ↓
-Layer 2:  [5.0, -10.0, 15.0] → Norm → [0.3, -0.8, 0.5]
-       ↓
-Layer 3:  [100, -500, 1000] → Norm → [0.1, -0.7, 0.6]
-       ↓
-Layer 4:  [20, -30, 40] → Norm → [0.4, -0.6, 0.2]
-
-Each layer receives normalized inputs → stable training!
-````
-
----
-
-## Why This Matters for LLMs
-
-### 1. Enables Deep Transformers
-
-```python
-
-def enables_depth():
-    """
-    How layer norm enables deep models
-    """
-    print("Layer Norm Enables Deep Transformers")
-    print("=" * 60)
-
-    print("""
-    Without layer norm:           With layer norm:
-
-    Layer 1 → [10, -5, 3]         Layer 1 → [0.2, -0.3, 0.1]
-    Layer 2 → [100, -50, 30]       Layer 2 → [0.1, 0.4, -0.5]
-    Layer 3 → [1000, -500, 300]    Layer 3 → [-0.3, 0.2, 0.1]
-    Layer 4 → explosion!           Layer 96 → still stable!
-
-    Layer norm keeps values in check through 100+ layers.
-    """)
-
-    print("\nThis is why we can have 96-layer models like GPT-3!")
-
-enables_depth()
-```
-
-### 2. RMSNorm: A Simplified Alternative
-
-```python
-
-def rmsnorm():
-    """
-    RMSNorm - used in some modern LLMs
-    """
-    print("RMSNorm: Root Mean Square Normalization")
-    print("=" * 60)
-
-    def rmsnorm(x, gamma=None):
-        rms = np.sqrt(np.mean(x**2) + 1e-5)
-        x_norm = x / rms
-        if gamma is not None:
-            x_norm = gamma * x_norm
-        return x_norm
-
-    x = np.array([2.0, -1.0, 3.0, 0.5])
-
-    print("""
-    RMSNorm simplifies layer norm by omitting mean:
-
-    LayerNorm:  y = (x - μ) / σ
-    RMSNorm:    y = x / RMS(x)
-
-    where RMS(x) = √(mean(x²))
-    """)
-
-    normalized = rmsnorm(x)
-    print(f"Input:  {x}")
-    print(f"RMSNorm: {[round(v,3) for v in normalized]}")
-
-    print("\nUsed in: Llama, some other modern LLMs")
-    print("Faster, nearly as effective as layer norm")
-
-rmsnorm()
-```
-
-### 3. Computational Cost
-
-```python
-
-def computational_cost():
-    """
-    Cost of layer normalization
-    """
-    print("Computational Cost of Layer Norm")
-    print("=" * 60)
-
-    seq_len = 2048
-    d_model = 768
-    n_layers = 12
-
-    # Each layer norm does O(d_model) operations per position
-    operations_per_token = 4 * d_model  # approximate
-    total_ops = seq_len * n_layers * 2 * operations_per_token  # 2 norms per layer
-
-    print(f"Sequence length: {seq_len}")
-    print(f"Model dimension: {d_model}")
-    print(f"Layers: {n_layers}")
-    print(f"\nApproximate operations for layer norm: {total_ops:,}")
-    print("(Relatively cheap compared to attention and FFN)")
-
-computational_cost()
-```
-
-### 4. Residual-Norm Interaction
-
-```python
-
-def residual_norm():
-    """
-    How residual connections and layer norm work together
-    """
-    print("Residual Connections + Layer Normalization")
-    print("=" * 60)
-
-    print("""
-    The transformer magic:
-
-    x_prev
-      ↓
-    ┌─────────────────────┐
-    │ Sub-layer (Attn/FFN) │
-    └─────────────────────┘
-      ↓
-      + ←─── x_prev (residual)
-      ↓
-    Layer Normalization
-      ↓
-    x_next
-
-    Benefits:
-    • Gradients flow directly through residuals
-    • Layer norm keeps values stable
-    • Can train very deep networks
-    """)
-
-residual_norm()
-```
-
----
-
-## Layer Norm Cheat Sheet
-
-| Aspect               | Value                                         |
-| -------------------- | --------------------------------------------- |
-| Normalizes across    | Feature dimension (per sample)                |
-| Learnable parameters | γ (scale), β (shift)                          |
-| Used in              | Every transformer sub-layer                   |
-| Position             | Pre-norm (modern) or Post-norm (original)     |
-| Epsilon (ε)          | Small constant (1e-5) for numerical stability |
-
----
-
-## Quick Recap
-
-• Layer normalization normalizes each sample's features to have zero mean and unit variance—like each musician tuning their instrument to a standard pitch, ensuring consistent scale across the orchestra
-
-• It's applied after each sub-layer in transformers—keeping activations stable through 100+ layers and enabling the training of very deep models
-
-• Transformers use layer norm instead of batch norm because it works with variable sequence lengths, doesn't depend on batch size, and behaves the same during training and inference
-
----
-
-## Mental Hook
-
-> "Layer normalization is like a sound engineer who ensures every microphone is set to the same volume level—not by comparing microphones to each other, but by calibrating each one individually to a standard reference, so the whole system works harmoniously."
+**Answer:** In Post-LN, the residual path (x + Attention(x)) flows through layer normalization before the next residual. The gradient must pass through the normalization's derivative, which can be small. In Pre-LN, the normalization is applied _before_ the attention/FFN, and the residual path is x + Attention(Norm(x)). The skip connection preserves the gradient from higher layers without passing through normalization. This creates a direct gradient highway. In very deep transformers, Pre-LN ensures gradients from the loss can reach early layers without vanishing. Modern LLMs (GPT-3, Llama) use Pre-LN exclusively for this reason.

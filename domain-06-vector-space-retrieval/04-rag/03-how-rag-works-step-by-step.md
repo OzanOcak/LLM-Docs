@@ -1,551 +1,284 @@
-# How RAG Works Step-by-Step
+# How RAG works step-by-step
 
-## The Research Assistant Analogy
-
-Imagine you have a brilliant research assistant. When you ask a question, they first dash to a massive library, grab the most relevant books and articles, and bring them back to you. Then you read those materials and craft your answer, citing your sources. That's exactly how RAG (Retrieval-Augmented Generation) works: a two-part system where a retriever finds relevant information, and an LLM reads it to generate an answer.
-
-RAG isn't magic—it's a clear, step-by-step pipeline. Understanding each step helps you build better RAG applications, debug when things go wrong, and appreciate why this technique has become the standard for production LLM systems.
+## **DOMAIN: VECTOR SPACE & RETRIEVAL | Sub domain: RAG (Retrieval-Augmented Generation)**
 
 ---
 
-## The Two-Phase RAG Pipeline
+### **1. Why this concept matters**
 
-RAG has two distinct phases: Indexing (done once ahead of time) and Querying (done for each user question).
-
-```text
-
-PHASE 1: INDEXING (Prepare the library)    PHASE 2: QUERYING (Answer questions)
-──────────────────────────────────────    ──────────────────────────────────────
-Documents ──→ Chunk ──→ Embed ──→ Store    User Question ──→ Embed ──→ Search
-                                                    │                │
-                                                    └────────┬───────┘
-                                                             ↓
-                                                   Retrieved Chunks
-                                                             ↓
-                                            Prompt = Question + Chunks
-                                                             ↓
-                                                          LLM
-                                                             ↓
-                                                        Answer
-```
-
-```python
-
-def rag_pipeline_intro():
-    """
-    The complete RAG pipeline
-    """
-    print("The RAG Pipeline: Two Phases, One Goal")
-    print("=" * 60)
-
-    print("""
-    PHASE 1: INDEXING (Do this once)
-    ─────────────────────────────────────────────
-    1. Load your documents (PDFs, websites, databases)
-    2. Split them into chunks (small pieces)
-    3. Create embeddings for each chunk
-    4. Store embeddings in vector database
-
-    PHASE 2: QUERYING (Do this per question)
-    ─────────────────────────────────────────────
-    5. User asks a question
-    6. Embed the question
-    7. Search vector DB for similar chunks
-    8. Retrieve top-k most relevant chunks
-    9. Create prompt with question + chunks
-    10. LLM generates answer
-    11. Return answer to user
-    """)
-
-rag_pipeline_intro()
-```
+You have heard of RAG. You know it retrieves documents before generating answers. But how does it actually work under the hood? What are the exact steps? What happens when you click "search" in a RAG chatbot? Understanding the pipeline—from document ingestion to query to answer—is essential for debugging, optimizing, and building your own RAG system. This section walks through every step, from raw documents to final answer, with concrete examples.
 
 ---
 
-## Phase 1: Indexing (Building Your Knowledge Base)
+### **2. Core idea**
 
-### Step 1: Load Documents
+**RAG has two phases: indexing (offline) and retrieval-generation (online). Indexing chunks documents, embeds them, and stores vectors. Online, the query is embedded, similar chunks are retrieved, and the LLM generates an answer grounded in those chunks.**
 
-First, gather all the information you want your LLM to access.
+---
 
-```python
+### **3. Concrete analogy**
 
-def step1_load():
-    """
-    Loading documents from various sources
-    """
-    print("Step 1: Load Your Documents")
-    print("=" * 60)
+Imagine building a research assistant for a lawyer.
 
-    sources = [
-        "Company policies (PDFs)",
-        "Product documentation (websites)",
-        "Customer support tickets (database)",
-        "Recent news articles (RSS feeds)",
-        "Internal wikis (Confluence, Notion)",
-        "Scientific papers (PDFs)",
-        "Emails and reports"
-    ]
+**Indexing phase (one-time setup):**
 
-    print("RAG can work with ANY text source:")
-    for src in sources:
-        print(f"  • {src}")
+- Take all legal documents (10,000 pages).
+- Cut them into bite-sized paragraphs (chunks).
+- For each chunk, write a summary card (embedding).
+- File cards in a massive card catalog indexed by meaning (vector DB).
 
-    print("\nTools like LangChain have built-in loaders")
-    print("for hundreds of different data sources.")
+**Query phase (each question):**
 
-step1_load()
+- Lawyer asks: "What are the notice requirements for termination?"
+- You write a summary card for the question.
+- Flip through the card catalog, find the most similar cards.
+- Pull the original document chunks for those cards.
+- Staple them together, hand to the lawyer.
+- Lawyer reads chunks and answers the question.
+
+The indexing happens once. The query happens per question. This is RAG.
+
+---
+
+### **4. ASCII diagram**
+
 ```
+RAG two-phase architecture:
 
-### Step 2: Split into Chunks
+    PHASE 1: INDEXING (offline, once)
 
-Documents are too long—we need smaller, focused pieces.
+    Documents (PDFs, wikis, emails)
+         │
+         ▼
+    Chunking (split into pieces)
+         │
+    ┌────┴────┬────────┬────────┐
+    ▼         ▼        ▼        ▼
+    Chunk1   Chunk2   Chunk3   Chunk4
+    │         │        │        │
+    ▼         ▼        ▼        ▼
+    Embedding model (e.g., SBERT)
+    │         │        │        │
+    ▼         ▼        ▼        ▼
+    Vector   Vector   Vector   Vector
+    │         │        │        │
+    └────┬────┴────────┴────────┘
+         ▼
+    Vector Database (HNSW, IVF)
 
-```python
 
-def step2_chunk():
-    """
-    Chunking documents into manageable pieces
-    """
-    print("Step 2: Split into Chunks")
-    print("=" * 60)
+    PHASE 2: QUERY (online, per user)
 
-    long_doc = """
-    The company remote work policy has been updated for 2024.
-    Employees may work remotely up to three days per week.
-    This requires manager approval. A home office stipend of
-    $500 is available. Equipment must be returned if leaving
-    the company. Security guidelines must be followed.
-    VPN access is required. Regular team meetings must be
-    attended in person at least twice per month.
-    """ * 5  # Simulate a long document
-
-    print(f"Original document: {len(long_doc)} characters")
-
-    # Chunk into smaller pieces
-    chunk_size = 200
-    chunks = [long_doc[i:i+chunk_size] for i in range(0, len(long_doc), chunk_size)]
-
-    print(f"After chunking: {len(chunks)} chunks")
-    print(f"Sample chunk 1: {chunks[0][:100]}...")
-
-    print("\nChunking strategies:")
-    print("  • Fixed size (e.g., 500 characters)")
-    print("  • Sentence-based")
-    print("  • Paragraph-based")
-    print("  • Recursive (smart splitting)")
-
-step2_chunk()
-```
-
-### Step 3: Create Embeddings
-
-Convert each chunk into a vector that captures its meaning.
-
-```python
-
-def step3_embed():
-    """
-    Creating embeddings for each chunk
-    """
-    print("Step 3: Create Embeddings")
-    print("=" * 60)
-
-    chunks = [
-        "Remote work policy allows 3 days WFH per week",
-        "$500 home office stipend available",
-        "Manager approval required for remote work",
-        "VPN must be used when working remotely"
-    ]
-
-    print(f"Chunks to embed: {len(chunks)}")
-    print("\nUsing an embedding model (e.g., text-embedding-ada-002)")
-    print("Each chunk → vector (e.g., 1536 dimensions)")
-
-    # Simulated embeddings
-    import numpy as np
-    np.random.seed(42)
-
-    for i, chunk in enumerate(chunks):
-        # Simulate a 4-dim embedding for demo
-        embedding = np.random.randn(4).round(2)
-        print(f"\n  Chunk {i+1}: '{chunk[:30]}...'")
-        print(f"  → Vector: {embedding}")
-
-step3_embed()
-```
-
-### Step 4: Store in Vector Database
-
-Save vectors and original text for fast retrieval.
-
-```python
-
-def step4_store():
-    """
-    Storing vectors in a database
-    """
-    print("Step 4: Store in Vector Database")
-    print("=" * 60)
-
-    print("""
-    Vector database record for each chunk:
-
-    ┌─────────────────────────────────────────┐
-    │ ID: chunk_123                           │
-    ├─────────────────────────────────────────┤
-    │ Vector: [0.23, -0.45, 0.67, ...]        │ ← 768/1536 dims
-    ├─────────────────────────────────────────┤
-    │ Metadata: {                              │
-    │   "text": "Remote work policy...",      │ ← Original text
-    │   "source": "HR_policy_2024.pdf",       │ ← For citation
-    │   "page": 3,                             │
-    │   "date": "2024-01-15"                   │
-    │ }                                        │
-    └─────────────────────────────────────────┘
-
-    This is what makes retrieval fast—indexing at insert time!
-    """)
-
-step4_store()
+    User query: "What is the refund policy?"
+         │
+         ▼
+    Embed query (same model)
+         │
+         ▼
+    Vector DB search (top-k by cosine)
+         │
+         ▼
+    Retrieved chunks (k=3-5)
+         │
+         ▼
+    Construct prompt:
+    "Context: [chunk1] [chunk2] [chunk3]
+     Question: [query]
+     Answer based only on context:"
+         │
+         ▼
+    LLM generates answer
+         │
+         ▼
+    Return answer to user
 ```
 
 ---
 
-## Phase 2: Querying (Answering Questions)
+### **5. Mathematical formulation**
 
-### Step 5: User Asks a Question
+**Phase 1: Indexing**
 
-```python
+Given document corpus D, chunk size L (tokens), overlap O (tokens).
 
-def step5_question():
-    """
-    User submits a question
-    """
-    print("Step 5: User Asks a Question")
-    print("=" * 60)
+Chunk each document: C = {c₁...cₘ} where |c_i| ≈ L, adjacent chunks overlap by O.
 
-    questions = [
-        "What's the remote work policy?",
-        "How much is the home office stipend?",
-        "Do I need manager approval for WFH?",
-        "What are the VPN requirements?"
-    ]
+Embed each chunk: v_i = E(c_i) ∈ ℝᵈ, where E is embedding model (e.g., `all-MiniLM-L6-v2`, d=384).
 
-    print("Example questions RAG can answer:")
-    for q in questions:
-        print(f"  • {q}")
+Store in vector DB: (v_i, c_i, metadata_i).
 
-step5_question()
+**Phase 2: Query**
+
+User query q. Compute query vector v_q = E(q).
+
+Retrieve top-k chunks by cosine similarity:
+
+$$
+\text{sim}(v_q, v_i) = \frac{v_q \cdot v_i}{\|v_q\| \|v_i\|}
+$$
+
+$$
+\text{Top-k} = \arg\max_{i=1..m}^k \text{sim}(v_q, v_i)
+$$
+
+Augment prompt template:
+
+```
+Context:
+{'\n'.join([c_i for i in Top-k])}
+
+Question: {q}
+
+Answer based only on the context above. If the answer is not in the context, say "I don't know."
 ```
 
-### Step 6: Embed the Question
+Generate answer: a = LLM(prompt)
 
-Convert the question to a vector using the SAME embedding model.
+**Optional reranking:** Retrieve top-k' (e.g., 20) then rerank with cross-encoder for final top-k (e.g., 5).
 
-```python
+---
 
-def step6_embed_question():
-    """
-    Embedding the user's question
-    """
-    print("Step 6: Embed the Question")
-    print("=" * 60)
+### **6. Worked example (step-by-step)**
 
-    question = "What's the current remote work policy?"
+#### **Step 1: Documents (tiny corpus)**
 
-    print(f"Question: '{question}'")
-    print("\nUsing the SAME embedding model as Step 3")
-    print("This ensures question and chunks are in the same vector space")
+Doc: "RAG stands for Retrieval-Augmented Generation. It combines LLMs with vector search. RAG reduces hallucinations and keeps answers current."
 
-    # Simulated embedding
-    import numpy as np
-    np.random.seed(123)
-    q_vector = np.random.randn(4).round(2)
+#### **Step 2: Chunking (L=30 chars, O=0 for simplicity)**
 
-    print(f"\nQuestion vector: {q_vector}")
-    print("(Same format as document chunk vectors)")
+Chunk1: "RAG stands for Retrieval-Augmented Generation."
+Chunk2: "It combines LLMs with vector search."
+Chunk3: "RAG reduces hallucinations and keeps answers current."
 
-step6_embed_question()
+#### **Step 3: Embed (2D example for visualization)**
+
+Assume embedding model produces:
+v1 = [0.9, 0.2]
+v2 = [0.8, 0.3]
+v3 = [0.1, 0.9]
+
+#### **Step 4: Index in vector DB**
+
+Store (v1, chunk1), (v2, chunk2), (v3, chunk3).
+
+#### **Step 5: User query**
+
+q = "What is RAG?"
+
+#### **Step 6: Embed query**
+
+v_q = [0.85, 0.25] (similar to v1, v2; dissimilar to v3)
+
+#### **Step 7: Cosine similarity**
+
+sim(v_q, v1) = 0.96
+sim(v_q, v2) = 0.92
+sim(v_q, v3) = 0.35
+
+Top-2: v1 (chunk1), v2 (chunk2)
+
+#### **Step 8: Augment prompt**
+
+```
+Context:
+RAG stands for Retrieval-Augmented Generation.
+It combines LLMs with vector search.
+
+Question: What is RAG?
+
+Answer based only on the context above:
 ```
 
-### Step 7: Search Vector Database
+#### **Step 9: LLM generates**
 
-Find chunks most similar to the question.
+Output: "RAG stands for Retrieval-Augmented Generation. It combines LLMs with vector search."
 
-```python
+#### **Step 10: Return to user**
 
-def step7_search():
-    """
-    Searching for relevant chunks
-    """
-    print("Step 7: Search Vector Database")
-    print("=" * 60)
+User receives answer grounded in retrieved chunks.
 
-    import numpy as np
-    from sklearn.metrics.pairwise import cosine_similarity
+---
 
-    # Simulated data
-    np.random.seed(42)
-    chunks = [
-        "Remote work policy allows 3 days WFH per week",
-        "$500 home office stipend available",
-        "Manager approval required for remote work",
-        "VPN must be used when working remotely",
-        "Health insurance covers dental and vision"
-    ]
+### **7. How this appears inside neural networks or LLMs**
 
-    # Simulated embeddings
-    chunk_vectors = np.random.randn(5, 4)
-    question_vector = np.random.randn(1, 4)
+- **Chunking strategies:** Fixed-size (e.g., 512 tokens, overlap 50). Semantic chunking (split at sentence boundaries). Recursive (document structure). Overlap prevents cutting sentences.
 
-    # Calculate similarities
-    similarities = cosine_similarity(question_vector, chunk_vectors)[0]
+- **Embedding models:** General: SBERT (`all-MiniLM-L6-v2`, 384 dims). Domain-specific: Legal-BERT, Bio-BERT, CodeBERT. OpenAI `text-embedding-ada-002` (1536 dims). Voyage, Cohere, etc.
 
-    print("Finding chunks most relevant to the question:")
-    for i, (chunk, sim) in enumerate(zip(chunks, similarities)):
-        print(f"  {sim:.3f}: {chunk}")
+- **Vector DB retrieval:** Cosine similarity, top-k (typically 3-10). Filter by metadata before search (pre-filter) or after (post-filter).
 
-    print("\nTop 2 most relevant chunks:")
-    top_indices = np.argsort(similarities)[-2:][::-1]
-    for i, idx in enumerate(top_indices, 1):
-        print(f"  {i}. {chunks[idx]} (score: {similarities[idx]:.3f})")
+- **Prompt template:** Critical. Include clear instructions: "Answer based only on context." "If not in context, say 'I don't know'." Helps reduce hallucination.
 
-step7_search()
+- **Reranking:** Cross-encoder (e.g., `cross-encoder/ms-marco-MiniLM-L-6-v2`) reranks retrieved chunks. Higher accuracy, slower. Use after initial vector search.
+
+- **Context window management:** If top-k chunks exceed LLM context limit, compress (summarize) or truncate (keep most relevant sentences).
+
+- **Citation:** LLM can be prompted to output citations: `Answer: ... [1]`. Map to retrieved chunk IDs.
+
+---
+
+### **8. Brain-like connection (autobiographical memory retrieval)**
+
+Human memory retrieval follows a similar two-phase process. When asked "What did you do last summer?" your brain does not replay every memory. It embeds the query into a neural representation (hippocampus), searches memory via similarity, retrieves candidate episodes (pattern completion), and then "generates" a narrative. This is RAG: retrieval (hippocampus) + generation (prefrontal cortex). The brain's retrieval is approximate (like ANN), not exact. Patients with hippocampal damage can still generate answers but cannot retrieve specific memories—they hallucinate plausible but false narratives. This is analogous to an LLM without retrieval: fluent but not grounded.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "RAG retrieves documents first, then the LLM reads them. That is all. Nothing else matters."
+
+_Why it is wrong:_ RAG has many knobs. Chunk size: too small → missing context; too large → irrelevant information. Embedding model: general model may fail on domain jargon. Top-k: too few → missing answer; too many → context window overflow. Prompt template: "Answer based only on context" prevents hallucination; without it, LLM may ignore retrieved docs. Reranking: vector search is approximate; cross-encoder can fix order. All these choices matter. A naive RAG (fixed chunk, default model, top-5, simple prompt) works for simple cases but fails for real-world complexity. RAG is not trivial—it is a pipeline of components that must be tuned together.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### Step 8: Retrieve Top-K Chunks
-
-Get the actual text of the most relevant chunks.
-
-```python
-
-def step8_retrieve():
-    """
-    Retrieving the actual chunk text
-    """
-    print("Step 8: Retrieve Top-K Chunks")
-    print("=" * 60)
-
-    # Retrieved from vector DB
-    retrieved_chunks = [
-        {
-            "text": "Remote work policy allows 3 days WFH per week. Manager approval required.",
-            "source": "HR_policy_2024.pdf",
-            "score": 0.92
-        },
-        {
-            "text": "$500 home office stipend available for remote workers. Equipment must be returned if leaving.",
-            "source": "benefits_guide.pdf",
-            "score": 0.87
-        }
-    ]
-
-    k = 2
-    print(f"Retrieved top-{k} chunks with metadata:")
-    for i, chunk in enumerate(retrieved_chunks, 1):
-        print(f"\n  {i}. [Score: {chunk['score']}]")
-        print(f"     Text: {chunk['text']}")
-        print(f"     Source: {chunk['source']}")
-
-step8_retrieve()
-```
-
-### Step 9: Create Augmented Prompt
-
-Combine the question with retrieved chunks.
-
-```python
-
-def step9_prompt():
-    """
-    Creating the augmented prompt
-    """
-    print("Step 9: Create Augmented Prompt")
-    print("=" * 60)
-
-    question = "What's the current remote work policy?"
-    chunks = [
-        "Remote work policy allows 3 days WFH per week. Manager approval required.",
-        "$500 home office stipend available for remote workers."
-    ]
-
-    print("Original prompt (just question):")
-    print(f"  {question}")
-
-    print("\nAugmented prompt with context:")
-    print("-" * 40)
-    print("Context information:")
-    for chunk in chunks:
-        print(f"• {chunk}")
-    print(f"\nQuestion: {question}")
-    print("\nAnswer based on the context above:")
-    print("-" * 40)
-
-    print("\nNow the LLM has ALL the information it needs!")
-
-step9_prompt()
-```
-
-### Step 10: LLM Generates Answer
-
-```python
-
-def step10_generate():
-    """
-    LLM generates answer from augmented prompt
-    """
-    print("Step 10: LLM Generates Answer")
-    print("=" * 60)
-
-    print("""
-    LLM sees:
-
-    Context:
-    • Remote work policy allows 3 days WFH per week.
-      Manager approval required.
-    • $500 home office stipend available for remote workers.
-
-    Question: What's the current remote work policy?
-
-    LLM generates:
-
-    "Based on the company documents, the current remote work
-    policy allows employees to work from home up to 3 days per
-    week with manager approval. A $500 home office stipend is
-    also available for eligible remote workers."
-
-    Source: HR_policy_2024.pdf, benefits_guide.pdf
-    """)
-
-step10_generate()
-```
-
-### Step 11: Return Answer to User
-
-```python
-
-def step11_return():
-    """
-    Return the answer to the user
-    """
-    print("Step 11: Return Answer to User")
-    print("=" * 60)
-
-    print("""
-    Final response to user:
-
-    ┌─────────────────────────────────────────────────────┐
-    │                                                     │
-    │   Based on the company documents, the current       │
-    │   remote work policy allows employees to work from  │
-    │   home up to 3 days per week with manager approval. │
-    │   A $500 home office stipend is also available for  │
-    │   eligible remote workers.                          │
-    │                                                     │
-    │   Sources:                                          │
-    │   • HR_policy_2024.pdf                              │
-    │   • benefits_guide.pdf                              │
-    │                                                     │
-    └─────────────────────────────────────────────────────┘
-    """)
-
-step11_return()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  RAG is not magic. It is a pipeline: chunk → embed →      |
+|  index → retrieve → rerank → prompt → generate. Each      |
+|  step has knobs. Turn them wrong, you get garbage.        |
+|  Turn them right, you get answers grounded in your        |
+|  documents. Understanding the step-by-step is not         |
+|  academic—it is how you debug when RAG fails. Learn the   |
+|  pipeline. Test each component. Build RAG that works.     |
+-------------------------------------------------------------
 ```
 
 ---
 
-## The Complete RAG Pipeline (All Steps)
+### **11. Quick self-check question**
 
-```python
+You deploy a RAG system for customer support. Users complain that the bot is missing obvious answers that exist in the documentation. You suspect the retrieval step is failing (relevant documents not retrieved). How would you debug? List three things to check.
 
-def complete_pipeline():
-    """
-    The entire RAG pipeline summarized
-    """
-    print("RAG PIPELINE: COMPLETE VIEW")
-    print("=" * 60)
-
-    steps = [
-        ("PHASE 1: INDEXING", [
-            "1. Load documents (PDFs, websites, databases)",
-            "2. Split into chunks (500-1000 tokens each)",
-            "3. Create embeddings for each chunk",
-            "4. Store vectors in database with metadata"
-        ]),
-        ("PHASE 2: QUERYING", [
-            "5. User asks question",
-            "6. Embed the question (same model)",
-            "7. Search vector DB for similar chunks",
-            "8. Retrieve top-k most relevant chunks",
-            "9. Create prompt: question + retrieved chunks",
-            "10. LLM generates answer using context",
-            "11. Return answer with sources"
-        ])
-    ]
-
-    for phase, substeps in steps:
-        print(f"\n{phase}:")
-        for step in substeps:
-            print(f"  {step}")
-
-complete_pipeline()
-```
+_(Answer hidden below)_
 
 ---
 
-## Key Parameters in RAG
+.
 
-| Parameter            | What It Controls                  | Typical Value                | Tradeoff                                      |
-| -------------------- | --------------------------------- | ---------------------------- | --------------------------------------------- |
-| Chunk size           | How big each document piece is    | 500-1000 tokens              | Smaller = more focused, larger = more context |
-| Chunk overlap        | Overlap between chunks            | 10-20%                       | Prevents cutting mid-sentence                 |
-| Top-k                | Number of chunks to retrieve      | 3-10                         | Higher = more context, slower, may confuse    |
-| Similarity threshold | Minimum relevance score           | 0.7-0.8                      | Higher = fewer but better results             |
-| Embedding model      | Quality of vector representations | text-embedding-ada-002, etc. | Better model = better retrieval               |
+.
 
----
+.
 
-## Why This Matters (The Callout Box)
+.
 
-```text
+.
 
-╔══════════════════════════════════════════════════════════════╗
-║                   WHY THIS MATTERS                           ║
-╠══════════════════════════════════════════════════════════════╣
-║                                                              ║
-║  Understanding each step of RAG lets you:                    ║
-║                                                              ║
-║  • Build better applications—tune chunk size, top-k,        ║
-║    and embedding models for your specific use case           ║
-║                                                              ║
-║  • Debug when things go wrong—is retrieval failing?         ║
-║    Is the LLM ignoring context? Each step can be checked     ║
-║                                                              ║
-║  • Optimize for speed and cost—caching, smaller models,     ║
-║    better chunking strategies all make a difference          ║
-║                                                              ║
-║  • Add citations and sources—retrieved chunks become         ║
-║    verifiable references, building user trust                ║
-║                                                              ║
-║  RAG isn't magic—it's engineering. And understanding the     ║
-║  steps turns you from a user into a builder.                 ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-```
+**Answer:** Three things to check:
 
----
+1. **Embedding model quality:** Test on sample queries. Embed a query and its relevant document. Cosine similarity should be >0.7. If low, try different embedding model (e.g., switch from `all-MiniLM-L6-v2` to `intfloat/e5-large-v2` or OpenAI `text-embedding-3-small`). Also check if model is domain-specific (legal, medical, code). Fine-tune embedding model on your data if needed.
 
-## Quick Recap
+2. **Chunking strategy:** Are answers split across chunks? Example: "Refund policy: Returns within 30 days. Refund issued to original payment method." If split into two chunks, retrieval may find only one. Increase chunk size or use overlapping chunks (50-100 token overlap). Use semantic chunking (split at sentence/paragraph boundaries).
 
-• RAG has two phases: Indexing (prepare your knowledge base once) and Querying (answer each question by retrieving relevant information)
+3. **Top-k and similarity threshold:** Maybe relevant doc has similarity 0.65 but top-k=5 includes only docs >0.7. Increase k to 10 or lower threshold. Check distribution of similarity scores for relevant vs irrelevant docs.
 
-• The indexing phase loads documents, chunks them, creates embeddings, and stores them in a vector database—building your searchable knowledge base
+4. **Query-document vocabulary mismatch:** User says "return item"; document says "refund policy." Embedding model may not capture synonymy. Use hybrid search (vector + BM25 keyword). Or use query expansion: LLM generates alternative phrasings.
 
-• The querying phase embeds the user's question, finds similar chunks, retrieves them, augments the prompt, and generates an answer grounded in those sources
+5. **Metadata filtering:** Are you accidentally filtering out relevant docs by metadata (e.g., product category, date)? Check filter logic. Try removing filters temporarily.
 
----
+6. **Reranking:** Retrieve top-20 with fast vector, rerank with cross-encoder. Cross-encoder may find relevance that vector search missed.
 
-## Mental Hook
-
-> "RAG is like having a librarian who, before you answer a question, dashes to the stacks, grabs the most relevant books, puts sticky notes on the important pages, and hands them to you—so you can give an answer that's accurate, current, and citable."
+Debugging RAG requires tracing each step. Log retrieved chunk IDs and their similarity scores. Compare to ground truth relevant documents. Adjust components based on findings.

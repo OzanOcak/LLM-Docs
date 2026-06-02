@@ -1,508 +1,263 @@
-# Encoder-Decoder Models (T5-like)
+# Encoder-decoder (T5-like)
 
-## The Translator's Booth Analogy
-
-Imagine a United Nations interpreter. First, they listen to the entire speech in English, taking in all the nuance, context, and meaning (encoding). Then, they step into their booth and deliver the translation in French, one sentence at a time, referring back to their notes of the original speech as needed (decoding). That's an encoder-decoder model: one part reads and understands the input, the other part generates the output based on that understanding.
-
-In the LLM family, encoder-decoder models like T5 (Text-to-Text Transfer Transformer) are the versatile workhorses. They treat every task as text-to-text—translation, summarization, question answering, classification—all by mapping input text to output text. They combine the understanding power of encoders with the generation power of decoders.
+## **DOMAIN: LLM-SPECIFIC CONCEPTS | Sub domain: Model Architecture Variants**
 
 ---
 
-## What Is an Encoder-Decoder Model?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-Encoder-decoder models use both an encoder to process input and a decoder to generate output.
-
-```text
-
-Encoder-Decoder (T5):
-    [The] [cat] [sat]  (input)
-       ↓    ↓    ↓
-    ┌─────────────────┐
-    │    ENCODER      │  (bidirectional understanding)
-    └─────────────────┘
-       ↓    ↓    ↓
-    [hidden representations]
-              ↓
-    ┌─────────────────┐
-    │    DECODER      │  (causal generation)
-    └─────────────────┘
-       ↓    ↓    ↓
-    [Le] [chat] [s'est] [assis]  (output)
-```
-
-```python
-
-def encoder_decoder_intro():
-    """
-    The basic concept of encoder-decoder models
-    """
-    print("Encoder-Decoder Models: Text-to-Text Framework")
-    print("=" * 60)
-
-    print("""
-    Architecture:
-    • Encoder: Bidirectional (like BERT)
-      - Understands input fully
-      - Creates rich representations
-
-    • Decoder: Causal (like GPT)
-      - Generates output left-to-right
-      - Can attend to encoder representations
-
-    • Cross-attention: Decoder attends to encoder
-      - Connects understanding to generation
-    """)
-
-encoder_decoder_intro()
-```
+Decoder-only models (GPT) generate text from a prompt. Encoder-only models (BERT) understand text but cannot generate. But what about tasks where the input and output have different structures—translation, summarization, text-to-SQL? For these, you want an encoder to read the full input (bidirectional) and a decoder to generate the output (causal). Encoder-decoder models combine the best of both worlds. T5, BART, and the original transformer are encoder-decoder. While decoder-only dominates chat, encoder-decoder remains state-of-the-art for translation and summarization. Understanding this architecture is essential for tasks where input and output differ.
 
 ---
 
-## How Encoder-Decoder Models Work
+### **2. Core idea**
 
-### The Two-Phase Process
+**An encoder-decoder model uses a bidirectional encoder to process the input sequence, a causal decoder to generate the output sequence autoregressively, and cross-attention between decoder and encoder to allow the decoder to access the full input at each generation step.**
 
-```python
+---
 
-def two_phase():
-    """
-    Encoding phase and decoding phase
-    """
-    print("The Two Phases: Encoding then Decoding")
-    print("=" * 60)
+### **3. Concrete analogy**
 
-    input_text = "The cat sat on the mat"
-    output_text = "Le chat s'est assis sur le tapis"
+Imagine a simultaneous interpreter at the UN. They listen to the entire Spanish sentence (encoder—bidirectional), understanding every word in context. Then they speak the English translation (decoder—causal, one word at a time). While speaking, they can still look back at the original Spanish sentence (cross-attention) to check details.
 
-    print(f"Input (English): '{input_text}'")
-    print(f"Output (French): '{output_text}'")
+This is different from:
 
-    print("\n" + "=" * 40)
-    print("PHASE 1: ENCODING")
-    print("=" * 40)
-    print("Encoder reads entire input bidirectionally:")
-    print("  [The] ←→ [cat] ←→ [sat] ←→ [on] ←→ [the] ←→ [mat]")
-    print("  Creates rich representations for each token")
-    print("  Final encoder states capture full meaning")
+- **Decoder-only (GPT):** Would have to translate on the fly, hearing one word at a time, like a tourist with a phrasebook.
+- **Encoder-only (BERT):** Could understand the Spanish sentence but could not produce the English translation at all.
 
-    print("\n" + "=" * 40)
-    print("PHASE 2: DECODING")
-    print("=" * 40)
-    print("Decoder generates output left-to-right:")
-    print("  Step 1: <START> → 'Le'   (attends to encoder)")
-    print("  Step 2: 'Le' → 'chat'    (attends to encoder + previous)")
-    print("  Step 3: 'chat' → 's'est'")
-    print("  Step 4: 's'est' → 'assis'")
-    print("  ...")
-    print("  Final: </s> (end token)")
+Encoder-decoder is purpose-built for sequence-to-sequence tasks: input sequence (source language, document, query) → output sequence (target language, summary, SQL query). This is why T5 (Text-to-Text Transfer Transformer) frames every NLP task as text-to-text: classification becomes "sentiment: positive" output, translation becomes "Hola" output, etc.
 
-two_phase()
+---
+
+### **4. ASCII diagram**
+
 ```
+Encoder-decoder architecture (T5, BART, original Transformer):
 
-### Cross-Attention
+    Input sequence: "The cat sat on the mat"
 
-```python
+    ┌─────────────────────────────────────────────────────────┐
+    │                    Encoder (bidirectional)              │
+    │  ┌───────┐   ┌───────┐   ┌───────┐   ┌───────┐         │
+    │  │ Block │ → │ Block │ → │ Block │ → │ Block │  (L×)   │
+    │  │   1   │   │   2   │   │   3   │   │   L   │         │
+    │  └───────┘   └───────┘   └───────┘   └───────┘         │
+    │       ↑           ↑           ↑           ↑             │
+    │  Bidirectional self-attention (no mask)                │
+    └─────────────────────────────────────────────────────────┘
+                              │
+                              ▼ (encoder outputs H)
+    ┌─────────────────────────────────────────────────────────┐
+    │                    Decoder (causal)                     │
+    │  ┌───────┐   ┌───────┐   ┌───────┐   ┌───────┐         │
+    │  │ Block │ → │ Block │ → │ Block │ → │ Block │  (L×)   │
+    │  │   1   │   │   2   │   │   3   │   │   L   │         │
+    │  └───────┘   └───────┘   └───────┘   └───────┘         │
+    │       ↑           ↑           ↑           ↑             │
+    │  Causal self-attention (future masked)                 │
+    │  + Cross-attention to encoder outputs H                │
+    └─────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    Output sequence: "Le chat était assis sur le tapis"
 
-def cross_attention():
-    """
-    How decoder attends to encoder
-    """
-    print("Cross-Attention: Connecting Encoder and Decoder")
-    print("=" * 60)
 
-    print("""
-    Decoder has TWO attention mechanisms:
+Three attention mechanisms in encoder-decoder:
 
-    1. Self-attention (causal)
-       • Attends to previous decoder outputs
-       • Like GPT's attention
+    1. Encoder self-attention (bidirectional)
+    2. Decoder self-attention (causal)
+    3. Cross-attention: decoder queries encoder keys/values
 
-    2. Cross-attention
-       • Attends to encoder outputs
-       • Queries from decoder, Keys/Values from encoder
-       • Decides what input information to use NOW
 
-    When generating "chat" (cat), cross-attention might focus on:
-    • "cat" in encoder (0.8)
-    • "sat" (0.1)
-    • "mat" (0.05)
-    • etc.
-    """)
+T5's text-to-text framework:
 
-cross_attention()
+    Task prefix → Input → Output
+
+    "translate English to German: The cat sat" → "Die Katze saß"
+    "summarize: [long article]" → "short summary"
+    "sentiment: This movie was great" → "positive"
+    "colossus: 2 + 2 = 4" → "true"
 ```
 
 ---
 
-## T5 Architecture
+### **5. Mathematical formulation**
 
-### Text-to-Text Framework
+**Encoder (bidirectional):**
 
-```python
+For input sequence x₁...x_m:
 
-def text_to_text():
-    """
-    T5's unifying text-to-text approach
-    """
-    print("T5: Text-to-Text Framework")
-    print("=" * 60)
+$$
+\mathbf{H}_{\text{enc}} = \text{Encoder}(\mathbf{x})
+$$
 
-    print("""
-    T5 treats EVERY task as text input → text output:
+Each encoder layer has bidirectional self-attention (no mask).
 
-    Task                    Input                     Output
-    ──────────────────────────────────────────────────────────
-    Translation   "translate English to German: Hello"  "Hallo"
+**Decoder (causal + cross-attention):**
 
-    Summarization "summarize: long article..."          "summary"
+For output sequence y₁...y_n (shifted right, start with <s>):
 
-    Classification "mnli premise: ... hypothesis: ..."  "entailment"
+$$
+\mathbf{s}_t = \text{Decoder}(\mathbf{y}_{<t}, \mathbf{H}_{\text{enc}})
+$$
 
-    QA            "question: ... context: ..."          "answer"
+Each decoder layer has:
 
-    Regression    "stsb sentence1: ... sentence2: ..."  "3.8"
+1. Causal self-attention (masked, future not visible)
+2. Cross-attention: queries from decoder, keys/values from encoder
 
-    All with the same model, same loss, same architecture!
-    """)
+**Cross-attention:**
 
-text_to_text()
+$$
+\text{CrossAttn}(\mathbf{s}_t, \mathbf{H}_{\text{enc}}) = \text{softmax}\left(\frac{\mathbf{s}_t \mathbf{H}_{\text{enc}}^T}{\sqrt{d_k}}\right) \mathbf{H}_{\text{enc}}
+$$
+
+**Training objective:**
+
+For sequence-to-sequence tasks:
+
+$$
+L_{\text{seq2seq}} = -\sum_{t=1}^{n} \log P(y_t | y_{<t}, \mathbf{x})
+$$
+
+**T5's pre-training (span corruption):**
+
+Input: "Thank you for [X] me to your [Y] party."
+Output: "inviting" (X), "birthday" (Y)
+
+Corrupt input by replacing random spans with sentinel tokens, train decoder to reconstruct original text. This teaches the model to generate missing text conditioned on context.
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Input (translation task)**
+
+Prompt: "translate English to French: The cat sat"
+
+#### **Step 2: Encoder processes input**
+
+Input tokens: ["translate", "English", "to", "French", ":", "The", "cat", "sat"]
+
+Encoder (bidirectional) produces H_enc: 8 vectors, each capturing full context.
+
+For "cat", representation includes left context ("translate", "English", "to", "French", ":", "The") and right context ("sat").
+
+#### **Step 3: Decoder starts generation**
+
+Initial decoder input: <s> (start token)
+
+First decoder step:
+
+- Causal self-attention: only <s> (nothing else)
+- Cross-attention: queries <s> against all encoder states H_enc
+- Output: most attention on "translate", "The", "cat" → predicts "Le"
+
+#### **Step 4: Decoder step 2**
+
+Input: ["<s>", "Le"]
+
+Causal self-attention: "Le" attends to "<s>" and itself.
+Cross-attention: "Le" queries H_enc → focuses on "cat" → predicts "chat"
+
+#### **Step 5: Decoder step 3**
+
+Input: ["<s>", "Le", "chat"]
+
+Cross-attention: "chat" queries H_enc → focuses on "sat" → predicts "était"
+
+#### **Step 6: Continue**
+
+Generates "assis" (sat), then "sur" (on), then "le" (the), then "tapis" (mat), then </s>.
+
+Final output: "Le chat était assis sur le tapis"
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Original Transformer (Vaswani et al., 2017):** Encoder-decoder architecture. Designed for machine translation.
+
+- **T5 (Google, 2019):** Text-to-Text Transfer Transformer. Encoder-decoder with 11B parameters. Framed all NLP tasks as text-to-text. State-of-the-art on GLUE, SuperGLUE, and many benchmarks.
+
+- **BART (Facebook, 2019):** Encoder-decoder pre-trained with denoising (corrupt input, reconstruct). Excellent for summarization and generation.
+
+- **T0 (Hugging Face, 2021):** Encoder-decoder instruction-tuned on 62 tasks. Strong zero-shot performance.
+
+- **LongT5 (Google, 2021):** Encoder-decoder with efficient attention for long documents (summarization).
+
+- **Modern usage:** Encoder-decoder still dominates translation, summarization, and text-to-SQL. Decoder-only models (GPT) are catching up via few-shot prompting, but encoder-decoder remains more efficient for these tasks.
+
+- **Parameter efficiency:** Encoder-decoder has separate parameters for encoder and decoder (2×). Decoder-only has only decoder (1×). For large-scale general-purpose LLMs, decoder-only is more parameter-efficient. For specialized seq2seq tasks, encoder-decoder is optimal.
+
+- **T5's "colossus" task:** T5 was trained on the "Colossal Clean Crawled Corpus" (C4)—750GB of cleaned web text. The span corruption objective (replace random spans with sentinel tokens) teaches the model to perform any text-to-text task.
+
+---
+
+### **8. Brain-like connection (Wernicke-Geschwind model)**
+
+The brain's language system separates comprehension (Wernicke's area, temporal lobe) from production (Broca's area, frontal lobe). Wernicke's area processes input bidirectionally, building understanding. The arcuate fasciculus connects Wernicke's to Broca's. Broca's area generates output sequentially, one word at a time. This is encoder-decoder: Wernicke's is the encoder (bidirectional understanding), Broca's is the decoder (causal generation), and the arcuate fasciculus is the cross-attention pathway. Damage to Wernicke's causes fluent but meaningless speech (decoder works, encoder broken). Damage to Broca's causes halting but meaningful speech (encoder works, decoder broken). The brain evolved encoder-decoder architecture for language.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Encoder-decoder models are obsolete. Decoder-only models (GPT) can do translation and summarization just as well, with fewer parameters."
+
+_Why it is wrong:_ For translation and summarization, encoder-decoder models are still more efficient and often more accurate at equal parameter counts. T5-11B outperformed GPT-3 175B on translation benchmarks when GPT-3 was released. Decoder-only models can do translation via prompting ("translate English to French: ..."), but they need to learn the task through examples (few-shot) or instruction tuning. Encoder-decoder is purpose-built for seq2seq, with bidirectional encoder providing full context and separate decoder parameters. For chat and open-ended generation, decoder-only wins. For translation, encoder-decoder still holds advantages. Neither is obsolete—they are tools for different jobs.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### T5 Model Sizes
-
-```python
-
-def t5_sizes():
-    """
-    T5 model variants
-    """
-    print("T5 Model Sizes")
-    print("=" * 60)
-
-    variants = {
-        "T5-small": "60M",
-        "T5-base": "220M",
-        "T5-large": "770M",
-        "T5-3B": "3B",
-        "T5-11B": "11B"
-    }
-
-    for name, params in variants.items():
-        print(f"  • {name}: {params} parameters")
-
-t5_sizes()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Translation, summarization, text-to-SQL—these tasks     |
+|  require reading the full input before generating.        |
+|  Encoder-decoder is designed for this. It separates       |
+|  understanding (bidirectional encoder) from production    |
+|  (causal decoder with cross-attention). T5 showed that    |
+|  all NLP tasks can be framed as text-to-text. While       |
+|  decoder-only models have taken the spotlight, encoder-   |
+|  decoder remains the best choice when input and output    |
+|  have different structures. Know the architecture,        |
+|  choose the right tool.                                   |
+-------------------------------------------------------------
 ```
 
 ---
 
-## What Encoder-Decoder Models Can Do
+### **11. Quick self-check question**
 
-### 1. Machine Translation
+You are building a medical text summarization system. Input: 10,000-character clinical note. Output: 500-character summary. The input and output are in the same language (English) but have very different structures (narrative vs bullet points).
 
-```python
+**Question:** Would you choose encoder-decoder (T5) or decoder-only (GPT)? Why? What advantage does encoder-decoder provide for this specific task?
 
-def translation():
-    """
-    Translation with encoder-decoder
-    """
-    print("Machine Translation")
-    print("=" * 60)
-
-    examples = [
-        ("translate English to German: Hello", "Hallo"),
-        ("translate English to Spanish: Good morning", "Buenos días"),
-        ("translate English to French: How are you?", "Comment allez-vous?")
-    ]
-
-    for inp, out in examples:
-        print(f"\n  Input: '{inp}'")
-        print(f"  Output: '{out}'")
-
-    print("\nThis is what encoder-decoders were designed for!")
-
-translation()
-```
-
-### 2. Summarization
-
-```python
-
-def summarization():
-    """
-    Text summarization
-    """
-    print("Text Summarization")
-    print("=" * 60)
-
-    article = """
-    The quick brown fox jumps over the lazy dog. The fox was quick and brown.
-    The dog was lazy and didn't move. This is a long article about foxes and dogs.
-    It contains many sentences that need to be summarized into something shorter.
-    """
-
-    summary = "A quick brown fox jumps over a lazy dog."
-
-    print(f"Long article: '{article.strip()}'")
-    print(f"\nSummary: '{summary}'")
-
-    print("\nEncoder reads full article, decoder generates summary!")
-
-summarization()
-```
-
-### 3. Question Answering
-
-```python
-
-def qa():
-    """
-    Question answering
-    """
-    print("Question Answering")
-    print("=" * 60)
-
-    context = "The capital of France is Paris. It is known for the Eiffel Tower."
-
-    examples = [
-        ("What is the capital of France?", "Paris"),
-        ("What is Paris known for?", "the Eiffel Tower")
-    ]
-
-    for question, answer in examples:
-        print(f"\nContext: {context}")
-        print(f"Question: {question}")
-        print(f"Answer: {answer}")
-
-qa()
-```
-
-### 4. Classification as Text Generation
-
-```python
-
-def classification():
-    """
-    Classification treated as text generation
-    """
-    print("Classification as Text Generation")
-    print("=" * 60)
-
-    examples = [
-        ("mnli premise: A dog is playing. hypothesis: An animal is outside.", "entailment"),
-        ("mnli premise: A cat is sleeping. hypothesis: The cat is running.", "contradiction"),
-        ("stsb sentence1: The car is red. sentence2: The vehicle is crimson.", "4.2")
-    ]
-
-    for inp, out in examples:
-        print(f"\n  Input: {inp}")
-        print(f"  Output: {out}")
-
-classification()
-```
+_(Answer hidden below)_
 
 ---
 
-## Encoder-Decoder vs Other Architectures
+.
 
-| Aspect            | Encoder-Decoder (T5) | Encoder-Only (BERT) | Decoder-Only (GPT) |
-| ----------------- | -------------------- | ------------------- | ------------------ |
-| Encoder attention | Bidirectional        | Bidirectional       | N/A                |
-| Decoder attention | Causal + cross       | N/A                 | Causal             |
-| Training          | Span corruption      | Masked LM           | Next word          |
-| Input → output    | Yes                  | No (repr only)      | Yes (continuation) |
-| Best for          | Transformation       | Understanding       | Generation         |
-| Example           | Translation          | Classification      | Chat               |
+.
 
-### When to Use Encoder-Decoder
+.
 
-```python
+.
 
-def when_to_use():
-    """
-    When to choose encoder-decoder
-    """
-    print("When to Use Encoder-Decoder Models")
-    print("=" * 60)
+.
 
-    use_cases = [
-        "Machine translation",
-        "Text summarization",
-        "Question answering (generative)",
-        "Data-to-text generation",
-        "Grammar correction",
-        "Paraphrasing",
-        "Any task with different input/output formats"
-    ]
+**Answer:** Choose encoder-decoder (T5). For summarization, the encoder can read the entire clinical note bidirectionally, capturing dependencies across the full document. The decoder then generates the summary step by step, with cross-attention allowing it to refer back to relevant parts of the original note.
 
-    print("Perfect for tasks that transform text:")
-    for task in use_cases:
-        print(f"  • {task}")
+Decoder-only (GPT) would need to read the note left-to-right (causal), which is suboptimal for understanding long documents. It would also need to generate the summary autoregressively without a separate encoder, forcing it to store all information in a single hidden state. For long inputs (10,000 characters), decoder-only may struggle with the context window.
 
-when_to_use()
-```
+Encoder-decoder advantages for this task:
 
----
+1. Bidirectional encoder captures full document context
+2. Separate decoder parameters specialized for generation
+3. Cross-attention allows focusing on relevant sections during summary generation
+4. T5 was specifically pre-trained on span corruption, which mimics summarization (corrupt long input, reconstruct short output)
 
-## Why This Matters for LLMs
-
-### 1. T5's Influence
-
-```python
-
-def t5_influence():
-    """
-    T5's impact on NLP
-    """
-    print("T5's Impact on NLP")
-    print("=" * 60)
-
-    print("""
-    T5 introduced several key ideas:
-
-    1. Text-to-text framework
-       • Unify all tasks
-       • Same model, same loss, same decoding
-
-    2. Span corruption (instead of masked LM)
-       • Mask contiguous spans of text
-       • Model must reconstruct them
-
-    3. Systematic study of transfer learning
-       • What data? What objectives? What scale?
-
-    4. FLAN (Fine-tuned LAnguage Net)
-       • Instruction tuning at scale
-       • Led to better zero-shot performance
-    """)
-
-t5_influence()
-```
-
-### 2. Modern Encoder-Decoder Models
-
-```python
-
-def modern_ed():
-    """
-    Modern encoder-decoder models
-    """
-    print("Modern Encoder-Decoder Models")
-    print("=" * 60)
-
-    models = {
-        "T5": "Original text-to-text",
-        "FLAN-T5": "T5 + instruction tuning",
-        "BART": "Denoising autoencoder (bidirectional encoder + autoregressive decoder)",
-        "Pegasus": "Optimized for summarization",
-        "M2M-100": "Multilingual translation",
-        "mT5": "Multilingual T5"
-    }
-
-    for model, desc in models.items():
-        print(f"  • {model}: {desc}")
-
-modern_ed()
-```
-
-### 3. Strengths and Weaknesses
-
-```python
-
-def strengths_weaknesses():
-    """
-    Pros and cons of encoder-decoder
-    """
-    print("Encoder-Decoder: Strengths and Weaknesses")
-    print("=" * 60)
-
-    strengths = [
-        "Best for transformation tasks",
-        "Encoder can fully understand input",
-        "Decoder can generate freely",
-        "Cross-attention is powerful",
-        "Separate understanding and generation"
-    ]
-
-    weaknesses = [
-        "Larger than encoder-only",
-        "Slower than decoder-only (two passes)",
-        "More complex architecture",
-        "Less scalable than decoder-only?",
-        "Not as popular for chatbots"
-    ]
-
-    print("\nStrengths:")
-    for s in strengths:
-        print(f"  • {s}")
-
-    print("\nWeaknesses:")
-    for w in weaknesses:
-        print(f"  • {w}")
-
-strengths_weaknesses()
-```
-
-### 4. The Future of Encoder-Decoder
-
-```python
-
-def future():
-    """
-    Where encoder-decoder fits in modern AI
-    """
-    print("The Future of Encoder-Decoder Models")
-    print("=" * 60)
-
-    print("""
-    Current trends:
-
-    • Decoder-only dominates chat/completion
-    • Encoder-only dominates understanding tasks
-    • Encoder-decoder specialized for transformations
-
-    But encoder-decoder still best for:
-    • Translation
-    • Summarization
-    • Any task with different input/output
-
-    Hybrid approaches emerging:
-    • Non-autoregressive decoders (faster)
-    • Diffusion models for text
-    • Unified architectures (like UL2)
-    """)
-
-future()
-```
-
----
-
-## Encoder-Decoder Cheat Sheet
-
-| Aspect            | Details                                |
-| ----------------- | -------------------------------------- |
-| Architecture      | Encoder + Decoder with cross-attention |
-| Encoder attention | Bidirectional                          |
-| Decoder attention | Causal + cross-attention               |
-| Training          | Span corruption (T5) or denoising      |
-| Best for          | Text transformation tasks              |
-| Examples          | T5, BART, FLAN-T5, mT5                 |
-| Key innovation    | Text-to-text framework                 |
-| Scale             | Up to 11B (T5), larger possible        |
-
----
-
-## Quick Recap
-
-• Encoder-decoder models combine bidirectional understanding with autoregressive generation—like a translator who first listens to the whole speech, then delivers the translation sentence by sentence
-
-• T5's text-to-text framework treats every task as mapping input text to output text—unifying translation, summarization, classification, and more under one architecture
-
-• While decoder-only models dominate chatbots, encoder-decoders remain best for transformation tasks—translation, summarization, and any task where input and output have different structures
-
----
-
-## Mental Hook
-
-> "Encoder-decoder models are like the perfect translator—they listen completely before speaking, understand every nuance of the original, and then craft their response while still being able to glance back at their notes."
+For summarization, encoder-decoder remains the established best practice, though decoder-only models (with sufficient scale) are competitive.

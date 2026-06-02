@@ -1,513 +1,283 @@
 # BPE (Byte Pair Encoding)
 
-## The Word Puzzle Analogy
-
-Imagine you have a huge box of letter tiles and you're trying to build words efficiently. You notice that "th" appears constantly—in "the", "that", "this", "with". So you glue those two tiles together permanently. Then you notice "the" itself appears everywhere, so you glue those three together. Soon you have a collection of common letter groups that let you build words faster. That's Byte Pair Encoding (BPE): finding the most frequent character pairs in your training data and merging them into subwords.
-
-In LLMs, BPE is the most popular tokenization algorithm. It's used by GPT models, RoBERTa, and many others. BPE strikes the perfect balance between character flexibility and word efficiency—common words become single tokens, while rare words break down into familiar pieces.
+## **DOMAIN: LLM-SPECIFIC CONCEPTS | Sub domain: Tokenization**
 
 ---
 
-## What Is BPE?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-BPE starts with individual characters and iteratively merges the most frequent pair of tokens.
-
-```text
-
-Start: characters
-['t', 'h', 'e', ' ', 'c', 'a', 't', ' ', 's', 'a', 't']
-
-Step 1: Find most frequent pair → 't' + 'h' appears often
-Merge: add 'th' to vocabulary
-
-Step 2: Find next most frequent → 'th' + 'e' appears often
-Merge: add 'the' to vocabulary
-
-Continue until desired vocabulary size
-```
-
-```python
-
-def bpe_intro():
-    """
-    The basic concept of BPE
-    """
-    print("BPE: Building a Vocabulary from Frequent Pairs")
-    print("=" * 60)
-
-    print("""
-    BPE algorithm:
-
-    1. Start with all characters as tokens
-    2. Count frequency of every adjacent pair
-    3. Merge the most frequent pair into a new token
-    4. Repeat until desired vocabulary size
-
-    Result: Common words become single tokens
-            Rare words break into common pieces
-    """)
-
-    print("\nAnalogy: Like creating shortcuts for common")
-    print("letter combinations in shorthand writing.")
-
-bpe_intro()
-```
+Subword tokenization is the Goldilocks solution—but how do we actually build the vocabulary of subword pieces? Byte Pair Encoding (BPE) is the algorithm that does it. It starts with individual characters and repeatedly merges the most frequent adjacent pair of tokens. The result is a vocabulary of common substrings: "th," "ing," "tion," "un." Every modern LLM uses BPE or its close cousin WordPiece. Understanding BPE means understanding how your model decides what counts as a token—and why "unbreakable" might be ["un", "break", "able"] instead of 12 characters or 1 word.
 
 ---
 
-## BPE Step by Step
+### **2. Core idea**
 
-### Training Phase: Building the Vocabulary
+**BPE builds a subword vocabulary by iteratively merging the most frequent adjacent pair of symbols in a training corpus, starting from individual characters or bytes, until reaching a target vocabulary size.**
 
-```python
+---
 
-from collections import Counter
-import re
+### **3. Concrete analogy**
 
-def bpe_training_demo():
-    """
-    Demonstrate BPE training on a small corpus
-    """
-    print("BPE Training: Building the Vocabulary")
-    print("=" * 60)
+Imagine you are compressing a dictionary by finding common letter pairs.
 
-    # Training corpus
-    corpus = ["low", "lower", "lowest", "high", "higher", "highest"]
-    print(f"Training corpus: {corpus}")
+You start with every letter as a separate symbol: a, b, c, ... space, period.
 
-    # Step 1: Initialize with characters
-    print("\nStep 1: Start with character vocabulary")
+You scan the entire training text and count every adjacent pair: "th" appears 1 million times, "he" appears 900k, "in" appears 800k, etc. The most frequent pair is "th". You merge "t" and "h" into a new symbol "th". Now your vocabulary has one new token.
 
-    # Get all characters
-    chars = set()
-    for word in corpus:
-        chars.update(list(word))
+You repeat. Now "th" + "e" = "the" might be the most frequent pair. Merge them into "the". Keep going until you have, say, 50,000 tokens.
 
-    vocab = {char: i for i, char in enumerate(sorted(chars))}
-    print(f"Initial characters: {sorted(chars)}")
+After merging, common words become single tokens ("the", "and", "ing"). Rare words get split into common fragments ("flibbertigibbet" might become ["fl", "ib", "bert", "ig", "ib", "bet"]). You never see <UNK> again because any word can be built from the available pieces.
 
-    # Step 2: Count character pairs in corpus
-    print("\nStep 2: Count frequency of each adjacent pair")
+---
 
-    # Convert corpus to list of character sequences
-    sequences = [list(word) for word in corpus]
+### **4. ASCII diagram**
 
-    # Count pairs
-    pair_counts = Counter()
-    for seq in sequences:
-        for i in range(len(seq) - 1):
-            pair = (seq[i], seq[i+1])
-            pair_counts[pair] += 1
-
-    print("Pair frequencies:")
-    for pair, count in sorted(pair_counts.items(), key=lambda x: -x[1])[:5]:
-        print(f"  {pair[0]}+{pair[1]}: {count}")
-
-    # Step 3: Merge most frequent pair
-    print("\nStep 3: Merge most frequent pair")
-    most_frequent = max(pair_counts, key=pair_counts.get)
-    new_token = most_frequent[0] + most_frequent[1]
-    print(f"  Merging '{most_frequent[0]}' + '{most_frequent[1]}' → '{new_token}'")
-
-    # Step 4: Repeat
-    print("\nStep 4: Repeat until desired vocab size")
-    print("  Next merges might be:")
-    print("  'o' + 'w' → 'ow'")
-    print("  'l' + 'ow' → 'low'")
-    print("  'e' + 'r' → 'er'")
-    print("  'low' + 'er' → 'lower'")
-
-bpe_training_demo()
 ```
+BPE algorithm step-by-step on a tiny corpus:
 
-### A Complete BPE Implementation
+Initial corpus (words with frequencies):
+    "low" (5 times), "lower" (2 times), "newest" (3 times), "widest" (2 times)
 
-```python
+Step 0: Split into characters (plus end-of-word marker)
+    l o w </w>   (5×)
+    l o w e r </w> (2×)
+    n e w e s t </w> (3×)
+    w i d e s t </w> (2×)
 
-import re
-from collections import Counter, defaultdict
+Count pairs:
+    "l o": 5+2=7
+    "o w": 5+2=7
+    "w e": 2+3=5
+    "e r": 2
+    "n e": 3
+    "e w": 3
+    ...
 
-def bpe_complete_demo():
-    """
-    Complete BPE implementation on small corpus
-    """
-    print("Complete BPE Implementation")
-    print("=" * 60)
+Most frequent: "l o" and "o w" (both 7). Merge "l o" → "lo"
 
-    class BPE:
-        def __init__(self, num_merges=10):
-            self.num_merges = num_merges
-            self.vocab = {}
-            self.merges = {}
+Step 1:
+    lo w </w> (5×)
+    lo w e r </w> (2×)
+    n e w e s t </w> (3×)
+    w i d e s t </w> (2×)
 
-        def get_stats(self, words):
-            """Count pair frequencies in words"""
-            pairs = defaultdict(int)
-            for word, freq in words.items():
-                symbols = word.split()
-                for i in range(len(symbols) - 1):
-                    pairs[symbols[i], symbols[i+1]] += freq
-            return pairs
+Count pairs again:
+    "lo w": 5+2=7
+    "w e": 2+3=5
+    "n e": 3
+    ...
 
-        def merge_vocab(self, pair, words):
-            """Merge a pair in all words"""
-            new_words = {}
-            bigram = ' '.join(pair)
-            replacement = ''.join(pair)
+Merge "lo w" → "low"
 
-            for word, freq in words.items():
-                new_word = word.replace(bigram, replacement)
-                new_words[new_word] = freq
-            return new_words
+Step 2:
+    low </w> (5×)
+    low e r </w> (2×)
+    n e w e s t </w> (3×)
+    w i d e s t </w> (2×)
 
-        def train(self, corpus):
-            """Train BPE on corpus"""
-            # Initialize with characters + end token
-            words = {}
-            for text in corpus:
-                # Add space between characters and end token
-                word = ' '.join(list(text)) + ' </w>'
-                words[word] = words.get(word, 0) + 1
+Continue merging until target vocabulary size (e.g., 10 tokens).
 
-            print("Initial words:")
-            for word, freq in words.items():
-                print(f"  {word}: {freq}")
+Final vocabulary includes: characters + "lo", "low", "er", "est", "new", etc.
 
-            # Perform merges
-            for i in range(self.num_merges):
-                pairs = self.get_stats(words)
-                if not pairs:
-                    break
 
-                best = max(pairs, key=pairs.get)
-                self.merges[best] = i
+Visualization of merge tree:
 
-                print(f"\nMerge {i+1}: {'+'.join(best)} → {''.join(best)}")
-                print(f"  frequency: {pairs[best]}")
+    "unbreakable" tokenization:
 
-                words = self.merge_vocab(best, words)
+         unbreakable
+        /     |     \
+      un    break   able
+     / \    /  \    /  \
+    u   n  br  eak ab  le
+           / \   /\
+          b   r e  ak
+                  /\
+                 a  k
 
-            self.vocab = set()
-            for word in words:
-                self.vocab.update(word.split())
-
-            print(f"\nFinal vocabulary ({len(self.vocab)} tokens):")
-            print(f"  {sorted(self.vocab)}")
-
-        def tokenize(self, text):
-            """Tokenize new text using learned merges"""
-            # Start with characters
-            tokens = list(text) + ['</w>']
-
-            # Apply merges in order learned
-            for (a, b), _ in sorted(self.merges.items(), key=lambda x: x[1]):
-                i = 0
-                while i < len(tokens) - 1:
-                    if tokens[i] == a and tokens[i+1] == b:
-                        tokens = tokens[:i] + [a+b] + tokens[i+2:]
-                    else:
-                        i += 1
-
-            return tokens
-
-    # Train BPE on small corpus
-    corpus = ["low", "lower", "lowest", "high", "higher", "highest"]
-    bpe = BPE(num_merges=8)
-    bpe.train(corpus)
-
-    # Test on new words
-    print("\n" + "=" * 60)
-    print("Testing on new words:")
-    test_words = ["lowly", "highest", "lowest", "higher"]
-
-    for word in test_words:
-        tokens = bpe.tokenize(word)
-        print(f"  '{word}' → {tokens}")
-
-bpe_complete_demo()
+Each node is a merge that occurred during BPE training.
 ```
 
 ---
 
-## How BPE Tokenizes New Text
+### **5. Mathematical formulation**
 
-### Greedy Tokenization
+**Let V be vocabulary (set of tokens). Initialization:**
 
-```python
+$$
+V_0 = \{\text{all characters/bytes in training corpus}\}
+$$
 
-def bpe_tokenization_demo():
-    """
-    How BPE tokenizes new text
-    """
-    print("BPE Tokenization: Greedy Algorithm")
-    print("=" * 60)
+**Let frequencies: For each adjacent pair (a,b) in corpus, count C(a,b).**
 
-    # Learned vocabulary (from previous training)
-    vocab = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-             'er', 'es', 'est', 'high', 'low', 'lowest', '</w>']
+**Iteration (for t = 1 to target_size - |V₀|):**
 
-    def tokenize(word, vocab):
-        """Simple greedy tokenization"""
-        word = word + '</w>'
-        tokens = []
-        i = 0
+1. Find the most frequent pair:
 
-        while i < len(word):
-            # Try to find longest matching token
-            found = False
-            for j in range(len(word), i, -1):
-                candidate = word[i:j]
-                if candidate in vocab:
-                    tokens.append(candidate)
-                    i = j
-                    found = True
-                    break
-            if not found:
-                # Shouldn't happen with proper BPE
-                tokens.append(word[i])
-                i += 1
+   $$
+   (p^*, q^*) = \arg\max_{(p,q)} C(p,q) \quad \text{where } p,q \in V_{t-1}
+   $$
 
-        return tokens
+2. Merge: create new token r = concatenation(p^_, q^_)
 
-    test_cases = ["lowest", "higher", "unhappiness"]
+   $$
+   V_t = V_{t-1} \cup \{r\}
+   $$
 
-    for word in test_cases:
-        tokens = tokenize(word, vocab)
-        print(f"\n'{word}' → {tokens}")
+3. Update corpus: replace every occurrence of (p^_, q^_) with r
 
-bpe_tokenization_demo()
+4. Update frequencies C for pairs involving r
+
+**Byte-level BPE (used in GPT-2, GPT-4):**
+
+Start with 256 byte values (0-255) as initial vocabulary, not characters. This handles any text (UTF-8), any language, even binary files. No unknown tokens ever—anything is representable as bytes.
+
+**Vocabulary size:**
+
+Typical LLMs: 30,000 - 100,000 tokens. GPT-2: 50,257. GPT-4 (estimated): 100,000. Llama: 32,000.
+
+**Compression ratio improvement:**
+
+Let L_char = number of characters in text. After BPE with V tokens, tokens/char ≈ L_char / 3-4.
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Tiny corpus**
+
+Sentences:
+
+- "cat cat cat" (3×)
+- "cat sat mat" (1×)
+- "mat mat" (2×)
+
+#### **Step 2: Initial tokenization (characters + space)</w> marker**
+
+Let's use space as explicit token " ".
+
+Corpus as tokens: ["c","a","t"," ","c","a","t"," ","c","a","t","\n"] ×3, etc.
+
+But simpler: assume we have frequencies of adjacent pairs.
+
+#### **Step 3: Count initial pairs**
+
+Assume training data yields these pair frequencies:
+
+- "c a": 1000
+- "a t": 1000
+- "t ": 800
+- " s": 400 (space + s from "sat")
+- "a t": already counted
+- "m a": 500
+- "a t": 1000 again
+
+Most frequent is "c a" (1000) and "a t" (1000). Pick "c a".
+
+#### **Step 4: Merge "c a" → "ca"**
+
+Now tokens include "ca". Update corpus: every "c"+"a" becomes "ca".
+
+New pairs involving "ca":
+
+- "ca t": 1000 (since "ca"+"t" appears where "c a t" was)
+- other pairs unchanged.
+
+#### **Step 5: Now most frequent might be "ca t" (1000). Merge → "cat"**
+
+Vocabulary now has "cat". "cat" becomes a single token.
+
+#### **Step 6: Continue**
+
+Next might be "m a" (500) → "ma". Then "ma t" (500) → "mat".
+
+Final vocabulary (small example):
+['c','a','t',' ','m','s','\n', 'ca', 'cat', 'ma', 'mat', ...]
+
+#### **Step 7: Tokenize new sentence**
+
+"cat mat"
+
+With learned merges:
+
+- "c a t" → merge "c a" to "ca", then "ca t" to "cat" → ["cat"]
+- " m a t" → " m" is space+"m" (not merged yet), "m a" → "ma", "ma t" → "mat" → [" ", "mat"]
+
+Result: ["cat", " ", "mat"] (assuming space token exists separately)
+
+Without BPE: ["c","a","t"," ","m","a","t"] (7 tokens). With BPE: 3 tokens.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **GPT series (GPT-2, GPT-3, GPT-4):** Byte-level BPE. Initial vocabulary is 256 bytes. Handles any UTF-8 text. GPT-2 has 50,257 tokens (256 bytes + 50,000 merges + special tokens). No unknown tokens ever.
+
+- **RoBERTa:** Also uses byte-level BPE (same as GPT-2). No <UNK> token.
+
+- **Llama (Meta):** Uses BPE (SentencePiece wrapper, but BPE algorithm). Vocabulary size 32,000.
+
+- **Advantage over character/word:** BPE balances vocabulary size and sequence length. Rare words split into common pieces; common words remain whole.
+
+- **Disadvantage (non-deterministic):** Different BPE implementations (merge order, handling of spaces, Unicode normalization) produce different vocabularies. GPT-2's BPE is not identical to Llama's BPE.
+
+- **Byte fallback:** If a Unicode character is not in the training corpus, BPE at byte level splits it into multiple bytes (UTF-8 encoding). The model can still process it. Full Unicode coverage.
+
+---
+
+### **8. Brain-like connection (morphological acquisition)**
+
+Children acquire subword units (morphemes) through statistical learning, just like BPE. Infants detect frequent sound patterns ("ma," "da") and merge them into proto-words. Later, they segment words into morphemes ("un-" + "break" + "-able") by noticing that certain substrings recur across different words. This is BPE in the brain: the child's "training corpus" is the speech they hear; the "merges" are the morphemes they acquire; the "vocabulary" is their mental lexicon. Children with language impairment often fail at this statistical learning, producing word-fragmentation errors similar to BPE with insufficient merges.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "BPE just splits on spaces and then does frequency merging. It's basically word tokenization with a fallback."
+
+_Why it is wrong:_ BPE does not split on spaces first. It starts from characters (or bytes) and merges across spaces as well. Spaces are just another character (often represented as "\_" or "Ġ"). BPE can merge "th" across word boundaries if "th" appears frequently across words. The difference is crucial: BPE discovers that "ing" is a common suffix regardless of which word it appears in. Word tokenization would never split "walking" into "walk"+"ing" because it never sees "ing" as a separate token. BPE learns true subword units that generalize, not just word fragments. This is why BPE handles morphology ("run", "running", "runner") while word tokenization treats them as unrelated.
+
+---
+
+### **10. Why This Matters**
+
+```
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  BPE is the algorithm that turned infinite vocabulary     |
+|  into a manageable 50,000 tokens. It learns which         |
+|  character sequences are common—"ing," "tion," "un"—      |
+|  and makes them atomic. Rare words become chains of       |
+|  common pieces. No more <UNK>. No more vocabulary         |
+|  bloat. Every modern LLM from GPT to Llama to BERT uses   |
+|  BPE or its cousins. It is the quiet workhorse of         |
+|  tokenization, the first step in turning text into        |
+|  numbers that machines can learn from.                    |
+-------------------------------------------------------------
 ```
 
 ---
 
-## Why BPE Works So Well
+### **11. Quick self-check question**
 
-### Handling Unknown Words
+You train BPE on an English corpus with a target vocabulary size of 10,000. You then train the same BPE on a German-English bilingual corpus with the same target vocabulary size.
 
-```python
+**Question:** How will the vocabularies differ? Which one will handle the German compound word "Donaudampfschifffahrtsgesellschaftskapitän" more efficiently? Why?
 
-def unknown_words():
-    """
-    How BPE handles words it hasn't seen
-    """
-    print("BPE: No Unknown Words")
-    print("=" * 60)
-
-    print("""
-    With word tokenization:
-    Training: sees "cat", "cats"
-    Inference: sees "caten" → [UNK] (lost!)
-
-    With BPE:
-    Training: learns "cat", "s", "en"
-    Inference: "caten" → ["cat", "en"]  (understood!)
-    """)
-
-    examples = {
-        "unhappiness": ["un", "happiness"] or ["un", "happy", "ness"],
-        "tokenization": ["token", "ization"],
-        "playing": ["play", "ing"],
-        "stronger": ["strong", "er"],
-        "strongest": ["strong", "est"]
-    }
-
-    print("\nCommon BPE segmentations:")
-    for word, tokens in examples.items():
-        print(f"  {word}: {tokens}")
-
-unknown_words()
-```
-
-### Frequency Distribution
-
-```text
-
-Word frequency in text follows Zipf's law:
-    • Few words appear VERY often ("the", "and", "of")
-    • Many words appear rarely
-
-BPE adapts perfectly:
-    • Common words → single tokens (efficient)
-    • Rare words → break into common pieces (flexible)
-    • New words → can always be constructed
-```
+_(Answer hidden below)_
 
 ---
 
-## BPE vs Other Tokenizers
+.
 
-| Aspect          | BPE          | WordPiece  | Unigram       |
-| --------------- | ------------ | ---------- | ------------- |
-| Merge criterion | Frequency    | Likelihood | Likelihood    |
-| Direction       | Bottom-up    | Bottom-up  | Top-down      |
-| Used in         | GPT, RoBERTa | BERT       | ALBERT, XLNet |
-| Complexity      | Simple       | Moderate   | Complex       |
+.
 
----
+.
 
-## Why This Matters for LLMs
+.
 
-### 1. BPE Powers Most Popular LLMs
+.
 
-```python
+**Answer:** The bilingual vocabulary will contain German-specific merges (e.g., "sch", "fahrt", "gesellschaft") that the English-only BPE lacks. It will therefore split "Donaudampfschifffahrtsgesellschaftskapitän" into fewer tokens (e.g., 6-8 pieces vs 20+ pieces for English BPE). The English-only BPE would split it into many small pieces because it never learned German subword frequencies.
 
-def bpe_models():
-    """
-    Which models use BPE
-    """
-    print("BPE in Popular LLMs")
-    print("=" * 60)
-
-    models = {
-        "GPT-2": "BPE",
-        "GPT-3": "BPE",
-        "GPT-4": "BPE (likely)",
-        "RoBERTa": "BPE",
-        "Llama": "BPE (SentencePiece variant)",
-        "Claude": "Likely BPE-based"
-    }
-
-    for model, tokenizer in models.items():
-        print(f"  • {model}: {tokenizer}")
-
-bpe_models()
-```
-
-### 2. Vocabulary Size Trade-offs
-
-```python
-
-def vocab_tradeoffs():
-    """
-    Choosing vocabulary size
-    """
-    print("Vocabulary Size Trade-offs")
-    print("=" * 60)
-
-    sizes = {
-        "Small (10k)": {
-            "pros": "Small model, fast",
-            "cons": "Long sequences, rare words over-segmented"
-        },
-        "Medium (32-50k)": {
-            "pros": "Good balance",
-            "cons": "Sweet spot for most LLMs"
-        },
-        "Large (100k+)": {
-            "pros": "Short sequences, efficient for common words",
-            "cons": "Large embedding matrix, rare words still unknown"
-        }
-    }
-
-    for size, info in sizes.items():
-        print(f"\n{size}:")
-        for key, value in info.items():
-            print(f"  • {key}: {value}")
-
-vocab_tradeoffs()
-```
-
-### 3. The Byte-Level Extension
-
-```python
-
-def byte_level_bpe():
-    """
-    Byte-level BPE (used in GPT-2/3/4)
-    """
-    print("Byte-Level BPE")
-    print("=" * 60)
-
-    print("""
-    GPT-2/3/4 use byte-level BPE:
-
-    • Works on raw bytes (UTF-8), not characters
-    • Handles ANY text, any language, any emoji
-    • 256 base tokens (one per byte)
-    • No [UNK] tokens EVER
-
-    Example: "café" → bytes: c a f é
-    BPE might merge: "c" + "a" → "ca"
-                     "ca" + "f" → "caf"
-                     "é" stays as byte (since less common)
-    """)
-
-    print("\nThis is why GPT models handle emojis, math symbols,")
-    print("and rare Unicode characters seamlessly.")
-
-byte_level_bpe()
-```
-
-### 4. Practical Implications
-
-```python
-
-def practical_bpe():
-    """
-    Real-world BPE considerations
-    """
-    print("Practical BPE Considerations")
-    print("=" * 60)
-
-    print("""
-    When using LLMs, BPE affects:
-
-    1. Token counts: "Hello" = 1 token, "Hola" = 1 token
-                     "สวัสดี" (Thai) = 5-8 tokens
-
-    2. Cost: You're charged by tokens, not words
-
-    3. Context window: Longer tokenized sequences
-                       = less actual text fits
-
-    4. Language bias: Languages with similar training data
-                      tokenize more efficiently
-    """)
-
-    # Example with GPT-2 tokenizer (approximate)
-    examples = [
-        ("Hello", 1),
-        ("Hello world", 2),
-        ("Hello world! How are you?", 8),
-        ("😊", 1),
-        ("∫ f(x) dx", 5)
-    ]
-
-    print("\nApproximate GPT token counts:")
-    for text, tokens in examples:
-        print(f"  '{text}': ~{tokens} tokens")
-
-practical_bpe()
-```
-
----
-
-## BPE Cheat Sheet
-
-| Aspect       | Details                                         |
-| ------------ | ----------------------------------------------- |
-| Algorithm    | Iteratively merge most frequent character pairs |
-| Start        | Individual characters + end token               |
-| End          | Vocabulary of subwords (30k-50k)                |
-| Tokenization | Greedy longest-match                            |
-| Pros         | No UNK, efficient, learns morphology            |
-| Used in      | GPT, RoBERTa, Llama (variants)                  |
-
----
-
-## Quick Recap
-
-• BPE starts with characters and iteratively merges the most frequent pairs—like gluing together common letter combinations, building a vocabulary of useful subwords from the bottom up
-
-• Common words become single tokens, rare words break into familiar pieces—this means the model never sees an unknown word; it can always fall back to smaller components
-
-• BPE powers most modern LLMs including GPT, RoBERTa, and Llama—its balance of efficiency and flexibility makes it the tokenization algorithm of choice for today's largest models
-
----
-
-## Mental Hook
-
-> "BPE is like creating a shorthand where common letter combinations get their own symbols—the more often a group appears, the more likely it becomes its own token, making the language both efficient and flexible."
+This highlights a key issue: BPE is corpus-dependent. A tokenizer trained only on English performs poorly on other languages. Modern multilingual models (mBERT, XLM-R) train BPE on hundreds of languages simultaneously, producing vocabularies that balance across languages. This is why Llama 3 was trained on multilingual data—its BPE can tokenize many languages efficiently.

@@ -1,485 +1,231 @@
 # GRUs (Gated Recurrent Units)
 
-## The Streamlined Assistant Analogy
-
-Imagine you have an executive assistant who used to have three separate notebooks (LSTM). One day they realize they can combine two of them into one—the "what to forget" and "what to remember" decisions happen together. Now they have just two notebooks: one for updates and one for current tasks. That's a GRU (Gated Recurrent Unit): a simplified, more efficient version of LSTM that combines the forget and input gates into a single update gate.
-
-In the evolution toward LLMs, GRUs offered a compelling alternative to LSTMs—simpler, faster to train, and often just as effective. While Transformers have largely replaced both for language, understanding GRUs shows how we learned to build more efficient sequence models.
+## **DOMAIN: ADVANCED ARCHITECTURES | Sub domain: Sequence Models (Pre-Transformer)**
 
 ---
 
-## What Is a GRU?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-A GRU (Gated Recurrent Unit) is a simplified LSTM with two gates instead of three:
-
-```text
-
-LSTM (3 gates):          GRU (2 gates):
-    Forget Gate              Update Gate
-    Input Gate               Reset Gate
-    Output Gate
-
-    Cell State +              Single hidden state
-    Hidden State              (merged)
-```
-
-```python
-
-def gru_intro():
-    """
-    The basic concept of GRUs
-    """
-    print("GRUs: LSTM's Efficient Cousin")
-    print("=" * 60)
-
-    print("""
-    GRU simplifies LSTM by:
-
-    1. Combining forget and input gates into one "update gate"
-       (decides both what to forget and what to remember)
-
-    2. Merging cell state and hidden state into one
-       (simpler architecture)
-
-    3. Adding a "reset gate" to control how much past to ignore
-    """)
-
-    print("\nResult: Fewer parameters, faster training,")
-    print("similar performance to LSTM on many tasks.")
-
-gru_intro()
-```
+LSTMs worked. But they were complex—three gates, two hidden states, separate cell memory. GRUs asked: do we need all that complexity? The answer was no. GRUs simplified the LSTM by combining the forget and input gates into a single "update gate" and merging the cell state with the hidden state. The result was a model that performed nearly as well as LSTMs but with fewer parameters, faster training, and less memory. GRUs became the go-to sequence model when compute was limited, proving that simpler can be better.
 
 ---
 
-## The Two Gates Explained
+### **2. Core idea**
 
-### 1. Update Gate: The Combined Decision
+**A GRU simplifies the LSTM by using only two gates: an update gate (combining forget and input) and a reset gate (controlling how much past information to ignore), and by eliminating the separate cell state, storing memory directly in the hidden state.**
 
-The update gate decides both what to forget from the past and what to add from the present—all in one go.
+---
 
-```python
+### **3. Concrete analogy**
 
-def update_gate():
-    """
-    The update gate in action
-    """
-    print("Update Gate: Forget and Remember in One Step")
-    print("=" * 60)
+Remember the office assistant with the filing cabinet (LSTM)? GRU asks: "Do I really need a separate filing cabinet and desk? Can't I just use my desk smartly?"
 
-    print("""
-    Formula: z_t = σ(W_z · [h_{t-1}, x_t] + b_z)
+In GRU:
 
-    Plain English:
-    Look at previous hidden state and current input,
-    output a number between 0 and 1.
+- **Update gate:** Decides how much of the old memory to keep versus how much new information to add. Like deciding: "I'll keep 70% of what I remembered and add 30% of this new document."
 
-    z ≈ 1: Keep most of old state, ignore new input
-    z ≈ 0: Replace old state with new input
-    """)
+- **Reset gate:** Decides how much past information to ignore when processing the new input. Like: "For this task, my previous notes about Q3 are irrelevant. I'll ignore them and focus only on this new email."
 
-    # Example: Reading a book
-    print("\nAnalogy: Reading a book chapter")
-    print("  Previous chapter: 'The butler did it'")
-    print("  New chapter: 'Years later, a new mystery...'")
-    print("  Update gate z = 0.8")
-    print("  → Keep 80% of old info, mix in 20% new")
+- **No separate cell state:** Your desk IS your memory. You update it directly. Simpler, but you must be careful—you cannot archive things indefinitely without overwriting.
 
-    print("\nThe update gate learns the optimal blend of old and new.")
+The GRU is leaner, faster, and often just as effective. On many tasks, the extra complexity of LSTMs was unnecessary.
 
-update_gate()
+---
+
+### **4. ASCII diagram**
+
 ```
+GRU cell at time step t:
 
-### 2. Reset Gate: Starting Fresh
+        h_{t-1} (previous hidden)    x_t (current input)
+                │                      │
+                └──────────┬───────────┘
+                           │
+    ┌──────────────────────┼──────────────────────┐
+    │                      ▼                      │
+    │   ┌─────────────────────────────────────┐  │
+    │   │    Reset Gate         Update Gate    │  │
+    │   │        σ                   σ         │  │
+    │   └─────────────────────────────────────┘  │
+    │                      │                      │
+    │                      ▼                      │
+    │   h_{t-1} ──┬───×────────────────┐         │
+    │             │                    │         │
+    │             ▼                    │         │
+    │          Reset (r_t)             │         │
+    │             │                    │         │
+    │             ▼                    │         │
+    │   Candidate h̃_t = tanh(W·[r_t⊙h_{t-1}, x_t])
+    │             │                    │         │
+    │             │        ┌───────────┘         │
+    │             │        │                     │
+    │             ▼        ▼                     │
+    │   h_t = (1 - u_t) ⊙ h_{t-1} + u_t ⊙ h̃_t   │
+    │                      │                     │
+    └──────────────────────┼─────────────────────┘
+                           │
+                           ▼
+                        h_t (output)
 
-The reset gate decides how much of the past to ignore when forming the new candidate memory.
-
-```python
-
-def reset_gate():
-    """
-    The reset gate in action
-    """
-    print("Reset Gate: Deciding When to Start Fresh")
-    print("=" * 60)
-
-    print("""
-    Formula: r_t = σ(W_r · [h_{t-1}, x_t] + b_r)
-
-    Plain English:
-    Look at previous hidden state and current input,
-    decide how much of the past to forget RIGHT NOW.
-
-    r ≈ 1: Use lots of past context
-    r ≈ 0: Ignore past, focus only on current input
-    """)
-
-    # Example
-    print("\nAnalogy: Topic change in conversation")
-    print("  Past: 'We were discussing the weather'")
-    print("  New: 'What's the capital of France?'")
-    print("  Reset gate r = 0.1")
-    print("  → Mostly ignore weather context, focus on question")
-
-    print("\nAnother example:")
-    print("  Past: 'The murder weapon was a knife'")
-    print("  New: 'The detective examined the bloody knife'")
-    print("  Reset gate r = 0.9")
-    print("  → Keep most context (still same topic)")
-
-reset_gate()
+Legend:
+σ = sigmoid
+⊙ = elementwise multiplication
+r_t = reset gate (0-1)
+u_t = update gate (0-1)
 ```
 
 ---
 
-## The GRU Flow: Step by Step
+### **5. Mathematical formulation**
 
-### Putting It All Together
+**Reset gate:** Controls how much past information to ignore.
 
-```python
+$$
+r_t = \sigma(W_r \cdot [h_{t-1}, x_t] + b_r)
+$$
 
-def gru_complete():
-    """
-    Complete GRU flow through one time step
-    """
-    print("GRU Step-by-Step Flow")
-    print("=" * 60)
+(Unicode: r*t = σ(W_r·[h*{t-1}, x_t] + b_r))
 
-    # Previous state
-    old_hidden = "Currently thinking: the butler, the library, midnight"
-    current_input = "New sentence: The bloody knife was found in the kitchen"
+**Update gate:** Controls how much of old memory to keep vs new to add.
 
-    print(f"Previous hidden state: {old_hidden}")
-    print(f"Current input: {current_input}")
+$$
+u_t = \sigma(W_u \cdot [h_{t-1}, x_t] + b_u)
+$$
 
-    print("\n" + "=" * 40)
-    print("STEP 1: Reset Gate")
-    print("=" * 40)
-    print("  Deciding what past context to ignore:")
-    print("  • 'the butler' → keep? r=0.9 (still relevant)")
-    print("  • 'the library' → keep? r=0.3 (scene changed)")
-    print("  • 'midnight' → keep? r=0.5 (time still relevant?)")
-    print("  Reset gate output: r = 0.7 (moderate reset)")
+(Unicode: u*t = σ(W_u·[h*{t-1}, x_t] + b_u))
 
-    print("\n" + "=" * 40)
-    print("STEP 2: Candidate Hidden State")
-    print("=" * 40)
-    print("  Creating new candidate memory:")
-    print("  • Using reset past: 0.7 × old context")
-    print("  • Adding new info: 'knife', 'kitchen', 'bloody'")
-    print("  Candidate h̃ = 'blend of butler context + knife discovery'")
+**Candidate hidden state:** New memory candidate, ignoring past according to reset gate.
 
-    print("\n" + "=" * 40)
-    print("STEP 3: Update Gate")
-    print("=" * 40)
-    print("  Deciding blend of old and new:")
-    print("  • z = 0.6 (keep 60% old, use 40% new)")
+$$
+\tilde{h}_t = \tanh(W_h \cdot [r_t \odot h_{t-1}, x_t] + b_h)
+$$
 
-    print("\n" + "=" * 40)
-    print("STEP 4: New Hidden State")
-    print("=" * 40)
-    print("  h_new = (1-z) × old + z × candidate")
-    print("        = 0.4 × old + 0.6 × candidate")
-    new_hidden = "Mostly butler context + knife discovery details"
-    print(f"  New hidden state: {new_hidden}")
+(Unicode: h̃*t = tanh(W_h·[r_t ⊙ h*{t-1}, x_t] + b_h))
 
-gru_complete()
+**Final hidden state:** Interpolate between old and candidate using update gate.
+
+$$
+h_t = (1 - u_t) \odot h_{t-1} + u_t \odot \tilde{h}_t
+$$
+
+(Unicode: h*t = (1 - u_t) ⊙ h*{t-1} + u_t ⊙ h̃_t)
+
+**Key differences from LSTM:**
+
+| LSTM                            | GRU                           |
+| ------------------------------- | ----------------------------- |
+| 3 gates (forget, input, output) | 2 gates (reset, update)       |
+| Separate cell state C_t         | No cell state                 |
+| Output gate controls h_t        | Hidden state is direct output |
+| More parameters                 | Fewer parameters (~25% less)  |
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Initialize**
+
+Hidden state h₀ = [0, 0] (2-dimensional GRU)
+
+#### **Step 2: First input x₁ = [1.0, 0.5]**
+
+Let learned weights produce:
+Reset gate r₁ = [0.1, 0.3] (mostly ignore little)
+Update gate u₁ = [0.8, 0.7] (keep 80/70% of old, add 20/30% new)
+
+Compute candidate ignoring past: r₁⊙h₀ = [0,0]
+h̃₁ = tanh(W_h·[[0,0], x₁] + b_h) ≈ [0.6, -0.2] (simplified)
+
+Final h₁ = (1-u₁)⊙h₀ + u₁⊙h̃₁ = [0.2×0, 0.3×0] + [0.8×0.6, 0.7×(-0.2)] = [0,0] + [0.48, -0.14] = [0.48, -0.14]
+
+#### **Step 3: Second input x₂ = [0.2, 0.8]**
+
+Reset gate r₂ = [0.9, 0.4] (ignore most past? Actually 0.9 means keep 90% of past for candidate)
+Update gate u₂ = [0.3, 0.6] (keep 70/40% of old, add 30/60% new)
+
+Compute candidate: r₂⊙h₁ = [0.9×0.48, 0.4×(-0.14)] = [0.432, -0.056]
+h̃₂ = tanh(W_h·[[0.432, -0.056], [0.2, 0.8]] + b_h) ≈ [0.3, 0.5] (simplified)
+
+Final h₂ = (1-u₂)⊙h₁ + u₂⊙h̃₂ = [0.7×0.48, 0.4×(-0.14)] + [0.3×0.3, 0.6×0.5] = [0.336, -0.056] + [0.09, 0.30] = [0.426, 0.244]
+
+#### **Step 4: Interpret**
+
+At t=1, update gate was high (0.8,0.7), so h₁ mostly came from new input. At t=2, update gate was lower (0.3,0.6), so h₂ preserved significant information from h₁ while adding new content. The reset gate at t=2 was high (0.9), so candidate h̃₂ was built from most of h₁, not ignoring the past. GRU smoothly blends old and new memory without a separate cell.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Pre-transformer sequence modeling:** GRUs were widely used in neural machine translation, speech recognition, and music generation, often matching LSTM performance with fewer parameters.
+
+- **Efficiency advantage:** GRUs have ~25% fewer parameters than LSTMs. For small datasets or limited compute, GRUs often outperform LSTMs because they are less prone to overfitting.
+
+- **Encoder-decoder architectures:** Many Seq2Seq models used GRU encoders and decoders, especially in resource-constrained environments (mobile, embedded).
+
+- **Why not GRUs in LLMs?** Transformers still dominate. But for time series, GRUs remain competitive. Recent work shows GRUs can be trained faster than LSTMs with comparable accuracy.
+
+- **Bidirectional GRUs:** Process sequence forward and backward, then concatenate outputs. Common in NLP tasks pre-transformer.
+
+- **Deep GRUs:** Stack multiple GRU layers. Each layer processes the hidden state from the layer below.
+
+---
+
+### **8. Brain-like connection (simplified memory)**
+
+If LSTMs mirror the hippocampus (explicit separate storage), GRUs mirror working memory in prefrontal cortex—information is maintained in active neural firing patterns, not a separate store. The update gate is like the brain's decision to refresh or replace working memory. The reset gate is like selective attention: ignoring irrelevant prior context when processing new input. GRUs suggest that the brain's working memory might be simpler than hippocampal long-term storage—a single system with gated updating, not two separate systems. This aligns with evidence that prefrontal cortex working memory is maintained by recurrent excitation, not a separate "cell state."
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "GRUs are always worse than LSTMs because they are simpler. LSTMs have more gates, so they are more powerful."
+
+_Why it is wrong:_ More gates do not guarantee better performance. On many tasks (small datasets, short sequences), GRUs match or outperform LSTMs. The extra LSTM gates can overfit on limited data. GRUs train faster (fewer parameters, simpler backprop) and use less memory. The choice is task-dependent. For language modeling with very long sequences (>200 steps), LSTMs sometimes edge out GRUs. For time series forecasting, GRUs often win. Simpler is not weaker—it is more efficient. Benchmark your task rather than assuming complexity equals capability.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### Visualizing the GRU Cell
-
-```text
-
-                    ┌─────────────────────────────────┐
-                    │           GRU CELL              │
-                    │                                 │
-Input ──────────────────┐                           │
-                    │   ↓                           │
-Previous Hidden ────────┼─────────────┐             │
-                    │   ↓             ↓             │
-                    │ ┌─────┐       ┌─────┐       │
-                    │ │Reset│       │Update│       │
-                    │ │Gate │       │ Gate │       │
-                    │ └──┬──┘       └──┬──┘       │
-                    │    ↓              ↓           │
-                    │    └──────┬───────┘           │
-                    │           ↓                   │
-                    │    ┌──────────────┐          │
-                    │    │   Candidate  │          │
-                    │    │   Hidden     │          │
-                    │    └──────────────┘          │
-                    │           ↓                   │
-                    │    ┌──────────────┐          │
-                    │    │    Update    │          │
-                    │    │   h_new =    │          │
-                    │    │ (1-z)×h + z×h̃│          │
-                    │    └──────────────┘          │
-                    │           ↓                   │
-                    │    New Hidden State          │
-                    └─────────────────────────────────┘
-                                      ↓
-                                    Output
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  GRUs teach a lesson: complexity is not free. LSTMs       |
+|  worked, but they were over-engineered for many tasks.    |
+|  GRUs stripped away the unnecessary parts and delivered   |
+|  comparable performance with half the headache. When      |
+|  building your own architectures, ask: do I need all      |
+|  these gates? All these parameters? Sometimes the         |
+|  simpler answer is not just easier—it is better.          |
+-------------------------------------------------------------
 ```
 
 ---
 
-## A Tiny GRU Implementation
+### **11. Quick self-check question**
 
-```python
+A GRU has update gate u*t = 0.1 and a candidate hidden state h̃_t = [0.5, -0.3]. The previous hidden state h*{t-1} = [0.2, 0.4].
 
-import numpy as np
+**Question:** Compute the new hidden state h_t. Which dominates: the old memory or the new candidate? Why might this be useful?
 
-def mini_gru_demo():
-    """
-    Simplified GRU implementation
-    """
-    print("Mini GRU: Forward Pass")
-    print("=" * 60)
-
-    class GRUCell:
-        def __init__(self, input_size, hidden_size):
-            self.hidden_size = hidden_size
-
-            # Update gate weights
-            self.W_z = np.random.randn(hidden_size, input_size + hidden_size) * 0.1
-            self.b_z = np.zeros((hidden_size, 1))
-
-            # Reset gate weights
-            self.W_r = np.random.randn(hidden_size, input_size + hidden_size) * 0.1
-            self.b_r = np.zeros((hidden_size, 1))
-
-            # Candidate hidden weights
-            self.W_h = np.random.randn(hidden_size, input_size + hidden_size) * 0.1
-            self.b_h = np.zeros((hidden_size, 1))
-
-        def sigmoid(self, x):
-            return 1 / (1 + np.exp(-x))
-
-        def forward(self, x, prev_h):
-            # Combine previous hidden and current input
-            combined = np.vstack([prev_h, x])
-
-            # Update gate (z) - decides blend of old and new
-            z = self.sigmoid(self.W_z @ combined + self.b_z)
-
-            # Reset gate (r) - decides how much past to ignore
-            r = self.sigmoid(self.W_r @ combined + self.b_r)
-
-            # Candidate hidden state (with reset)
-            combined_reset = np.vstack([r * prev_h, x])
-            h_candidate = np.tanh(self.W_h @ combined_reset + self.b_h)
-
-            # New hidden state (interpolation between old and candidate)
-            h_new = (1 - z) * prev_h + z * h_candidate
-
-            return h_new
-
-    # Create GRU cell
-    gru = GRUCell(input_size=10, hidden_size=5)
-
-    # Initial hidden state
-    h = np.zeros((5, 1))
-
-    # Process 3 time steps
-    print("\nProcessing 3 time steps:")
-    for t in range(3):
-        x = np.random.randn(10, 1)
-        h = gru.forward(x, h)
-        print(f"  Step {t+1}: hidden norm = {np.linalg.norm(h):.3f}")
-
-mini_gru_demo()
-```
+_(Answer hidden below)_
 
 ---
 
-## GRU vs LSTM
+.
 
-### Comparison Table
+.
 
-| Aspect         | LSTM                      | GRU                       |
-| -------------- | ------------------------- | ------------------------- |
-| Gates          | 3 (forget, input, output) | 2 (update, reset)         |
-| States         | Cell state + Hidden state | Hidden state only         |
-| Parameters     | More (4 weight matrices)  | Fewer (3 weight matrices) |
-| Training speed | Slower                    | Faster                    |
-| Memory         | Slightly more expressive  | Slightly less expressive  |
-| Performance    | Similar on many tasks     | Similar on many tasks     |
+.
 
-### When to Use Which
+.
 
-```python
+.
 
-def gru_vs_lstm():
-    """
-    Choosing between GRU and LSTM
-    """
-    print("GRU vs LSTM: Choosing the Right Tool")
-    print("=" * 60)
+**Answer:**
 
-    scenarios = {
-        "Small dataset": "GRU (fewer parameters, less overfitting)",
-        "Need speed": "GRU (faster to train)",
-        "Very long sequences": "LSTM (more expressive gating)",
-        "Memory constrained": "GRU (smaller footprint)",
-        "Complex dependencies": "LSTM (extra gate may help)",
-        "When in doubt": "Try both, they often perform similarly"
-    }
+h*t = (1 - u_t) ⊙ h*{t-1} + u_t ⊙ h̃_t
+= (0.9) ⊙ [0.2, 0.4] + (0.1) ⊙ [0.5, -0.3]
+= [0.18, 0.36] + [0.05, -0.03] = [0.23, 0.33]
 
-    for scenario, recommendation in scenarios.items():
-        print(f"  • {scenario}: {recommendation}")
-
-gru_vs_lstm()
-```
-
-### Computational Efficiency
-
-```python
-
-def efficiency():
-    """
-    Why GRUs are faster
-    """
-    print("Computational Efficiency of GRUs")
-    print("=" * 60)
-
-    print("""
-    LSTM operations per step:
-    • 4 matrix multiplications (forget, input, candidate, output)
-    • 3 gate calculations (sigmoid)
-    • 2 state updates (cell and hidden)
-
-    GRU operations per step:
-    • 3 matrix multiplications (update, reset, candidate)
-    • 2 gate calculations (sigmoid)
-    • 1 state update (hidden only)
-
-    Result: GRU is about 25-30% faster to train!
-    """)
-
-efficiency()
-```
-
----
-
-## Why This Matters for LLMs
-
-### 1. GRUs Were a Stepping Stone
-
-```python
-
-def gru_history():
-    """
-    GRUs in AI history
-    """
-    print("GRUs: The Efficient Intermediary")
-    print("=" * 60)
-
-    contributions = [
-        "Showed we could simplify LSTMs without losing performance",
-        "Influenced modern architectures with gating concepts",
-        "Used in early neural machine translation",
-        "Still popular for speech and time series",
-        "Demonstrated that simpler can be better"
-    ]
-
-    print("GRUs contributed to AI by:")
-    for contrib in contributions:
-        print(f"  • {contrib}")
-
-gru_history()
-```
-
-### 2. Gating Concepts in Transformers
-
-```python
-
-def gating_legacy():
-    """
-    How gating influenced transformers
-    """
-    print("Gating Concepts in Modern LLMs")
-    print("=" * 60)
-
-    print("""
-    Transformer architectures use gating-like mechanisms:
-
-    1. Gated Linear Units (GLU) in feed-forward layers
-       • Used in Llama, PaLM, many modern LLMs
-
-    2. Attention gates (softmax acts like a gate)
-       • Determines how much to focus on each word
-
-    3. Layer scaling (some architectures use gates)
-       • Adaptive computation
-    """)
-
-    print("\nThe idea of controlling information flow with gates")
-    print("is now everywhere in deep learning.")
-
-gating_legacy()
-```
-
-### 3. GRU vs Transformer
-
-| Aspect     | GRU                       | Transformer           |
-| ---------- | ------------------------- | --------------------- |
-| Processing | Sequential                | Parallel              |
-| Context    | Hidden state (bottleneck) | Direct attention      |
-| Long-range | Good (100+ steps)         | Excellent (thousands) |
-| Training   | Sequential (slower)       | Parallel (fast)       |
-| Parameters | Efficient                 | More data-hungry      |
-
-### 4. Where GRUs Still Excel Today
-
-```python
-
-def gru_today():
-    """
-    Modern applications of GRUs
-    """
-    print("GRUs in 2024: Still Relevant")
-    print("=" * 60)
-
-    applications = [
-        "Small device deployment (phones, IoT)",
-        "Real-time audio processing",
-        "Time series forecasting",
-        "Reinforcement learning (fast inference)",
-        "Hybrid models with attention"
-    ]
-
-    print("GRUs are still widely used in:")
-    for app in applications:
-        print(f"  • {app}")
-
-gru_today()
-```
-
----
-
-## GRU Variants
-
-| Variant           | Description                                |
-| ----------------- | ------------------------------------------ |
-| Bidirectional GRU | Processes forward and backward             |
-| Stacked GRU       | Multiple layers for deeper representations |
-| Attention GRU     | Adds attention mechanism                   |
-| Convolutional GRU | For spatial-temporal data                  |
-
----
-
-## Quick Recap
-
-• GRUs simplify LSTMs by combining forget and input gates into one update gate—like merging two notebooks into one, making the architecture simpler and faster while keeping most of the memory benefits
-
-• With only two gates (update and reset), GRUs have fewer parameters and train faster—about 25-30% speedup over LSTMs with similar performance on many tasks
-
-• While Transformers have replaced them for LLMs, GRUs showed that simpler architectures can work just as well—and their gating concepts influence modern designs like Gated Linear Units in today's largest models
-
----
-
-## Mental Hook
-
-> "GRUs are the minimalist apartment of neural networks—they combine the bedroom and living room (forget and input gates) into one multifunctional space, saving space and cleaning time while still being perfectly livable."
+Old memory dominates (weight 0.9 vs 0.1). This is useful when the current input is irrelevant or noisy—the GRU can ignore it and preserve existing memory. The update gate near 0 acts like "stay the course." This prevents the model from being distracted by unimportant inputs.

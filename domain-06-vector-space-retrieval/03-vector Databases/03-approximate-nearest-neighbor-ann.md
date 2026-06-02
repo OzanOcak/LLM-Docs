@@ -1,529 +1,253 @@
-# Approximate Nearest Neighbor (ANN) Search
+# Approximate Nearest Neighbor (ANN) search
 
-## The Restaurant Recommender Analogy
-
-Imagine you're in a huge city with 10,000 restaurants and want the 5 closest to your hotel. You could measure the exact distance to every single restaurant—exhausting and slow. Or you could ask a local: "Just give me some good restaurants nearby." They might miss the absolute closest, but they'll give you great options in seconds. That's Approximate Nearest Neighbor (ANN) search: trading a tiny amount of accuracy for MASSIVE speed gains, finding "good enough" neighbors almost instantly.
-
-In vector databases, ANN is the magic that makes real-time similarity search possible. Instead of comparing a query to every single vector (which would take seconds or minutes), ANN algorithms find most of the nearest neighbors in milliseconds. This is what powers every RAG application, recommendation system, and semantic search you've ever used.
+## **DOMAIN: VECTOR SPACE & RETRIEVAL | Sub domain: Vector Databases: The Collective Memory**
 
 ---
 
-## What Is Approximate Nearest Neighbor Search?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-ANN search finds vectors that are approximately closest to a query, not guaranteed to be the absolute closest.
-
-````text
-
-Exact Search (KNN):                    Approximate Search (ANN):
-    Compare to ALL vectors                 Use index to guess
-    Guarantee: 100% accurate                Guarantee: 95% accurate
-    Time: O(n)                              Time: O(log n) or O(1)
-
-    For 1M vectors:                         For 1M vectors:
-    1 second per query                       10 milliseconds
-    Too slow for real-time                   100 queries/second!
-```
-
-```python
-
-def ann_intro():
-    """
-    The basic concept of ANN search
-    """
-    print("ANN: Good Enough, Fast Enough")
-    print("=" * 60)
-
-    print("""
-    The tradeoff:
-
-    ┌─────────────────────────────────────┐
-    │                                     │
-    │   Exact      ●                      │
-    │   Search     │  Accuracy = 100%     │
-    │              │  Speed = 1x          │
-    │              │                      │
-    │   ANN        ●───────┐              │
-    │   Search     │       │ Accuracy = 95%│
-    │              │       │ Speed = 100x │
-    │              ▼       ▼              │
-    │         You trade 5% accuracy       │
-    │         for 100x speed!             │
-    └─────────────────────────────────────┘
-    """)
-
-ann_intro()
-````
+Exact nearest neighbor search guarantees you find the closest vector. But it requires scanning every vector—O(n) time. With 10 million vectors, that is 10 million distance computations. For real-time retrieval, that is impossible. Approximate Nearest Neighbor (ANN) search sacrifices perfect accuracy for speed. It returns "close enough" vectors, not necessarily the exact closest, but does it in O(log n) or O(√n) time. ANN is the reason vector databases can answer queries in milliseconds, not minutes. The tradeoff is recall: 99% recall (meaning 1% of true neighbors missed) is often acceptable for applications like search and recommendations.
 
 ---
 
-## Why Exact Search Is Impractical
+### **2. Core idea**
 
-### The Reality of Scale
+**Approximate Nearest Neighbor search finds vectors that are likely close to the query (but not guaranteed to be the exact closest) using indexing structures that prune the search space, achieving sub-linear query time at the cost of a small reduction in recall.**
 
-```python
+---
 
-def scale_reality():
-    """
-    Why exact search fails at scale
-    """
-    print("The Scale Problem: Exact Search Doesn't Scale")
-    print("=" * 60)
+### **3. Concrete analogy**
 
-    sizes = [1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000]
-    time_per_compare = 0.000001  # 1 microsecond
+Imagine you are looking for the tallest person in a stadium of 50,000 people. Exact search requires measuring every person's height—hours of work.
 
-    print("Vectors  | Comparisons | Time (exact) | Real-time?")
-    print("-" * 65)
+Approximate search: Look only at the basketball players section. You will find someone very tall, but possibly not the absolute tallest (there might be a tall person in the volleyball section). The tradeoff: minutes instead of hours, 99% as tall.
 
-    for n in sizes:
-        time_s = n * time_per_compare
-        realtime = "✓" if time_s < 0.1 else "✗"
-        print(f"{n:9,d} | {n:11,d} | {time_s:7.3f} s | {realtime}")
+In vector search, ANN algorithms like HNSW, IVF, and PQ each use different strategies to prune the search space:
 
-    print("\nFor 10M vectors: 10 seconds per query!")
-    print("For 100M vectors: 1.6 minutes per query!")
-    print("\nReal-time applications need <100ms → ANN is essential.")
+- **HNSW:** Follows "friends of friends" graph. Like asking people for someone taller, moving up the chain.
+- **IVF:** Clusters vectors. Like searching only the most promising sections of the stadium.
+- **PQ:** Compresses vectors. Like measuring height with a coarse ruler (faster but less precise).
 
-scale_reality()
+---
+
+### **4. ASCII diagram**
+
 ```
+Exact vs Approximate nearest neighbor:
 
-### The Curse of Dimensionality
+    Exact (linear scan):
 
-```python
+    Query ●
+           │
+    ┌──────┼──────────────────────────┐
+    │      ▼                          │
+    │ Compare to all 50,000 vectors   │
+    │ O(n) time, 100% recall          │
+    └─────────────────────────────────┘
 
-def curse_dimensions():
-    """
-    Why high dimensions make it worse
-    """
-    print("The Curse of Dimensionality")
-    print("=" * 60)
 
-    print("""
-    In high dimensions (768D for embeddings):
+    Approximate (IVF, n_probe=2):
 
-    • All points are far apart
-    • Distances become less meaningful
-    • Indexing gets harder
+    Query ●
+           │
+           ▼
+    Find nearest 2 cluster centroids
+           │
+    ┌──────┼──────────┐
+    │      ▼          ▼
+    │ Search only    │
+    │ Cluster A      │ Cluster B
+    │ (5,000 vectors)│ (5,000 vectors)
+    └────────────────┘
 
-    But ANN algorithms are designed for this:
-    • HNSW works well in high dimensions
-    • IVF with product quantization helps
-    • Still get good results despite the curse
-    """)
+    O(√n) time, ~95% recall
 
-curse_dimensions()
+
+Recall-speed tradeoff curve:
+
+    Recall
+      1.0 ┤                    ●
+          │                  ●
+      0.9 ┤                ●
+          │              ●
+      0.8 ┤            ●
+          │          ●
+      0.7 ┤        ●
+          │      ●
+      0.6 ┤    ●
+          └────────────────────→ Speed (queries/sec)
+             1    10   100   1000
+
+    You choose operating point based on application.
 ```
 
 ---
 
-## How ANN Achieves Speed
+### **5. Mathematical formulation**
 
-### The Three Main Strategies
+**Exact Nearest Neighbor (NN):**
 
-```python
+Given query q, dataset X = {x₁...xₙ}, find:
 
-def ann_strategies():
-    """
-    The three main approaches to ANN
-    """
-    print("ANN Strategies: How We Cheat for Speed")
-    "=" * 60
+$$
+\text{NN}(q) = \arg\min_{x_i} \|q - x_i\|
+$$
 
-    strategies = {
-        "Graph-based (HNSW)": {
-            "how": "Build a graph where each node connects to similar nodes",
-            "search": "Navigate the graph from node to node",
-            "speed": "O(log n)",
-            "accuracy": "Very high (98-99%)"
-        },
-        "Clustering-based (IVF)": {
-            "how": "Group vectors into clusters",
-            "search": "Only search closest clusters",
-            "speed": "O(log n) with clusters",
-            "accuracy": "High (95-98%)"
-        },
-        "Hashing-based (LSH)": {
-            "how": "Hash similar vectors to same buckets",
-            "search": "Only search same bucket",
-            "speed": "O(1)",
-            "accuracy": "Lower (90-95%)"
-        }
-    }
+**Approximate NN:** Find x̂ such that with high probability:
 
-    for name, details in strategies.items():
-        print(f"\n  {name}:")
-        for key, value in details.items():
-            print(f"    • {key}: {value}")
+$$
+\|q - \hat{x}\| \leq (1+\epsilon) \|q - \text{NN}(q)\|
+$$
 
-ann_strategies()
+Where ε ≥ 0 is approximation factor. ε=0 gives exact search.
+
+**Recall@k metric:**
+
+$$
+\text{Recall@k} = \frac{|\text{ANN}_k(q) \cap \text{NN}_k(q)|}{k}
+$$
+
+Proportion of true top-k neighbors retrieved by ANN.
+
+**Search complexity tradeoff:**
+
+| Algorithm   | Exact Complexity | ANN Complexity       | Typical Recall |
+| ----------- | ---------------- | -------------------- | -------------- |
+| Linear scan | O(n·d)           | O(n·d) (no speedup)  | 100%           |
+| HNSW        | N/A              | O(log n·d)           | 95-99%         |
+| IVF         | N/A              | O(√n·d)              | 90-98%         |
+| IVF+PQ      | N/A              | O(√n·d) + compressed | 85-95%         |
+
+**Speed-recall tradeoff curve:**
+
+For a given index (HNSW), you can vary efSearch (search effort). Higher efSearch = higher recall + slower query.
+
+For IVF, vary n_probe (number of clusters to search). Higher n_probe = higher recall + slower query.
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Dataset (2D, n=100,000)**
+
+Vectors randomly distributed in 100 clusters. Query q = [0,0].
+
+#### **Step 2: Exact nearest neighbor (brute-force)**
+
+Compute distance to all 100,000 vectors. Time: 100,000 × 768 dims ≈ 76M operations. Takes ~0.5 seconds. Finds true nearest neighbor (guaranteed).
+
+#### **Step 3: IVF (k=100 clusters, n_probe=1)**
+
+Train k-means on dataset, get 100 centroids.
+
+Compute distance from q to 100 centroids (fast, 100 ops). Nearest centroid C3.
+
+Search only vectors in cluster C3 (~1000 vectors). Time: 100 (centroid) + 1000 (cluster) = 1100 ops. 0.005 seconds. 100× faster.
+
+Recall: True nearest neighbor may be in a different cluster. If it is in C3, recall=100%. If in another cluster, recall=0% for n_probe=1. For n_probe=10 (search 10 clusters), recall >95%.
+
+#### **Step 4: HNSW (M=16, efSearch=100)**
+
+Graph built with each vector connected to ~16 neighbors.
+
+Search: Start at top layer, greedily move to closer vectors, refining. Visits ~500 vectors instead of 100,000. Time: ~500 ops. 0.002 seconds. 200× faster. Recall ~98% for this dataset.
+
+#### **Step 5: Tradeoff selection**
+
+For product search: 98% recall acceptable (users may miss some less relevant items). For medical retrieval: need 99.9% recall, use slower index (more probes, higher efSearch) or fall back to exact for safety.
+
+---
+
+### **7. How this appears inside neural networks or LLMs**
+
+- **RAG (Retrieval-Augmented Generation):** ANN search retrieves relevant documents for LLM context. 95% recall acceptable; LLM still answers correctly with slightly suboptimal context.
+
+- **Vector databases (Pinecone, Qdrant, Milvus, Weaviate):** All implement ANN (HNSW or IVF) as default. Users control recall via parameters (efSearch, n_probe).
+
+- **FAISS (Facebook):** Explicitly supports tradeoff. `index.search()` returns distances and IDs; you can increase `nprobe` for higher recall.
+
+- **Recommendation systems:** Retrieve similar items to user's last purchase. 99% recall not necessary; 90% recall still improves recommendations.
+
+- **Deduplication:** Find near-duplicate documents. ANN is sufficient; exact duplicates rare.
+
+- **Outlier detection:** ANN approximations may miss outliers if not in probed clusters. Use higher recall for safety.
+
+- **Neural network inference caching:** Store input-output pairs, retrieve cached response for similar inputs using ANN. Small recall loss acceptable for speed gain.
+
+- **Approximate distance computation (PQ):** Compressed distances cheaper to compute. Recall loss compensated by larger n_probe.
+
+---
+
+### **8. Brain-like connection (recall vs precision tradeoff in memory)**
+
+Human memory is approximate. When you try to recall a fact (e.g., "What is the capital of France?"), your brain does not scan every memory exactly. It uses approximate retrieval: "Paris" comes to mind quickly, but you might also recall "Lyon" or "Marseille" if the cue is weak. This is ANN in the brain—fast, approximate, but occasionally wrong. Eyewitness testimony is notoriously unreliable for the same reason: memory retrieval trades off recall for speed. Patients with hyperthymesia (superior autobiographical memory) may have more exact retrieval but at the cost of slower recall or distraction. The brain's ANN tradeoff is evolutionarily optimal: speed matters for survival; exactness is secondary.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "ANN is just an approximation. Why not always use exact search? It is more accurate."
+
+_Why it is wrong:_ Exact search is O(n·d). For n=1 million, d=768, that is 768M operations per query. At 1ms per operation (optimistic), that is 768 seconds—unacceptable for real-time. Even with GPU optimization (parallel batch), exact search on 1M vectors takes >10ms, which may be acceptable. But at 100M vectors, exact search becomes impossible. ANN brings search time to ~1ms. The accuracy loss (98-99% recall) is negligible for most applications. Users do not notice missing the 100th nearest neighbor if they get the top 99. Speed is more important than perfection in production systems.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### Visualizing the Search Space
-
-```text
-
-Exact search (check everything):
-[██████████████████████████████] 100% of data
-
-ANN graph search (HNSW):
-    Layer 2: [██] (2% of data)
-        ↓
-    Layer 1: [████] (4% of data)
-        ↓
-    Layer 0: [██████] (6% of data)
-
-Total: ~12% of data, 90+% accuracy!
-
-ANN cluster search (IVF):
-    Cluster 1: [██]
-    Cluster 2: [██] ← search these 2 only
-    Cluster 3: [  ]  (nprobe=2)
-    Cluster 4: [  ]
-    Cluster 5: [  ]
-
-Total: 2/10 clusters = 20% of data, 95% accuracy!
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Exact nearest neighbor is a gold standard you cannot     |
+|  afford. At scale, O(n) kills you. ANN gives you 1000×    |
+|  speedup for 1% recall loss. For web search, 99.9% of     |
+|  users click the top result—they never miss the 100th.    |
+|  For RAG, LLMs are robust to slightly different context.  |
+|  The tradeoff is worth it. ANN is not laziness; it is     |
+|  engineering reality. Speed matters. Approximate is       |
+|  often good enough.                                       |
+-------------------------------------------------------------
 ```
 
 ---
 
-## Measuring ANN Quality
+### **11. Quick self-check question**
 
-### Recall@K
+You are building a RAG system for legal document retrieval (10 million legal paragraphs). Accuracy is critical (lawyers need correct citations). You benchmark ANN (HNSW) with recall@10 = 98.5% and latency = 20ms. Exact search has 100% recall but latency = 5000ms.
 
-```python
+**Question:** Would you use ANN or exact? If ANN, how would you mitigate the recall loss? If exact, how would you make it faster?
 
-def recall_metric():
-    """
-    How we measure ANN accuracy
-    """
-    print("Recall@K: The ANN Quality Metric")
-    print("=" * 60)
-
-    print("""
-    Recall@K = (number of true nearest neighbors found) / K
-
-    Example with K=5:
-
-    True nearest neighbors (exact search): [A, B, C, D, E]
-    ANN returns:                            [A, B, C, F, G]
-
-    Found 3 of the true 5 → Recall@5 = 3/5 = 60%
-
-    Good ANN aims for 95%+ recall at K=10.
-    """)
-
-recall_metric()
-```
-
-### Speed-Recall Tradeoff
-
-```python
-
-def speed_recall():
-    """
-    The fundamental tradeoff
-    """
-    print("Speed vs Recall: You Choose")
-    print("=" * 60)
-
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    # Simulated tradeoff curve
-    speeds = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]
-    recalls = [100, 99.5, 99, 98, 96, 93, 88, 80, 65, 40]
-
-    print("Speedup | Recall | Quality")
-    print("-" * 30)
-
-    for s, r in zip(speeds[:8], recalls[:8]):
-        stars = "★" * int(r/20)
-        print(f"   {s:3d}x   |  {r:5.1f}% | {stars}")
-
-    print("\nYou can tune parameters to get the tradeoff you need:")
-    print("• HNSW: adjust efSearch")
-    print("• IVF: adjust nprobe")
-    print("• Higher recall = slower queries")
-    print("• Lower recall = faster queries")
-
-speed_recall()
-```
+_(Answer hidden below)_
 
 ---
 
-## ANN in Practice
+.
 
-### HNSW Parameters for Recall/Speed
+.
 
-```python
+.
 
-def hnsw_tuning():
-    """
-    Tuning HNSW for different needs
-    """
-    print("Tuning HNSW: efSearch Controls the Tradeoff")
-    print("=" * 60)
+.
 
-    print("""
-    efSearch (number of candidates to check):
+.
 
-    efSearch=10:  Fast, lower recall
-    • Search time: 2ms
-    • Recall@10: 85%
+**Answer:** Use ANN, but with a fallback strategy. Here's why:
 
-    efSearch=50:  Balanced
-    • Search time: 8ms
-    • Recall@10: 95%
+- 5000ms (exact) is too slow for interactive use. Lawyers will not wait 5 seconds per query.
+- 98.5% recall means 1.5% of queries will miss relevant documents. Unacceptable for legal.
 
-    efSearch=200: Accurate, slower
-    • Search time: 30ms
-    • Recall@10: 99%
+**Mitigation strategies:**
 
-    efSearch=500: Almost exact
-    • Search time: 70ms
-    • Recall@10: 99.5%
-    """)
+1. **Two-stage retrieval:** ANN retrieves top-100 (instead of top-10). Re-rank with exact distances (only 100 vectors, cheap). Recall improves to near 100%.
 
-hnsw_tuning()
-```
+2. **Hybrid search:** Combine ANN with keyword search (BM25). If ANN confidence low, fall back to exact or hybrid.
 
-### IVF Parameters for Recall/Speed
+3. **Higher recall ANN:** Tune HNSW parameters (increase efSearch from 100 to 500). Recall may reach 99.5% with latency 50ms. Acceptable.
 
-```python
+4. **Index partitioning:** Pre-filter by metadata (jurisdiction, date range) before ANN. Smaller index per query.
 
-def ivf_tuning():
-    """
-    Tuning IVF with nprobe
-    """
-    print("Tuning IVF: nprobe Controls the Tradeoff")
-    print("=" * 60)
+5. **Exact on cache:** Cache frequent queries and their exact results. After a few days, most queries are cached.
 
-    print("""
-    nprobe (number of clusters to search):
+**If you insisted on exact search:** Use GPU with batched queries (process 100 queries in parallel). Optimize with FAISS (GPU exact). May reduce latency to 200ms. Still slower than ANN but acceptable if queries are batched.
 
-    nprobe=1:  Fastest, lowest recall
-    • Search 1/1000 of data
-    • Recall@10: 80%
-
-    nprobe=10: Good balance
-    • Search 1% of data
-    • Recall@10: 94%
-
-    nprobe=50: More accurate
-    • Search 5% of data
-    • Recall@10: 98%
-
-    nprobe=100: Almost exhaustive
-    • Search 10% of data
-    • Recall@10: 99%
-    """)
-
-ivf_tuning()
-```
-
----
-
-## Real-World ANN Example
-
-```python
-
-import numpy as np
-import time
-
-def ann_demo():
-    """
-    Demonstrate ANN vs exact search
-    """
-    print("ANN vs Exact Search: Live Demo")
-    print("=" * 60)
-
-    # Generate random dataset
-    np.random.seed(42)
-    n_vectors = 100000
-    d = 128
-
-    data = np.random.random((n_vectors, d)).astype('float32')
-    query = np.random.random((1, d)).astype('float32')
-
-    print(f"Dataset: {n_vectors:,} vectors, {d} dimensions")
-
-    # Exact search (simulated time)
-    exact_time = n_vectors * 0.000001  # 1 microsecond per comparison
-    print(f"\nExact search would take: {exact_time*1000:.2f} ms")
-
-    # Simulate different ANN approaches
-    ann_methods = [
-        {"name": "HNSW (ef=50)", "speedup": 100, "recall": 0.95},
-        {"name": "HNSW (ef=200)", "speedup": 30, "recall": 0.99},
-        {"name": "IVF (nprobe=10)", "speedup": 80, "recall": 0.94},
-        {"name": "IVF (nprobe=50)", "speedup": 20, "recall": 0.98},
-    ]
-
-    print("\nANN Options:")
-    for method in ann_methods:
-        ann_time = exact_time / method["speedup"] * 1000
-        print(f"\n  {method['name']}:")
-        print(f"    • Time: {ann_time:.2f} ms ({method['speedup']}x faster)")
-        print(f"    • Recall: {method['recall']*100:.0f}%")
-
-    print("\n" + "=" * 60)
-    print("In production, you'd choose based on needs:")
-    print("• High traffic, less accuracy critical → fast settings")
-    print("• Quality critical, lower traffic → accurate settings")
-
-ann_demo()
-```
-
----
-
-## ANN vs Exact Search: Complete Comparison
-
-| Aspect      | Exact (KNN)           | Approximate (ANN)       |
-| ----------- | --------------------- | ----------------------- |
-| Accuracy    | 100%                  | 90-99%                  |
-| Speed       | O(n)                  | O(log n) or O(1)        |
-| 1M vectors  | 1 second              | 10-50 ms                |
-| Memory      | Low (no index)        | Higher (index overhead) |
-| Index build | None                  | Minutes to hours        |
-| Use case    | Baselines, small data | Production, large scale |
-
-### When to Use Each
-
-```python
-
-def when_to_use():
-    """
-    Decision guide for exact vs ANN
-    """
-    print("Exact vs ANN: When to Use")
-    print("=" * 60)
-
-    scenarios = [
-        ("< 10K vectors", "Exact", "Brute force is fast enough"),
-        ("10K-100K vectors", "Either", "Depends on latency needs"),
-        ("> 100K vectors", "ANN", "Exact becomes too slow"),
-        ("Offline batch processing", "Exact", "Can wait for accuracy"),
-        ("Real-time user queries", "ANN", "Must be fast"),
-        ("Benchmarking", "Exact", "Get ground truth"),
-        ("Production RAG", "ANN", "Sub-100ms required")
-    ]
-
-    for scenario, choice, reason in scenarios:
-        print(f"\n  • {scenario}: {choice}")
-        print(f"    → {reason}")
-
-when_to_use()
-```
-
----
-
-## Why This Matters for LLMs
-
-### 1. RAG Would Be Impossible Without ANN
-
-```python
-
-def rag_ann():
-    """
-    ANN enables RAG applications
-    """
-    print("ANN Makes RAG Possible")
-    print("=" * 60)
-
-    print("""
-    Typical RAG pipeline:
-
-    User Query → Embed (50ms) → Vector Search → LLM Generation
-
-    With exact search on 1M docs:
-    • Vector search: 1000ms
-    • Total: >1 second → user abandons
-
-    With ANN search:
-    • Vector search: 20ms
-    • Total: <300ms → feels instant
-
-    ANN is what makes RAG practical for real users!
-    """)
-
-rag_ann()
-```
-
-### 2. Scaling to Millions/Billions of Documents
-
-```python
-
-def scaling():
-    """
-    ANN enables web-scale search
-    """
-    print("ANN Enables Web-Scale Search")
-    print("=" * 60)
-
-    scales = {
-        "Startup": "100K docs → IVF or HNSW",
-        "Medium": "1M docs → HNSW (if RAM available)",
-        "Large": "10M docs → IVF with PQ",
-        "Web scale": "100M-1B docs → IVF+PQ, distributed"
-    }
-
-    for scale, solution in scales.items():
-        print(f"  • {scale}: {solution}")
-
-scaling()
-```
-
-### 3. Real-World ANN Libraries
-
-```python
-
-def ann_libraries():
-    """
-    Popular ANN libraries
-    """
-    print("Popular ANN Libraries")
-    print("=" * 60)
-
-    libraries = {
-        "FAISS": "Facebook - IVF, HNSW, PQ - Industry standard",
-        "Annoy": "Spotify - Tree-based - Memory efficient",
-        "HNSWlib": "Pure HNSW implementation - Very fast",
-        "ScaNN": "Google - State-of-the-art speed/accuracy",
-        "NMSLIB": "Non-Metric Space Library - Many algorithms"
-    }
-
-    for lib, desc in libraries.items():
-        print(f"  • {lib}: {desc}")
-
-ann_libraries()
-```
-
----
-
-## ANN Cheat Sheet
-
-| Algorithm | Type             | Speed  | Accuracy | Best For                      |
-| --------- | ---------------- | ------ | -------- | ----------------------------- |
-| HNSW      | Graph            | ⭐⭐⭐ | ⭐⭐⭐   | High accuracy, <1M            |
-| IVF       | Cluster          | ⭐⭐   | ⭐⭐     | Large scale, memory efficient |
-| IVF+PQ    | Cluster+compress | ⭐⭐   | ⭐⭐     | Billion-scale, compressed     |
-| LSH       | Hash             | ⭐⭐⭐ | ⭐       | Very fast, lower accuracy     |
-| Annoy     | Tree             | ⭐⭐   | ⭐⭐     | Read-only, memory mapped      |
-
----
-
-## Quick Recap
-
-• ANN search trades a small amount of accuracy for massive speed gains—like asking a local for restaurant recommendations instead of checking every restaurant, getting great options in a fraction of the time
-
-• Recall@K measures ANN quality—what percentage of the true nearest neighbors were found, typically 95%+ is considered good
-
-• ANN is what makes RAG and real-time vector search possible—without it, searching millions of documents would take seconds, not milliseconds, making production LLM applications impractical
-
----
-
-## Mental Hook
-
-> "ANN search is like having a friend who knows the city—they won't find the absolute closest coffee shop to you, but they'll find one 95% as close in 1% of the time, and you'll be drinking your latte while everyone else is still measuring distances."
+Recommendation: ANN + two-stage re-ranking. Fast enough, near-exact recall. This is standard practice in production RAG.

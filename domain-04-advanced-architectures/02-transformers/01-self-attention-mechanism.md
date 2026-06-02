@@ -1,586 +1,246 @@
-# Self-Attention Mechanism
+# Self-attention mechanism
 
-## The Committee Meeting Analogy
-
-Imagine a committee discussing a topic. Each member comes in with their own perspective. During the discussion, they listen to others and update their own understanding based on what they hear. The marketing expert pays attention to the sales expert when discussing revenue, but focuses on the legal expert when discussing regulations. That's self-attention: each word in a sentence looks at all other words, decides how much attention to pay to each, and updates its own representation accordingly.
-
-In modern LLMs, self-attention is the core innovation of the Transformer architecture. It allows every word to directly interact with every other word, capturing complex relationships regardless of their distance in the sentence. This is why models like GPT can understand long-range dependencies so effectively.
+## **DOMAIN: ADVANCED ARCHITECTURES | Sub domain: Transformers (The LLM Revolution)**
 
 ---
 
-## What Is Self-Attention?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-Self-attention lets each word in a sequence look at all other words and decide how much to focus on each.
-
-```text
-
-Traditional attention:                    Self-attention:
-Decoder looks at encoder                   Each word looks at ALL words
-                                           (including itself!)
-    ↓                                               ↓
-Query from decoder      ←→      Keys from encoder   Each word computes:
-                                                    Query, Key, Value from itself
-```
-
-```python
-
-def self_attention_intro():
-    """
-    The basic concept of self-attention
-    """
-    print("Self-Attention: Words Looking at Words")
-    print("=" * 60)
-
-    sentence = "The animal didn't cross the street because it was tired"
-
-    print(f"Sentence: '{sentence}'")
-    print("\nWhat does 'it' refer to?")
-    print("Self-attention lets 'it' look at ALL other words:")
-    print("""
-    'it' attention weights:
-    The:     0.02
-    animal:  0.65  ←── Most attention here!
-    didn't:  0.05
-    cross:   0.08
-    street:  0.03
-    because: 0.02
-    was:     0.01
-    tired:   0.14
-
-    The model learns that 'it' likely refers to 'animal'
-    """)
-
-    print("\nEach word gets a NEW representation that includes")
-    print("context from the whole sentence!")
-
-self_attention_intro()
-```
+Original attention let a decoder look back at an encoder. But what about within a single sequence? In the sentence "The animal didn't cross the street because it was too tired," what does "it" refer to? To know, the model needs to compare "it" to every preceding word and find the most relevant—"animal," not "street." Self-attention does exactly this: each position attends to all positions in the same sequence, including itself. This is the core innovation of the transformer. It captures dependencies regardless of distance, in parallel, without the sequential bottleneck of RNNs. Without self-attention, there is no GPT, no BERT, no modern LLM.
 
 ---
 
-## The Three Roles: Query, Key, Value
+### **2. Core idea**
 
-### The Library Analogy
+**Self-attention computes a weighted representation for each position in a sequence by comparing it to all positions (including itself), using queries, keys, and values all derived from the same input, allowing the model to capture contextual relationships regardless of distance.**
 
-To understand self-attention, think of a library search:
+---
 
-- Query: What you're looking for (your question)
+### **3. Concrete analogy**
 
-- Key: The catalog entry for each book (what each book is about)
+Imagine a team meeting with 10 people. Each person needs to understand the discussion in context. Self-attention is like each person listening to everyone else, then summarizing: "What matters to me from what everyone said?"
 
-- Value: The actual book content (the information you'll get)
+For the word "it" in our sentence, self-attention asks:
 
-```python
+- Query: "What am I looking for?" (from "it")
+- Keys: "What do each of you offer?" (from each word)
+- Values: "What information do you carry?"
 
-def qkv_intro():
-    """
-    Explaining Query, Key, Value
-    """
-    print("Query, Key, Value: The Library Analogy")
-    print("=" * 60)
+"Animal" has a high key similarity to "it"'s query (pronoun likely refers to animate noun). "Street" has low similarity. So "it" pays high attention to "animal," modest to "crossed," low to "street." Its new representation blends information from relevant words. This happens for every word simultaneously, in parallel, not one after another.
 
-    print("""
-    For each word, we create three vectors:
+---
 
-    Query (Q): "What am I looking for?"
-    Key (K):   "What information do I have?"
-    Value (V): "What information do I contain?"
+### **4. ASCII diagram**
 
-    Then:
-    1. Compare Query with all Keys (compatibility scores)
-    2. Use scores to weight the Values
-    3. Sum weighted Values to get new representation
-    """)
-
-    print("\nAnalogy: You (Query) search the library catalog (Keys)")
-    print("to find relevant books (Values) to check out.")
-
-qkv_intro()
 ```
+Self-attention for the sentence: "The animal crossed the street"
 
-### Concrete Example
+Step 1: Create Q, K, V from each word's embedding:
 
-```python
+    "The"    → q₁, k₁, v₁
+    "animal" → q₂, k₂, v₂
+    "crossed"→ q₃, k₃, v₃
+    "the"    → q₄, k₄, v₄
+    "street" → q₅, k₅, v₅
 
-def qkv_example():
-    """
-    Concrete example of QKV for a sentence
-    """
-    print("QKV in Action: 'The cat sat'")
-    print("=" * 60)
+Step 2: Compute attention scores (dot product between q and all k's):
 
-    words = ["The", "cat", "sat"]
+For "animal" (position 2):
+    score₂₁ = q₂·k₁  (The)
+    score₂₂ = q₂·k₂  (animal)  ← highest (self)
+    score₂₃ = q₂·k₃  (crossed)
+    score₂₄ = q₂·k₄  (the)
+    score₂₅ = q₂·k₅  (street)
 
-    print(f"Sentence: {' → '.join(words)}")
-    print("\nEach word has its own Q, K, V (simplified):")
+Step 3: Softmax to get weights:
 
-    # Simplified vectors (in reality, these are learned)
-    qkv = {
-        "The": {"Q": [0.1, 0.2], "K": [0.1, 0.1], "V": [0.3, 0.1]},
-        "cat": {"Q": [0.8, 0.7], "K": [0.8, 0.8], "V": [0.9, 0.7]},
-        "sat": {"Q": [0.3, 0.9], "K": [0.4, 0.9], "V": [0.5, 0.8]}
-    }
+    α₂₁, α₂₂, α₂₃, α₂₄, α₂₅
 
-    for word, vectors in qkv.items():
-        print(f"\n  '{word}':")
-        print(f"    Q: {vectors['Q']} (what I'm looking for)")
-        print(f"    K: {vectors['K']} (what I offer)")
-        print(f"    V: {vectors['V']} (what I contain)")
+Step 4: New representation for "animal":
 
-    print("\nNow 'cat' will look at all words:")
-    print("  Compare cat's Q with everyone's K → attention weights")
-    print("  Weighted sum of everyone's V → new 'cat' representation")
+    z₂ = α₂₁×v₁ + α₂₂×v₂ + α₂₃×v₃ + α₂₄×v₄ + α₂₅×v₅
 
-qkv_example()
+Now "animal" knows about its context!
+
+
+Matrix form (all positions at once):
+
+    Input X (n × d_model)
+         │
+         ├───→ W_Q ──→ Q (n × d_k)
+         ├───→ W_K ──→ K (n × d_k)
+         └───→ W_V ──→ V (n × d_v)
+                    │
+                    ▼
+            Attention = softmax(Q·Kᵀ / √d_k) · V
+                    │
+                    ▼
+              Output Z (n × d_v)
 ```
 
 ---
 
-## Self-Attention Step by Step
+### **5. Mathematical formulation**
 
-### Step 1: Create Q, K, V for Each Word
+**Input:** Sequence X of length n, each token as vector (d_model dimensions)
 
-```python
+**Linear projections to lower dimensions:**
 
-def self_attention_step1():
-    """
-    Step 1: Create queries, keys, values
-    """
-    print("Step 1: Creating Q, K, V")
-    print("=" * 60)
+$$
+\mathbf{Q} = \mathbf{X} \mathbf{W}^Q, \quad
+\mathbf{K} = \mathbf{X} \mathbf{W}^K, \quad
+\mathbf{V} = \mathbf{X} \mathbf{W}^V
+$$
 
-    # Input embeddings for each word
-    embeddings = {
-        "The": [1.0, 0.0, 1.0],
-        "cat": [0.0, 1.0, 1.0],
-        "sat": [1.0, 1.0, 0.0]
-    }
+Where W^Q, W^K are d_model × d_k, W^V is d_model × d_v. Typically d_k = d_v = d_model / num_heads.
 
-    # Learned weight matrices (simplified)
-    W_Q = [[0.5, 0.0, 0.0], [0.0, 0.5, 0.0]]
-    W_K = [[0.3, 0.0, 0.0], [0.0, 0.3, 0.0]]
-    W_V = [[0.7, 0.0, 0.0], [0.0, 0.7, 0.0]]
+**Attention scores (logits):**
 
-    print("Input embeddings:")
-    for word, emb in embeddings.items():
-        print(f"  '{word}': {emb}")
+$$
+\text{Scores} = \frac{\mathbf{Q} \mathbf{K}^T}{\sqrt{d_k}}
+$$
 
-    print("\nComputing Q = embedding × W_Q:")
-    for word, emb in embeddings.items():
-        q0 = emb[0]*W_Q[0][0] + emb[1]*W_Q[0][1] + emb[2]*W_Q[0][2]
-        q1 = emb[0]*W_Q[1][0] + emb[1]*W_Q[1][1] + emb[2]*W_Q[1][2]
-        print(f"  '{word}' Q: [{q0:.1f}, {q1:.1f}]")
+(Unicode: Scores = Q·Kᵀ / √d_k)
 
-self_attention_step1()
+Dividing by √d_k prevents dot products from growing too large (which would push softmax into saturated region).
+
+**Attention weights (probabilities):**
+
+$$
+\mathbf{A} = \text{softmax}(\text{Scores})
+$$
+
+(Each row sums to 1)
+
+**Output (weighted sum of values):**
+
+$$
+\mathbf{Z} = \mathbf{A} \mathbf{V}
+$$
+
+**Complete formula:**
+
+$$
+\text{Attention}(\mathbf{X}) = \text{softmax}\left(\frac{\mathbf{X}\mathbf{W}^Q (\mathbf{X}\mathbf{W}^K)^T}{\sqrt{d_k}}\right) \mathbf{X}\mathbf{W}^V
+$$
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: A tiny example**
+
+Sequence length n=3, d_model=4. Simplified: skip W projections (use X directly as Q, K, V).
+
+X = [[1, 0, 0, 0],   # token "cat"
+     [0, 1, 0, 0],   # token "sat"
+     [0, 0, 1, 0]] # token "down"
+
+d_k = 4, so √d_k = 2
+
+#### **Step 2: Compute Q·Kᵀ**
+
+Scores = X·Xᵀ / 2
+
+X·Xᵀ (dot products):
+
+- Row1·Row1 = 1, Row1·Row2 = 0, Row1·Row3 = 0
+- Row2·Row1 = 0, Row2·Row2 = 1, Row2·Row3 = 0
+- Row3·Row1 = 0, Row3·Row2 = 0, Row3·Row3 = 1
+
+Scores = [[0.5, 0, 0],
+          [0, 0.5, 0],
+          [0, 0, 0.5]]
+
+#### **Step 3: Softmax (each row independently)**
+
+Softmax of [0.5, 0, 0] = [exp(0.5), exp(0), exp(0)] = [1.648, 1, 1]; sum = 3.648
+Weights = [0.452, 0.274, 0.274]
+
+Similarly for each row:
+A = [[0.452, 0.274, 0.274],
+     [0.274, 0.452, 0.274],
+     [0.274, 0.274, 0.452]]
+
+#### **Step 4: Compute output Z = A × X**
+
+Z₁ = 0.452×[1,0,0,0] + 0.274×[0,1,0,0] + 0.274×[0,0,1,0] = [0.452, 0.274, 0.274, 0]
+Z₂ = [0.274, 0.452, 0.274, 0]
+Z₃ = [0.274, 0.274, 0.452, 0]
+
+#### **Step 5: Interpret**
+
+Each output token now contains information from all input tokens, weighted by similarity. "cat" (position 1) kept most of itself (0.452) but also gained 0.274 from "sat" and 0.274 from "down." This is context! The model now knows "cat" is related to "sat" and "down" in this sentence.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Transformer blocks:** Every transformer block has self-attention as its core component. Without it, the transformer is just feed-forward layers.
+
+- **GPT (decoder-only):** Uses masked self-attention (causal mask) so positions cannot attend to future tokens. Enables autoregressive generation.
+
+- **BERT (encoder-only):** Uses bidirectional self-attention (no mask). Each token sees full context left and right.
+
+- **Long-range dependencies:** Unlike RNNs where path length = O(n), self-attention connects any two positions in O(1) operations.
+
+- **Parallel processing:** All positions compute attention simultaneously (no sequential bottleneck). This is why transformers train fast on GPUs.
+
+- **Inductive bias:** Self-attention has no built-in notion of position. The model treats "cat sat" same as "sat cat" unless positional encodings are added.
+
+- **Attention heads:** Multiple self-attention mechanisms run in parallel (multi-head), each learning different relationship types (syntax, coreference, etc.).
+
+---
+
+### **8. Brain-like connection (relational memory)**
+
+The brain's working memory operates like self-attention. The prefrontal cortex maintains representations of current stimuli (keys/values) while a "retrieval cue" (query) determines what is recalled. When you hear "She poured water from the pitcher into the glass until it was full," your brain retrieves "glass" (not "pitcher") for "it" based on semantic relationships. This is relational memory—binding representations based on similarity and relevance. Self-attention mathematically formalizes this cognitive process: weighted retrieval from a memory store based on query-key similarity. The transformer is, in essence, a differentiable implementation of content-addressable memory.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Self-attention is just computing similarity between all pairs of words. It's a simple lookup table."
+
+_Why it is wrong:_ Self-attention does compute pairwise similarities (the Q·Kᵀ scores), but that is only the first step. The learned transformations W^Q, W^K, W^V are crucial. The model learns to project the same input X into three different spaces: query (what I'm looking for), key (what I offer), and value (what I communicate). These projections can emphasize different features. For example, in "bank," the query for "river" projects into a space where "bank" (river bank) has high similarity, while the query for "money" projects into a different space where "bank" (financial) is similar. Same word, different projections, different retrieved values. This is not a simple lookup.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### Step 2: Calculate Attention Scores
-
-```python
-
-def self_attention_step2():
-    """
-    Step 2: Calculate attention scores
-    """
-    print("Step 2: Computing Attention Scores")
-    print("=" * 60)
-
-    # Q and K vectors (simplified)
-    Q = {
-        "The": [0.5, 0.0],
-        "cat": [0.0, 0.5],
-        "sat": [0.5, 0.5]
-    }
-
-    K = {
-        "The": [0.3, 0.0],
-        "cat": [0.0, 0.3],
-        "sat": [0.3, 0.3]
-    }
-
-    print("For 'cat' looking at all words:")
-    q_cat = Q["cat"]
-    print(f"  cat's Q: {q_cat}")
-
-    scores = {}
-    for word, k in K.items():
-        # Dot product score
-        score = q_cat[0]*k[0] + q_cat[1]*k[1]
-        scores[word] = score
-        print(f"  score with '{word}' (K={k}): {score:.2f}")
-
-    print("\nThese scores say how much 'cat' should attend to each word.")
-
-self_attention_step2()
-```
-
-### Step 3: Apply Softmax (Normalize Scores)
-
-```python
-
-import math
-
-def self_attention_step3():
-    """
-    Step 3: Softmax to get attention weights
-    """
-    print("Step 3: Softmax - Making Scores Sum to 1")
-    print("=" * 60)
-
-    # Raw scores from previous step
-    scores = {
-        "The": 0.15,
-        "cat": 0.15,
-        "sat": 0.30
-    }
-
-    print("Raw scores (for 'cat'):")
-    total_raw = sum(scores.values())
-    for word, score in scores.items():
-        print(f"  '{word}': {score:.2f}")
-
-    # Apply softmax
-    exp_scores = {w: math.exp(s) for w, s in scores.items()}
-    sum_exp = sum(exp_scores.values())
-
-    print("\nAfter softmax (probabilities):")
-    for word, exp_s in exp_scores.items():
-        weight = exp_s / sum_exp
-        print(f"  '{word}': {weight:.3f}")
-
-    print(f"\nSum of weights: {sum(exp_s.values())/sum_exp:.1f} ✓")
-
-self_attention_step3()
-```
-
-### Step 4: Weighted Sum of Values
-
-```python
-
-def self_attention_step4():
-    """
-    Step 4: Weighted sum of values
-    """
-    print("Step 4: Creating New Representations")
-    print("=" * 60)
-
-    # Attention weights (from softmax)
-    weights = {
-        "The": 0.20,
-        "cat": 0.30,
-        "sat": 0.50
-    }
-
-    # Value vectors
-    V = {
-        "The": [0.7, 0.0],
-        "cat": [0.0, 0.7],
-        "sat": [0.5, 0.5]
-    }
-
-    print("Attention weights for 'cat':")
-    for word, w in weights.items():
-        print(f"  '{word}': {w:.2f} × V{word}")
-
-    # Compute weighted sum
-    new_cat = [0, 0]
-    for word, w in weights.items():
-        v = V[word]
-        new_cat[0] += w * v[0]
-        new_cat[1] += w * v[1]
-
-    print(f"\nNew 'cat' representation: [{new_cat[0]:.2f}, {new_cat[1]:.2f}]")
-    print("This now contains context from the whole sentence!")
-
-self_attention_step4()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Self-attention is the engine of modern AI. It replaces   |
+|  the sequential chains of RNNs with a web of connections  |
+|  between every pair of words. This parallel structure     |
+|  unlocked training on massive datasets and led directly   |
+|  to GPT, BERT, Llama, and every LLM you use today.        |
+|  Understand self-attention and you understand the heart   |
+|  of the transformer—the architecture that taught machines |
+|  to pay attention to everything at once.                  |
+-------------------------------------------------------------
 ```
 
 ---
 
-## The Complete Self-Attention Formula
+### **11. Quick self-check question**
 
-```python
+In self-attention, after computing scores = Q·Kᵀ / √d_k, we apply softmax row-wise. Why do we divide by √d_k before softmax? What would happen if d_k were 512 and we did not divide?
 
-def self_attention_formula():
-    """
-    The mathematical formulation
-    """
-    print("Self-Attention: The Complete Formula")
-    print("=" * 60)
-
-    print("""
-    Attention(Q, K, V) = softmax( QK^T / √d_k ) V
-
-    Where:
-    • Q: Query matrix (each row is a word's query)
-    • K: Key matrix (each row is a word's key)
-    • V: Value matrix (each row is a word's value)
-    • d_k: dimension of keys (for scaling)
-
-    Step-by-step:
-    1. Q × K^T : Compute compatibility between all pairs
-    2. Scale by 1/√d_k : Prevent dot products from getting too large
-    3. Softmax : Convert to probabilities
-    4. Multiply by V : Get weighted sum of values
-    """)
-
-    print("\nEach word's new representation = weighted sum of all values,")
-    print("with weights based on compatibility of its query with their keys.")
-
-self_attention_formula()
-```
+_(Answer hidden below)_
 
 ---
 
-## A Tiny Self-Attention Implementation
+.
 
-```python
+.
 
-import numpy as np
+.
 
-def self_attention_implementation():
-    """
-    Minimal self-attention implementation
-    """
-    print("Tiny Self-Attention Implementation")
-    print("=" * 60)
+.
 
-    class SelfAttention:
-        def __init__(self, d_model):
-            self.d_model = d_model
-            # Random Q, K, V matrices (in reality, these are learned)
-            self.W_q = np.random.randn(d_model, d_model) * 0.1
-            self.W_k = np.random.randn(d_model, d_model) * 0.1
-            self.W_v = np.random.randn(d_model, d_model) * 0.1
+.
 
-        def forward(self, x):
-            """
-            x: (seq_len, d_model) input embeddings
-            """
-            seq_len = x.shape[0]
-
-            # Step 1: Compute Q, K, V
-            Q = x @ self.W_q  # (seq_len, d_model)
-            K = x @ self.W_k
-            V = x @ self.W_v
-
-            print(f"Q shape: {Q.shape}, K shape: {K.shape}, V shape: {V.shape}")
-
-            # Step 2: Compute attention scores
-            scores = Q @ K.T  # (seq_len, seq_len)
-            print(f"\nAttention scores shape: {scores.shape}")
-
-            # Step 3: Scale
-            scores = scores / np.sqrt(self.d_model)
-
-            # Step 4: Softmax
-            exp_scores = np.exp(scores - np.max(scores, axis=-1, keepdims=True))
-            weights = exp_scores / np.sum(exp_scores, axis=-1, keepdims=True)
-
-            print(f"Attention weights shape: {weights.shape}")
-            print("Each row sums to 1")
-
-            # Step 5: Weighted sum of values
-            output = weights @ V
-
-            return output, weights
-
-    # Create attention module
-    attn = SelfAttention(d_model=4)
-
-    # Example input: 3 words, each 4-dim
-    x = np.random.randn(3, 4)
-    print(f"Input shape: {x.shape} (3 words, 4-dim embeddings)")
-
-    # Forward pass
-    output, weights = attn.forward(x)
-
-    print(f"\nOutput shape: {output.shape}")
-    print("Each word now contains context from all words!")
-
-self_attention_implementation()
-```
-
----
-
-## Why Self-Attention Is Powerful
-
-### Advantages Over RNNs
-
-| Aspect                  | RNNs                            | Self-Attention               |
-| ----------------------- | ------------------------------- | ---------------------------- |
-| Parallelization         | Sequential (slow)               | Parallel (fast)              |
-| Long-range dependencies | Difficult (vanishing gradients) | Direct (O(1) path)           |
-| Context                 | Compressed in hidden state      | All positions accessible     |
-| Interpretability        | Hard to analyze                 | Attention weights show focus |
-
-### The Receptive Field
-
-```text
-
-RNN: Information flows step by step
-Word1 → Word2 → Word3 → Word4 → Word5
-  ↑       ↑       ↑       ↑       ↑
-  └───────┴───────┴───────┴───────┘
-  Word5 needs 4 steps to see Word1
-
-Self-Attention: Direct connections
-Word1 ←→ Word2 ←→ Word3 ←→ Word4 ←→ Word5
-  ↑       ↑       ↑       ↑       ↑
-  └───────┴───────┴───────┴───────┘
-  Any word sees any other in ONE step!
-```
-
----
-
-## Why This Matters for LLMs
-
-### 1. Self-Attention Is the Heart of Transformers
-
-```python
-
-def transformer_heart():
-    """
-    Self-attention in transformers
-    """
-    print("Self-Attention: The Heart of Transformers")
-    print("=" * 60)
-
-    print("""
-    Transformer block:
-
-    Input Embeddings
-           ↓
-    [Multi-Head Self-Attention]  ←─── Here!
-           ↓
-    Add & LayerNorm
-           ↓
-    Feed-Forward Network
-           ↓
-    Add & LayerNorm
-           ↓
-    Output
-
-    Repeated 12 to 96+ times!
-    """)
-
-    print("\nEach layer refines representations through self-attention.")
-
-transformer_heart()
-```
-
-### 2. Multi-Head Attention
-
-```python
-
-def multi_head():
-    """
-    Multiple attention heads
-    """
-    print("Multi-Head Attention: Different Perspectives")
-    print("=" * 60)
-
-    print("""
-    Instead of one attention mechanism, use multiple:
-
-    Head 1: Focuses on subject-verb relationships
-    Head 2: Focuses on adjective-noun relationships
-    Head 3: Focuses on coreference (it → animal)
-    Head 4: Focuses on positional relationships
-
-    Then concatenate and project:
-    MultiHead(Q,K,V) = Concat(head₁,...,headₕ)W^O
-    """)
-
-    print("\nEach head learns a different type of relationship!")
-    print("This is why Transformers are so powerful.")
-
-multi_head()
-```
-
-### 3. Causal Self-Attention (For GPT)
-
-```python
-
-def causal_attention():
-    """
-    Masked self-attention for generation
-    """
-    print("Causal Self-Attention: Can't See the Future")
-    print("=" * 60)
-
-    print("""
-    GPT uses masked self-attention:
-
-    When generating "The cat sat":
-
-    For "The": can only see "The"
-    For "cat": can see "The", "cat"
-    For "sat": can see "The", "cat", "sat"
-
-    Mask prevents looking at future words:
-
-    Attention weights matrix:
-    [1, 0, 0]  # "The" sees only itself
-    [1, 1, 0]  # "cat" sees The, cat
-    [1, 1, 1]  # "sat" sees all previous
-    """)
-
-    print("\nThis lets GPT generate left to right!")
-
-causal_attention()
-```
-
-### 4. The Quadratic Cost Challenge
-
-```python
-
-def quadratic_challenge():
-    """
-    The computational cost of self-attention
-    """
-    print("The Quadratic Cost Challenge")
-    print("=" * 60)
-
-    seq_lengths = [512, 1024, 2048, 4096, 8192, 16384]
-
-    print("Sequence Length | Attention Computations | Memory (approx)")
-    print("-" * 65)
-
-    for L in seq_lengths:
-        computations = L * L  # Each word attends to all words
-        memory_gb = (L * L * 2) / (1024**3)  # Rough estimate
-        print(f"     {L:5d}      |   {computations:12,d}   |   {memory_gb:.3f} GB")
-
-quadratic_challenge()
-```
-
----
-
-## Self-Attention Variants
-
-| Variant         | Description                              | Used In              |
-| --------------- | ---------------------------------------- | -------------------- |
-| Multi-Head      | Multiple attention heads in parallel     | All transformers     |
-| Causal/Masked   | Prevent looking at future                | GPT, decoder-only    |
-| Sparse          | Only attend to local windows             | Longformer, BigBird  |
-| Linear          | Approximate attention for long sequences | Performer, Linformer |
-| Cross-attention | Attend to different sequence             | Encoder-decoder (T5) |
-
----
-
-## Quick Recap
-
-• Self-attention lets every word look at every other word in the sequence—like a committee meeting where each member updates their understanding based on what everyone else says
-
-• Each word creates Query (what it's looking for), Key (what it offers), and Value (what it contains)—attention weights are computed by matching Queries with Keys, then used to weight Values
-
-• Self-attention is the core innovation of Transformers—it enables parallel processing, captures long-range dependencies directly, and multi-head attention allows learning different types of relationships, making modern LLMs possible
-
----
-
-## Mental Hook
-
-> "Self-attention is like a conversation where everyone listens to everyone else, then updates their own understanding based on what they heard—by the end, each person's knowledge contains context from the whole group."
+**Answer:** Dividing by √d_k prevents the dot products from becoming too large. For high-dimensional vectors (e.g., d_k=512), the expected magnitude of a dot product grows with √d_k. Without scaling, scores would be large (±50-100), pushing the softmax into regions where gradients are extremely small (saturation). The model would stop learning because gradients vanish. The √d_k scaling keeps the variance of the scores roughly 1, maintaining healthy gradient flow. This is critical for stable training of deep transformers.

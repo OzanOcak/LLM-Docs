@@ -1,593 +1,260 @@
-# Properties of Embedding Spaces (Linear Relationships, Analogies)
+# Properties of embedding spaces (linear relationships, analogies)
 
-## The Crystal Structure Analogy
-
-Imagine a crystal where atoms arrange themselves in a repeating pattern. If you know the vector from one carbon atom to another in a diamond, you can find every carbon atom just by following that same vector over and over. That's what embedding spaces are like—they have a regular, almost crystalline structure where relationships between concepts are captured as consistent directions. "Man" to "woman" is the same vector as "king" to "queen," and "Paris" to "France" is the same as "Rome" to "Italy."
-
-In LLMs, this property is what makes embeddings so powerful. The space isn't just a random cloud of points—it's organized with geometric regularity. This is why we can do analogies with vector arithmetic, find concept directions, and even debias models by manipulating these consistent directions.
+## **DOMAIN: VECTOR SPACE & RETRIEVAL | Sub domain: Embeddings: Turning Words into Coordinates**
 
 ---
 
-## The Linear Structure of Meaning
+### **1. Why this concept matters**
 
-### What Linear Relationships Mean
-
-```python
-
-def linear_intro():
-    """
-    The concept of linearity in embedding spaces
-    """
-    print("Linear Relationships: Meaning as Directions")
-    print("=" * 60)
-
-    print("""
-    In a linear embedding space:
-
-    • Relationships between concepts are VECTORS
-    • The SAME relationship appears in multiple places
-    • You can add and subtract meanings
-
-    Example:
-    If we find the vector for "masculine → feminine":
-    v = woman - man
-
-    Then:
-    king + v ≈ queen
-    boy + v ≈ girl
-    father + v ≈ mother
-    """)
-
-linear_intro()
-```
-
-### Visualizing Linear Structure
-
-```text
-
-Embedding space as a crystal:
-
-    man ────────→ woman
-     ↑              ↑
-     │              │
-     │ gender       │ gender
-     │ vector       │ vector
-     │              │
-    king ────────→ queen
-
-    boy ─────────→ girl
-     ↑              ↑
-     │ age         │ age
-     │ vector      │ vector
-     │              │
-    man ─────────→ woman
-
-The SAME gender vector works everywhere!
-The SAME age vector works everywhere!
-```
+Embedding spaces are not random. They have rich linear structure: directions correspond to semantic dimensions (gender, tense, size), and analogies become vector arithmetic. "King - Man + Woman = Queen" is not a parlor trick—it is a fundamental property of the space. This linearity means you can solve analogies by vector addition, find word clusters via centroids, and even debias by subtracting unwanted dimensions. Understanding these properties is understanding how meaning organizes itself into geometry.
 
 ---
 
-## The Famous King - Man + Woman = Queen
+### **2. Core idea**
 
-### The Classic Analogy
+**Word embedding spaces exhibit linear substructure where semantic relationships (e.g., gender, tense, plurals) correspond to consistent vector offsets, enabling analogical reasoning through vector arithmetic and revealing the geometric organization of meaning.**
 
-```python
+---
 
-def king_queen_analogy():
-    """
-    The most famous embedding property
-    """
-    print("The Classic Analogy: King - Man + Woman = Queen")
-    print("=" * 60)
+### **3. Concrete analogy**
 
-    # Simplified 2D embeddings
-    embeddings = {
-        "king": [0.9, 0.8],
-        "queen": [0.9, 0.2],
-        "man": [0.3, 0.8],
-        "woman": [0.3, 0.2],
-        "boy": [0.2, 0.7],
-        "girl": [0.2, 0.3],
-        "father": [0.4, 0.8],
-        "mother": [0.4, 0.2]
-    }
+Imagine a 2D map of a city. The vector from the library to the museum is (2 km east, 1 km north). The vector from the school to the hospital is also (2 km east, 1 km north). You discover a relationship: "library is to museum as school is to hospital." The city's geography has consistent offsets.
 
-    print("2D embedding space (dim1 = royalty, dim2 = gender):")
-    for word, vec in embeddings.items():
-        print(f"  {word:6}: royalty={vec[0]}, gender={vec[1]}")
+Now add a 3rd dimension: elevation. Rich neighborhoods have higher elevation. The vector from the library to the museum might have a small upward component, representing increased richness. This is an embedding space.
 
-    # Gender vector
-    gender_vec = [embeddings["woman"][0] - embeddings["man"][0],
-                  embeddings["woman"][1] - embeddings["man"][1]]
-    print(f"\nGender vector (woman - man): {gender_vec}")
+In word embeddings, each dimension captures a semantic feature. The vector from "man" to "woman" represents "gender." The same vector added to "king" yields "queen." The space is not just a set of points—it is a structured geometric object where directions correspond to meanings.
 
-    # Apply to king
-    king = embeddings["king"]
-    result = [king[0] + gender_vec[0], king[1] + gender_vec[1]]
-    print(f"king + gender vector = {result}")
-    print(f"queen = {embeddings['queen']}")
-    print(f"✓ They match! (0.9, 0.2)")
+---
 
-    # Works for others too
-    print("\nIt works for other pairs:")
-    for pair in [("boy", "girl"), ("father", "mother")]:
-        male = embeddings[pair[0]]
-        female = embeddings[pair[1]]
-        print(f"  {pair[0]} + gender = {[male[0]+gender_vec[0], male[1]+gender_vec[1]]}")
-        print(f"  {pair[1]} = {female}")
-        print(f"  ✓")
+### **4. ASCII diagram**
 
-king_queen_analogy()
 ```
+Linear relationships in embedding space:
 
-### Why This Happens
+    Dimension: Gender
+         ↑
+         │   king─────────queen
+         │    ╱           ╱
+         │   ╱           ╱
+         │  ╱           ╱
+         │ ╱           ╱
+         │man─────────woman
+         │
+         └────────────────────────→ Dimension: Royalty
 
-```python
+    Offsets:
+    Δ_gender = e_woman - e_man = (0.3, -0.1, 0.2)
+    Δ_royalty = e_king - e_man = (0.5, 0.8, 0.1)
 
-def why_linear():
-    """
-    Why embeddings become linear
-    """
-    print("Why Embeddings Become Linear")
-    print("=" * 60)
+    e_queen = e_woman + Δ_royalty
+    e_queen = e_king + Δ_gender
 
-    print("""
-    During training, the model sees patterns like:
 
-    "The king ruled the kingdom"
-    "The queen ruled the kingdom"
+Common analogy types and their offsets:
 
-    "The man walked into the room"
-    "The woman walked into the room"
+    Type          | Example                    | Offset
+    --------------|---------------------------|----------------
+    Gender        | man:woman :: king:queen   | gender
+    Tense         | walk:walked :: run:ran    | past-tense
+    Plural        | cat:cats :: dog:dogs      | plural
+    Country-capital| France:Paris :: Japan:Tokyo| capital-of
+    Degree        | good:better :: fast:faster| comparative
+    Antonym       | good:bad :: hot:cold      | negation
 
-    The model learns that "king" and "man" share something,
-    and that "queen" and "woman" share something.
 
-    The most efficient way to represent this is to have
-    a consistent "gender" direction that can be added
-    to any royal/parent/child word.
+Vector arithmetic examples:
 
-    This linear structure emerges naturally from
-    the training objective!
-    """)
-
-why_linear()
+    e_king - e_man + e_woman ≈ e_queen
+    e_paris - e_france + e_japan ≈ e_tokyo
+    e_running - e_run + e_walk ≈ e_walking
 ```
 
 ---
 
-## More Analogy Examples
+### **5. Mathematical formulation**
 
-### Capital-Country Relationships
+**Analogy as vector offset:**
 
-```python
+For analogy a:b :: c:d, there exists a relationship vector r such that:
 
-def capital_country():
-    """
-    Capital-city analogies
-    """
-    print("Capital-Country Analogies")
-    print("=" * 60)
+$$
+\mathbf{e}_b - \mathbf{e}_a \approx \mathbf{e}_d - \mathbf{e}_c = \mathbf{r}
+$$
 
-    # Simplified 2D embeddings
-    embeddings = {
-        "paris": [0.8, 0.7],
-        "france": [0.8, 0.1],
-        "rome": [0.6, 0.7],
-        "italy": [0.6, 0.1],
-        "london": [0.4, 0.7],
-        "uk": [0.4, 0.1],
-        "berlin": [0.2, 0.7],
-        "germany": [0.2, 0.1]
-    }
+**Solving analogies via vector addition:**
 
-    capital_vec = [embeddings["france"][0] - embeddings["paris"][0],
-                   embeddings["france"][1] - embeddings["paris"][1]]
+$$
+\mathbf{e}_d \approx \mathbf{e}_c + (\mathbf{e}_b - \mathbf{e}_a)
+$$
 
-    print("Capital vector (country - capital): moving from city to country")
-    print(f"  france - paris = {capital_vec}")
+**Cosine similarity evaluation:**
 
-    print("\nParis : France :: Rome : ?")
-    rome = embeddings["rome"]
-    result = [rome[0] + capital_vec[0], rome[1] + capital_vec[1]]
-    print(f"  rome + capital vector = {result}")
-    print(f"  italy = {embeddings['italy']}")
+Find d' that maximizes cosine similarity:
 
-    print("\nLondon : UK :: Berlin : ?")
-    london = embeddings["london"]
-    result = [london[0] + capital_vec[0], london[1] + capital_vec[1]]
-    print(f"  berlin + capital vector = {result}")
-    print(f"  germany = {embeddings['germany']}")
+$$
+d^* = \arg\max_{v \in V, v \neq c} \cos(\mathbf{e}_v, \mathbf{e}_c + \mathbf{e}_b - \mathbf{e}_a)
+$$
 
-capital_country()
+**Linear substructure discovery (PCA):**
+
+Principal components of embedding space often align with meaningful dimensions:
+
+$$
+\mathbf{v}_{\text{gender}} \approx \text{PC}_1, \quad \mathbf{v}_{\text{tense}} \approx \text{PC}_2, \ldots
+$$
+
+**Bias direction identification:**
+
+Compute gender direction vector:
+
+$$
+\mathbf{g} = \frac{1}{|M|} \sum_{m \in M} \mathbf{e}_m - \frac{1}{|F|} \sum_{f \in F} \mathbf{e}_f
+$$
+
+Where M and F are sets of gender-defining word pairs.
+
+**Debiasing (hard de-biasing):**
+
+Project vectors orthogonal to bias direction:
+
+$$
+\mathbf{e}' = \mathbf{e} - \frac{\mathbf{e} \cdot \mathbf{g}}{\|\mathbf{g}\|^2} \mathbf{g}
+$$
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Embedding vectors (hypothetical 3D)**
+
+man = [0.4, 0.2, 0.1]
+woman = [0.3, 0.5, 0.2]
+king = [0.9, 0.3, 0.1]
+queen = [0.8, 0.6, 0.2]
+
+#### **Step 2: Compute gender offset**
+
+Δ_gender = woman - man = [0.3-0.4, 0.5-0.2, 0.2-0.1] = [-0.1, 0.3, 0.1]
+
+#### **Step 3: Apply offset to king**
+
+king + Δ_gender = [0.9-0.1, 0.3+0.3, 0.1+0.1] = [0.8, 0.6, 0.2] = queen
+
+Perfect! The gender offset generalizes.
+
+#### **Step 4: Test a different analogy**
+
+walk = [0.2, 0.1, 0.7]
+walked = [0.3, 0.2, 0.5]
+run = [0.4, 0.1, 0.8]
+
+Compute tense offset: walked - walk = [0.1, 0.1, -0.2]
+
+Prediction: run + tense_offset = [0.5, 0.2, 0.6]
+
+Expected "ran" vector (hypothetical) = [0.5, 0.2, 0.6] — works!
+
+#### **Step 5: Failure case (antonym)**
+
+good = [0.8, 0.1, 0.2]
+bad = [0.1, 0.8, 0.3]
+fast = [0.7, 0.2, 0.4]
+
+bad - good = [-0.7, 0.7, 0.1]
+
+fast + (bad - good) = [0.0, 0.9, 0.5]
+
+Expected "slow"? Not necessarily. Antonym offsets are less consistent than gender. The space may not have a linear "negation" dimension.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Word2vec analogies benchmark:** Classic evaluation: "man:woman :: king:?" Accuracy ~75% for 300-dim embeddings on Google analogy dataset.
+
+- **GloVe (Global Vectors):** Count-based embeddings show even stronger linear substructure. The offset "Paris - France" clusters near other country-capital pairs.
+
+- **FastText:** Subword embeddings preserve analogies for rare words and morphological relationships (e.g., "run:running :: walk:walking").
+
+- **Contextual embeddings (BERT, GPT):** Linear analogies hold less consistently because embeddings are context-dependent. Same word has different vectors in different sentences. However, static embeddings derived from pooling (e.g., SBERT) still show analogies.
+
+- **Bias detection:** Linear direction for gender can be computed. Project profession words onto this direction: "doctor" has higher projection than "nurse" in biased spaces. Quantifies bias.
+
+- **Debiasing algorithms:** Hard-debias, soft-debias, and conceptor debiasing all exploit linear substructure to remove unwanted dimensions.
+
+- **Cross-lingual analogies:** After aligning embedding spaces, analogies hold across languages. "dog:puppy :: chien:chiot" (English to French).
+
+- **Semantic search:** Use analogy to expand queries: "metal:iron :: material:steel" adds related terms.
+
+---
+
+### **8. Brain-like connection (continuous semantic spaces)**
+
+Cognitive neuroscience suggests semantic memory is organized as a continuous space, not discrete categories. Dimensions include animacy, size, danger, valence. fMRI studies show that word meanings are represented in a smooth 2D space (posterior temporal lobe), with continuous gradations: "dog" near "cat", further from "car". This space supports analogical reasoning—the brain can compute vector offsets between concepts. Moreover, the brain's semantic space shows linearity: the neural pattern for "king" minus "man" plus "woman" approximates the pattern for "queen". Embedding spaces are not just mathematical constructs—they are models of how the brain organizes meaning.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Embedding analogies always work perfectly. If an embedding fails an analogy, it is a bad embedding."
+
+_Why it is wrong:_ Analogies fail for many reasons. Polysemous words (bank) have multiple meanings—which sense should the analogy use? Rare words have poorly estimated embeddings. Relations that are not linear (negation, causality) may not be captured. The embedding space is only approximately linear. For contextual embeddings (BERT), analogies fail often because the same word has different vectors per context. Analogies are a useful property, but not a requirement. Many useful embedding spaces have poor analogy performance but excel at other tasks. Treat analogies as a diagnostic, not a hard requirement.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### Tense Relationships
-
-```python
-
-def tense_relationships():
-    """
-    Verb tense analogies
-    """
-    print("Verb Tense Analogies")
-    print("=" * 60)
-
-    # Simplified embeddings for verbs
-    embeddings = {
-        "walk": [0.8, 0.3],
-        "walked": [0.8, 0.7],
-        "talk": [0.6, 0.3],
-        "talked": [0.6, 0.7],
-        "eat": [0.4, 0.3],
-        "ate": [0.4, 0.7],
-        "see": [0.2, 0.3],
-        "saw": [0.2, 0.7]
-    }
-
-    past_vec = [embeddings["walked"][0] - embeddings["walk"][0],
-                embeddings["walked"][1] - embeddings["walk"][1]]
-
-    print("Past tense vector (past - present): moving from present to past")
-    print(f"  walked - walk = {past_vec}")
-
-    print("\nwalk : walked :: talk : ?")
-    talk = embeddings["talk"]
-    result = [talk[0] + past_vec[0], talk[1] + past_vec[1]]
-    print(f"  talk + past vector = {result}")
-    print(f"  talked = {embeddings['talked']}")
-
-    print("\neat : ate :: see : ?")
-    see = embeddings["see"]
-    result = [see[0] + past_vec[0], see[1] + past_vec[1]]
-    print(f"  see + past vector = {result}")
-    print(f"  saw = {embeddings['saw']}")
-
-tense_relationships()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Embedding spaces are not just clusters—they have         |
+|  geometry. Directions correspond to gender, tense,        |
+|  plurals, and country-capital relationships. Analogies    |
+|  become vector arithmetic. This linearity is powerful:    |
+|  you can solve analogies by addition, debias by           |
+|  projection, and discover hidden semantic dimensions      |
+|  with PCA. Understanding this geometry means you can      |
+|  manipulate meaning mathematically.                       |
+-------------------------------------------------------------
 ```
 
 ---
 
-## Mathematical Formulation
+### **11. Quick self-check question**
 
-### Vector Arithmetic
+You have a word embedding space. You compute the vector for "Spain" minus "Madrid" plus "Paris". The closest word to the result is "France" (cosine similarity 0.89). You repeat: "Japan" minus "Tokyo" plus "Paris". The closest word is "France" again (0.92).
 
-```python
+**Question:** What property of the embedding space does this demonstrate? Why does "Paris" act as a "probe" for country vectors? Could you use this to identify capital cities for any country?
 
-def vector_arithmetic():
-    """
-    The math behind analogy solving
-    """
-    print("The Mathematics of Analogies")
-    print("=" * 60)
-
-    print("""
-    Given: a : b :: c : ?
-
-    We want to find d such that:
-    b - a ≈ d - c
-
-    Therefore:
-    d ≈ c + (b - a)
-
-    Example:
-    king : queen :: man : ?
-
-    d = man + (queen - king)
-      = man + gender_vector
-      = woman
-
-    In practice, we find the word whose embedding
-    is closest to c + (b - a).
-    """)
-
-vector_arithmetic()
-```
-
-### Finding the Right Word
-
-```python
-
-def nearest_neighbor():
-    """
-    Finding the answer word
-    """
-    print("Finding the Analogy Answer")
-    print("=" * 60)
-
-    print("""
-    Steps to solve an analogy:
-
-    1. Compute target vector = c + (b - a)
-
-    2. Find word whose embedding is closest
-       to this target vector
-
-    3. Exclude a, b, c from candidates
-
-    Example: king : queen :: man : ?
-
-    target = man + (queen - king)
-           = man + gender_vector
-
-    Find nearest word to target:
-    • woman: 0.95 similarity ✓
-    • person: 0.65 similarity ✗
-    • human: 0.60 similarity ✗
-
-    Answer: woman
-    """)
-
-nearest_neighbor()
-```
+_(Answer hidden below)_
 
 ---
 
-## A Complete Example
+.
 
-```python
+.
 
-import numpy as np
+.
 
-def analogy_demo():
-    """
-    Complete analogy-finding demonstration
-    """
-    print("Complete Analogy Demo")
-    print("=" * 60)
+.
 
-    # Create a simple 3D embedding space
-    embeddings = {
-        "king": np.array([0.9, 0.8, 0.5]),
-        "queen": np.array([0.9, 0.2, 0.5]),
-        "man": np.array([0.3, 0.8, 0.5]),
-        "woman": np.array([0.3, 0.2, 0.5]),
-        "prince": np.array([0.8, 0.8, 0.4]),
-        "princess": np.array([0.8, 0.2, 0.4]),
-        "actor": np.array([0.4, 0.8, 0.3]),
-        "actress": np.array([0.4, 0.2, 0.3]),
-        "paris": np.array([0.9, 0.7, 0.8]),
-        "france": np.array([0.9, 0.1, 0.8]),
-        "rome": np.array([0.7, 0.7, 0.8]),
-        "italy": np.array([0.7, 0.1, 0.8]),
-        "london": np.array([0.5, 0.7, 0.8]),
-        "uk": np.array([0.5, 0.1, 0.8])
-    }
+.
 
-    def cosine_similarity(v1, v2):
-        return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+**Answer:** This demonstrates that the embedding space has a consistent "country-capital" offset. The vector from a country to its capital is roughly constant: e_capital ≈ e_country + Δ. Therefore:
 
-    def solve_analogy(a, b, c, embeddings):
-        """Find d such that a:b :: c:d"""
-        target = embeddings[c] + (embeddings[b] - embeddings[a])
+e_capital - e_country ≈ Δ
 
-        best_word = None
-        best_score = -1
+e_country ≈ e_capital - Δ
 
-        for word, vec in embeddings.items():
-            if word in [a, b, c]:
-                continue
-            score = cosine_similarity(target, vec)
-            if score > best_score:
-                best_score = score
-                best_word = word
+Given e_country + (e_paris - e_france) = e_country + Δ = e_capital (for that country).
 
-        return best_word, best_score
+Thus, "Japan" + (Paris - France) ≈ "Tokyo".
 
-    analogies = [
-        ("man", "woman", "king"),
-        ("man", "woman", "prince"),
-        ("man", "woman", "actor"),
-        ("paris", "france", "rome"),
-        ("paris", "france", "london")
-    ]
+This works because the offset Δ is shared across countries. "Paris" acts as a probe because France is the reference country. To identify a capital city for any country X:
 
-    print("Solving analogies:")
-    for a, b, c in analogies:
-        result, score = solve_analogy(a, b, c, embeddings)
-        print(f"\n  {a} : {b} :: {c} : ?")
-        print(f"  → {result} (similarity: {score:.3f})")
+e_capital_X ≈ e_X + (e_paris - e_france)
 
-analogy_demo()
-```
+You need to know the offset from a known country-capital pair (e.g., France-Paris). Then add that offset to any country vector. This is how analogy-based reasoning works: learn one relationship, apply to others.
 
----
-
-## Beyond Simple Analogies
-
-### Concept Directions
-
-```python
-
-def concept_directions():
-    """
-    Using directions for more than analogies
-    """
-    print("Concept Directions: Beyond Analogies")
-    print("=" * 60)
-
-    print("""
-    We can find directions for ANY concept:
-
-    • Gender direction = woman - man
-    • Plural direction = cats - cat
-    • Past tense direction = walked - walk
-    • Sentiment direction = good - bad
-    • Formality direction = formal - informal
-
-    Then we can:
-
-    1. Measure how much a word has that property
-       e.g., doctor · gender_direction = ? (bias detection)
-
-    2. Add or remove the property
-       e.g., "nurse" - gender_direction = "doctor"? (debiasing)
-
-    3. Find words that vary along that direction
-    """)
-
-concept_directions()
-```
-
-### Bias Detection and Mitigation
-
-```python
-
-def bias_detection():
-    """
-    Using linear structure to detect bias
-    """
-    print("Detecting and Mitigating Bias")
-    print("=" * 60)
-
-    print("""
-    Problem: Embeddings can capture societal biases
-
-    Example: Gender bias in professions
-
-    Compute gender direction = she - he
-
-    Project professions onto this direction:
-
-    • nurse:     strong feminine bias   (large projection)
-    • secretary: strong feminine bias
-    • engineer:  slight masculine bias
-    • doctor:    slight masculine bias
-    • programmer: masculine bias
-
-    Solutions:
-    1. Identify biased directions
-    2. Remove that component from embeddings
-    3. Neutralize the representation
-
-    This is active research area!
-    """)
-
-bias_detection()
-```
-
----
-
-## Properties of Embedding Spaces
-
-| Property           | Description                            | Example                             |
-| ------------------ | -------------------------------------- | ----------------------------------- |
-| Linearity          | Relationships are consistent vectors   | Same gender vector works everywhere |
-| Compositionality   | Meanings can be combined               | "royal" + "female" ≈ "queen"        |
-| Analogies          | a:b :: c:d solved by vector arithmetic | king - man + woman = queen          |
-| Concept directions | Each abstract concept has a direction  | sentiment, tense, formality         |
-| Clustering         | Similar words form neighborhoods       | animals together, vehicles together |
-| Hierarchy          | Nested categories                      | animal > mammal > dog               |
-
----
-
-## Why This Matters for LLMs
-
-### 1. Interpretability
-
-```python
-
-def interpretability():
-    """
-    Understanding what models know
-    """
-    print("Interpretability Through Linear Structure")
-    print("=" * 60)
-
-    print("""
-    Linear structure lets us peek inside:
-
-    • Find what directions the model cares about
-    • Measure bias in representations
-    • Understand how concepts are organized
-    • Identify spurious correlations
-
-    Example: Probing tasks
-    Train a linear classifier on embeddings
-    If it works, the concept is linearly represented.
-    """)
-
-interpretability()
-```
-
-### 2. Controllable Generation
-
-```python
-
-def controllable():
-    """
-    Steering generation with directions
-    """
-    print("Controllable Generation")
-    print("=" * 60)
-
-    print("""
-    We can steer generation by manipulating embeddings:
-
-    • Add "positive sentiment" direction to generate happier text
-    • Add "formal" direction for professional writing
-    • Subtract "biased" direction for fairness
-
-    This is called "steering vectors" or "activation engineering"
-    and works surprisingly well!
-    """)
-
-controllable()
-```
-
-### 3. Cross-lingual Transfer
-
-```python
-
-def cross_lingual():
-    """
-    Linear structure across languages
-    """
-    print("Cross-lingual Linear Structure")
-    print("=" * 60)
-
-    print("""
-    In multilingual embeddings, the SAME directions
-    work across languages:
-
-    English gender vector ≈ French gender vector
-    English plural vector ≈ German plural vector
-
-    This enables:
-    • Translation by vector arithmetic
-    • Cross-lingual analogies
-    • Zero-shot transfer of concepts
-    """)
-
-cross_lingual()
-```
-
----
-
-## Properties Cheat Sheet
-
-| Concept          | Vector Operation | Example                     |
-| ---------------- | ---------------- | --------------------------- |
-| Analogy          | d = c + (b - a)  | king - man + woman = queen  |
-| Gender direction | woman - man      | Add to any word to feminize |
-| Plural direction | cats - cat       | Add to make plural          |
-| Past tense       | walked - walk    | Add to change tense         |
-| Sentiment        | good - bad       | Positive vs negative        |
-| Degree           | very - somewhat  | Intensity modification      |
-
----
-
-## Quick Recap
-
-• Embedding spaces have linear structure—relationships between concepts are captured as consistent vectors that work across many word pairs, like a crystal with repeating patterns
-
-• Analogies become vector arithmetic—famous examples like "king - man + woman = queen" work because the gender direction is the same everywhere in the space
-
-• These properties enable interpretability, bias detection, and controllable generation—we can find concept directions, measure bias, and even steer model outputs by manipulating these linear relationships
-
----
-
-## Mental Hook
-
-> "Embedding spaces are like crystalline structures of meaning—once you discover the vector from 'man' to 'woman', you've found a gender crystal that you can place anywhere in the space to transform kings to queens, boys to girls, and fathers to mothers, all with the same mathematical operation."
+Yes, you could use this to identify capital cities if the embedding space has learned the relationship. Test on "China" + (Paris - France) → "Beijing". Works if the space is sufficiently linear and the country vectors are well-separated. This is how early analogy solvers worked.

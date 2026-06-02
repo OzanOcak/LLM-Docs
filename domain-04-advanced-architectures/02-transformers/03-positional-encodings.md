@@ -1,536 +1,240 @@
-# Positional Encodings
+# Positional encodings
 
-## The Seating Chart Analogy
-
-Imagine you walk into a meeting where everyone is wearing name tags but there are no assigned seats. You know who people are, but you have no idea who sits next to whom, who arrived first, or what the order of speakers is. That's the problem transformers face—they process all words in parallel, so without additional information, "cat sat" and "sat cat" look identical. Positional encodings are like assigning each person a seat number, so the model knows the order of words.
-
-In LLMs, positional encodings are essential because transformers have no built-in sense of sequence. They need to be explicitly told where each word appears in the sentence. This seemingly simple addition is what allows models like GPT to understand that "dog bites man" is very different from "man bites dog."
+## **DOMAIN: ADVANCED ARCHITECTURES | Sub domain: Transformers (The LLM Revolution)**
 
 ---
 
-## The Problem: Transformers Are Order-Blind
+### **1. Why this concept matters**
 
-### Why Position Matters
-
-```python
-
-def order_matters():
-    """
-    Why word order is crucial
-    """
-    print("Why Word Order Matters")
-    print("=" * 60)
-
-    sentence1 = "dog bites man"
-    sentence2 = "man bites dog"
-
-    print(f"Sentence 1: '{sentence1}'")
-    print(f"Sentence 2: '{sentence2}'")
-
-    print("\nSame words, completely different meanings!")
-    print("But transformers process all words in parallel.")
-    print("\nWithout position information:")
-    print("  'dog' at position 1 looks identical to 'dog' at position 3")
-    print("  The model can't tell them apart!")
-
-    print("\nWe need to inject position information somehow.")
-
-order_matters()
-```
-
-### The Parallel Processing Challenge
-
-```text
-
-RNNs: Natural order (sequential)
-Step 1: "dog" ──→ Step 2: "bites" ──→ Step 3: "man"
-           ↑                         ↑
-    Knows it's position 1       Knows it's position 3
-
-Transformers: All at once
-    "dog"    "bites"    "man"
-      ↓         ↓         ↓
-    [???]     [???]     [???]
-
-    All words processed simultaneously!
-    No inherent order information.
-```
+Self-attention has a fatal flaw: it is permutation invariant. The sentence "cat sat on mat" produces the same attention patterns as "mat on sat cat" because the mechanism treats all positions as a set, not a sequence. Word order is everything in language. Without knowing position, "dog bites man" and "man bites dog" are identical to a transformer. Positional encodings solve this by injecting information about each token's position into the input embeddings. This small addition—a carefully crafted sine/cosine pattern—is what gives transformers the ability to understand word order and reason about relative positions.
 
 ---
 
-## The Solution: Positional Encodings
+### **2. Core idea**
 
-### Core Idea
-
-Positional encodings are vectors added to word embeddings to give each word a sense of its position.
-
-```python
-
-def positional_intro():
-    """
-    The basic concept of positional encodings
-    """
-    print("Positional Encodings: Adding Order Information")
-    print("=" * 60)
-
-    print("""
-    Word embedding:      Positional encoding:    Final input:
-    [0.2, -0.5, 0.8]  +  [0.1, 0.0, -0.1]  =  [0.3, -0.5, 0.7]
-         ↑                        ↑                        ↑
-    Word meaning          Position info          Meaning + Position
-
-    Each word gets a unique position signal added to its embedding.
-    """)
-
-    print("\nNow words at different positions have different vectors!")
-    print("'dog' at position 1 ≠ 'dog' at position 3")
-
-positional_intro()
-```
-
-### Visualizing the Addition
-
-```text
-
-Position 1:    "dog" embedding + pos₁ = input₁
-Position 2:    "bites" embedding + pos₂ = input₂
-Position 3:    "man" embedding + pos₃ = input₃
-
-Even though "dog" and "man" use the same word embedding,
-they get different positional signals → different inputs!
-```
+**Positional encodings add a unique vector to each token's embedding based on its position in the sequence, allowing the transformer to distinguish word order using either fixed sinusoidal functions or learnable position embeddings.**
 
 ---
 
-## Types of Positional Encodings
+### **3. Concrete analogy**
 
-### 1. Sinusoidal Encodings (Original Transformer)
+Imagine a row of numbered chairs. Each person (token) sits on a chair. Their identity (embedding) matters, but so does where they sit. "Alice before Bob" is different from "Bob before Alice."
 
-The original Transformer used sine and cosine functions of different frequencies.
+Now imagine you give each person a colored badge. The badge encodes their seat number: red for seat 1, blue for seat 2, green for seat 3. Even if people swap chairs, the badge tells you their original position. This is like positional encoding—a signal added to each token that indicates its place in the sequence.
 
-```python
+But there is a problem: if seats are numbered 1, 2, 3, a model might learn that seat 1000 is "large" and treat it differently from seat 1. Sinusoidal encodings solve this by using waves: position 1000 is a specific combination of sine and cosine values that is unique but not arbitrarily large. The model can also learn position embeddings directly—treating position like a vocabulary of 512 "position tokens."
 
-import math
+---
 
-def sinusoidal_demo():
-    """
-    Sinusoidal positional encodings
-    """
-    print("Sinusoidal Positional Encodings")
-    print("=" * 60)
+### **4. ASCII diagram**
 
-    def get_positional_encoding(pos, d_model=4):
-        """Simplified positional encoding for demonstration"""
-        pe = []
-        for i in range(d_model):
-            if i % 2 == 0:
-                # Sine for even indices
-                value = math.sin(pos / (10000 ** (i / d_model)))
-            else:
-                # Cosine for odd indices
-                value = math.cos(pos / (10000 ** ((i-1) / d_model)))
-            pe.append(value)
-        return pe
-
-    d_model = 4
-    print(f"Positional encodings for dimension {d_model}:")
-    print("-" * 50)
-
-    for pos in range(1, 6):
-        pe = get_positional_encoding(pos, d_model)
-        rounded = [round(x, 3) for x in pe]
-        print(f"Position {pos}: {rounded}")
-
-    print("\nProperties:")
-    print("• Each position has a unique encoding")
-    print("• Works for any sequence length (can extrapolate)")
-    print("• Pattern is consistent: pos₁ - pos₂ relationship is predictable")
-
-sinusoidal_demo()
 ```
+Positional encoding added to word embedding:
 
-### Why Sine and Cosine?
+    Word Embedding (E) + Positional Encoding (P) = Input to Transformer
 
-```python
+    "cat" at position 1:
+    E_cat = [0.8, -0.2, 0.5,  0.1, ...]
+    P_pos1= [0.1,  0.8, -0.3,  0.4, ...]  (from sine/cosine)
+    X₁    = [0.9,  0.6,  0.2,  0.5, ...]  ← final input
 
-def why_sine_cosine():
-    """
-    The intuition behind sinusoidal encodings
-    """
-    print("Why Sine and Cosine?")
-    print("=" * 60)
+    "sat" at position 2:
+    E_sat = [0.3,  0.7, -0.1,  0.2, ...]
+    P_pos2= [0.4,  0.2,  0.9, -0.1, ...]  (different pattern)
+    X₂    = [0.7,  0.9,  0.8,  0.1, ...]
 
-    print("""
-    Sinusoidal encodings have useful properties:
 
-    1. Unique for each position
-       pos₁ ≠ pos₂ → encoding₁ ≠ encoding₂
+Sinusoidal positional encoding matrix (positions vs dimensions):
 
-    2. Bounded values (between -1 and 1)
-       Stable for neural networks
-
-    3. Linear relationships
-       PE(pos + k) can be represented as linear function of PE(pos)
-       This helps the model learn relative positions!
-
-    4. Extrapolates to longer sequences
-       Can handle sentences longer than those seen in training
-    """)
-
-    print("\nThe formula:")
-    print("  PE(pos, 2i)   = sin(pos / 10000^(2i/d_model))")
-    print("  PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))")
-
-why_sine_cosine()
-```
-
-### 2. Learned Positional Embeddings
-
-Some models (like BERT) learn positional embeddings during training.
-
-```python
-
-def learned_positional():
-    """
-    Learned positional embeddings
-    """
-    print("Learned Positional Embeddings")
-    print("=" * 60)
-
-    print("""
-    Instead of fixed sine/cosine functions,
-    let the model learn position representations:
-
-    Position 1: learnable vector p₁
-    Position 2: learnable vector p₂
-    Position 3: learnable vector p₃
+    Position → 0       1       2       3       4       5
+    Dim ↓
+    0        sin(0)  sin(1)  sin(2)  sin(3)  sin(4)  sin(5)
+    1        cos(0)  cos(1)  cos(2)  cos(3)  cos(4)  cos(5)
+    2        sin(0/2) sin(1/2) sin(2/2) sin(3/2) ...
+    3        cos(0/2) cos(1/2) cos(2/2) cos(3/2) ...
+    4        sin(0/4) sin(1/4) sin(2/4) ...
+    5        cos(0/4) cos(1/4) cos(2/4) ...
     ...
 
-    These are trained like word embeddings!
-    """)
-
-    max_length = 512
-    d_model = 768
-
-    print(f"\nBERT uses learned positional embeddings:")
-    print(f"  Max sequence length: {max_length}")
-    print(f"  Embedding dimension: {d_model}")
-    print(f"  Parameters: {max_length} × {d_model} = {max_length * d_model:,}")
-
-    print("\nPros: Can adapt to data")
-    print("Cons: Can't handle sequences longer than training max")
-
-learned_positional()
+    Each row is a wave with different frequency.
+    Each position gets a unique fingerprint across dimensions.
 ```
 
 ---
 
-## A Complete Example
+### **5. Mathematical formulation**
 
-```python
+**Sinusoidal positional encoding (Vaswani et al., 2017):**
 
-def complete_positional_example():
-    """
-    End-to-end example of positional encodings
-    """
-    print("Complete Example: Adding Position to Words")
-    print("=" * 60)
+For position pos and dimension i (0-indexed):
 
-    # Word embeddings (simplified)
-    word_embeddings = {
-        "dog": [0.1, 0.5, -0.2],
-        "bites": [0.3, -0.1, 0.4],
-        "man": [0.2, 0.3, 0.1]
-    }
+If i is even:
 
-    # Positional encodings (simplified)
-    positional_encodings = {
-        1: [0.01, 0.02, 0.01],
-        2: [0.02, 0.01, 0.02],
-        3: [0.01, 0.03, 0.01]
-    }
+$$
+PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)
+$$
 
-    sentence1 = ["dog", "bites", "man"]
-    sentence2 = ["man", "bites", "dog"]
+If i is odd:
 
-    print("Sentence 1: 'dog bites man'")
-    print("-" * 40)
-    for pos, word in enumerate(sentence1, 1):
-        word_emb = word_embeddings[word]
-        pos_enc = positional_encodings[pos]
-        final = [word_emb[i] + pos_enc[i] for i in range(3)]
-        print(f"  Position {pos} - '{word}':")
-        print(f"    Word emb: {word_emb}")
-        print(f"    + Pos enc: {pos_enc}")
-        print(f"    = Final:   {[round(x,2) for x in final]}")
+$$
+PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)
+$$
 
-    print("\nSentence 2: 'man bites dog'")
-    print("-" * 40)
-    for pos, word in enumerate(sentence2, 1):
-        word_emb = word_embeddings[word]
-        pos_enc = positional_encodings[pos]
-        final = [word_emb[i] + pos_enc[i] for i in range(3)]
-        print(f"  Position {pos} - '{word}':")
-        print(f"    Word emb: {word_emb}")
-        print(f"    + Pos enc: {pos_enc}")
-        print(f"    = Final:   {[round(x,2) for x in final]}")
+(Unicode: PE(pos,2i) = sin(pos / 10000^(2i/d_model)), PE(pos,2i+1) = cos(pos / 10000^(2i/d_model)))
 
-    print("\nKey insight: 'dog' at position 1 ≠ 'dog' at position 3!")
-    print("The model can now distinguish word order.")
+**Learnable positional embedding:**
 
-complete_positional_example()
+Treat position as a vocabulary of size max_len (e.g., 512). Each position gets a learnable vector of dimension d_model.
+
+$$
+\mathbf{P} \in \mathbb{R}^{\text{max\_len} \times d_{\text{model}}}
+$$
+
+During training, these vectors are updated via backpropagation.
+
+**Final input to transformer:**
+
+$$
+\mathbf{X}_{\text{input}} = \mathbf{E} + \mathbf{P}
+$$
+
+(Elementwise addition, not concatenation)
+
+**Relative positional encodings (used in some modern LLMs):**
+
+Instead of absolute positions, encode relative distances: how many steps between token i and token j. Used in Transformer-XL, some T5 variants, and Llama (RoPE).
+
+**Rotary Position Embedding (RoPE, used in Llama, GPT-NeoX):**
+
+Rotates queries and keys by angles proportional to position. Preserves relative distance information naturally.
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: Small d_model=4, max_len=6**
+
+Compute PE for pos=2 (third token), d_model=4 → i=0,1 (2i=0, 2i+1=1)
+
+d_model=4, so i=0 and i=1 cover dimensions 0,1,2,3
+
+#### **Step 2: Frequency for i=0**
+
+divisor = 10000^(0/4) = 10000^0 = 1
+
+dim 0 (even): sin(2 / 1) = sin(2) ≈ 0.909
+dim 1 (odd): cos(2 / 1) = cos(2) ≈ -0.416
+
+#### **Step 3: Frequency for i=1**
+
+divisor = 10000^(2/4) = 10000^0.5 = 100
+
+dim 2 (even): sin(2 / 100) = sin(0.02) ≈ 0.020
+dim 3 (odd): cos(2 / 100) = cos(0.02) ≈ 0.9998
+
+#### **Step 4: PE vector for position 2**
+
+PE(2) = [0.909, -0.416, 0.020, 0.9998]
+
+#### **Step 5: PE for position 5 (later token)**
+
+For pos=5:
+
+dim 0: sin(5) ≈ -0.959
+dim 1: cos(5) ≈ 0.284
+dim 2: sin(5/100)=sin(0.05)=0.050
+dim 3: cos(5/100)=cos(0.05)=0.999
+
+PE(5) = [-0.959, 0.284, 0.050, 0.999]
+
+#### **Step 6: Interpret**
+
+Each position has a unique fingerprint. Note how low-frequency dimensions (i=1, dims 2-3) change slowly across positions—they encode coarse position. High-frequency dimensions (i=0, dims 0-1) change rapidly—they encode fine-grained position differences. This multi-scale representation allows the model to distinguish both nearby and distant positions.
+
+#### **Step 7: Why not just use position 1,2,3 as numbers?**
+
+If we used raw numbers [1,2,3,...], large positions (e.g., 1000) would dominate the embedding magnitude. The model would struggle because position 1000 is "larger" than position 1, which has no linguistic meaning. Sinusoidal encodings keep values bounded between -1 and 1, and the pattern allows the model to extrapolate to longer sequences than seen during training.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **Original transformer (Vaswani et al.):** Used sinusoidal encodings. Required for the model to distinguish word order since self-attention is permutation-invariant.
+
+- **BERT:** Uses learnable positional embeddings (absolute positions 0 to 511). Learns position-specific vectors from data rather than fixed sinusoids.
+
+- **GPT-2/GPT-3:** Also use learnable absolute positional embeddings. Works well because pretraining data is massive.
+
+- **Relative positional encodings (Transformer-XL, T5):** Encode distance between tokens, not absolute position. Better for long sequences because relative distances generalize beyond training length.
+
+- **Rotary Position Embedding (RoPE) - Llama, GPT-NeoX, PaLM:** Rotates queries and keys in complex space. Preserves relative position information naturally without adding vectors to embeddings. Currently state-of-the-art for LLMs.
+
+- **ALiBi (Attention with Linear Biases):** Adds a bias to attention scores based on distance (not added to embeddings). Simpler and extrapolates well to longer sequences.
+
+- **No positional encoding?** Some recent work (NoPE) shows transformers can learn position from causal masking alone, but standard practice still includes positional encodings.
+
+---
+
+### **8. Brain-like connection (place cells and grid cells)**
+
+The brain encodes position using two complementary systems. Place cells in the hippocampus fire at specific absolute locations—like absolute positional embeddings. Grid cells in entorhinal cortex fire in repeating hexagonal patterns across space—like sinusoidal positional encodings (periodic, multi-scale). The brain combines both to navigate. Similarly, transformers use both absolute (position embeddings) and relative (attention bias, RoPE) signals to understand word order. The multi-frequency sinusoidal encoding mirrors the brain's use of different spatial scales for coarse and fine localization. Evolution discovered that position encoding requires multiple scales; transformers independently arrived at the same solution.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Positional encodings are just a hack. The transformer should learn order from the data without them."
+
+_Why it is wrong:_ Without positional encodings, self-attention treats sequences as sets. "A B C" and "C B A" produce identical attention outputs because the dot products Q·Kᵀ are the same (just permuted). The transformer has no way to know that order matters. You cannot learn order from data if the architecture has no mechanism to represent it. Positional encodings are not a hack—they are a fundamental requirement for sequence modeling in permutation-invariant architectures. Removing them collapses the transformer to a bag-of-words model, regardless of training data size.
+
+---
+
+### **10. Why This Matters**
+
+```
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Word order is half the meaning of language. "Dog bites    |
+|  man" is news. "Man bites dog" is a different story.       |
+|  Self-attention, left to its own devices, cannot tell     |
+|  the difference. Positional encodings restore the         |
+|  sense of order—the before and after, the cause and       |
+|  effect, the subject and object. Without them, a          |
+|  transformer is just counting words. With them, it        |
+|  understands sentences.                                   |
+-------------------------------------------------------------
 ```
 
 ---
 
-## A Tiny Positional Encoding Implementation
+### **11. Quick self-check question**
 
-```python
+For a sinusoidal positional encoding with d_model=2, what is the PE vector for position pos=0? For pos=π? (Assume division by 10000^(0/2)=1)
 
-import numpy as np
-
-def positional_implementation():
-    """
-    Implement positional encodings from scratch
-    """
-    print("Implementing Positional Encodings")
-    print("=" * 60)
-
-    class PositionalEncoding:
-        def __init__(self, d_model, max_len=100):
-            self.d_model = d_model
-
-            # Create positional encoding matrix
-            pe = np.zeros((max_len, d_model))
-
-            # Position indices (0 to max_len-1)
-            position = np.arange(0, max_len).reshape(-1, 1)
-
-            # Division term: 10000^(2i/d_model)
-            div_term = np.exp(np.arange(0, d_model, 2) * -(math.log(10000.0) / d_model))
-
-            # Apply sine to even indices
-            pe[:, 0::2] = np.sin(position * div_term)
-
-            # Apply cosine to odd indices
-            pe[:, 1::2] = np.cos(position * div_term)
-
-            self.pe = pe
-
-        def get_encoding(self, pos):
-            """Get encoding for a specific position"""
-            if pos < len(self.pe):
-                return self.pe[pos]
-            else:
-                return None
-
-        def visualize(self, num_positions=10):
-            """Show encodings for first few positions"""
-            print(f"\nPositional encodings (first {num_positions} positions, first 4 dims):")
-            print("Pos | Dim0 (sin) | Dim1 (cos) | Dim2 (sin) | Dim3 (cos)")
-            print("-" * 55)
-
-            for pos in range(num_positions):
-                enc = self.pe[pos][:4]
-                print(f"{pos:3d} |   {enc[0]:6.3f}   |   {enc[1]:6.3f}   |   {enc[2]:6.3f}   |   {enc[3]:6.3f}")
-
-    # Create positional encoder
-    pe = PositionalEncoding(d_model=6, max_len=20)
-
-    # Show encodings
-    pe.visualize(8)
-
-    print("\nEach position has a unique pattern!")
-    print("Notice how values stay between -1 and 1.")
-
-positional_implementation()
-```
+_(Answer hidden below)_
 
 ---
 
-## Relative Positional Encodings
+.
 
-### Beyond Absolute Position
+.
 
-Modern models often use relative positional encodings that focus on distances between words.
+.
 
-```python
+.
 
-def relative_positional():
-    """
-    Relative positional encodings
-    """
-    print("Relative Positional Encodings")
-    print("=" * 60)
+.
 
-    print("""
-    Absolute position: "This is word #5"
-    Relative position: "This word is 3 words after that one"
+**Answer:**
 
-    For many tasks, relative distance matters more:
+For d_model=2, only i=0 (dimensions 0 and 1):
 
-    "The cat sat on the mat and then..."
+- dim 0 (even): sin(pos / 1) = sin(pos)
+- dim 1 (odd): cos(pos / 1) = cos(pos)
 
-    It's more useful to know:
-    • "cat" is 2 words before "sat"
-    • "mat" is 4 words after "sat"
+For pos=0: PE = [sin(0), cos(0)] = [0, 1]
 
-    Than to know absolute positions 2 and 6.
-    """)
+For pos=π: PE = [sin(π), cos(π)] = [0, -1]
 
-    print("\nModern models like GPT use relative position information.")
-    print("This helps with generalization to longer sequences.")
-
-relative_positional()
-```
-
-### Relative vs Absolute
-
-| Aspect          | Absolute                   | Relative                 |
-| --------------- | -------------------------- | ------------------------ |
-| What it encodes | Position number (1,2,3...) | Distance between words   |
-| Extrapolation   | Limited by max length      | Works for any length     |
-| Used in         | Original Transformer, BERT | GPT, modern LLMs         |
-| Intuition       | "Word at position 5"       | "Word 3 positions later" |
-
----
-
-## Why This Matters for LLMs
-
-### 1. Every LLM Needs Position Information
-
-```python
-
-def llm_positional():
-    """
-    Positional encodings in popular models
-    """
-    print("Positional Encodings in Popular LLMs")
-    print("=" * 60)
-
-    models = {
-        "Transformer (original)": "Sinusoidal encodings",
-        "BERT": "Learned positional embeddings (max 512)",
-        "GPT-2": "Learned positional embeddings",
-        "GPT-3": "Learned positional embeddings",
-        "Llama": "Rotary Position Embeddings (RoPE) - relative",
-        "RoBERTa": "Learned positional embeddings"
-    }
-
-    for model, encoding in models.items():
-        print(f"  • {model}: {encoding}")
-
-llm_positional()
-```
-
-### 2. Rotary Position Embeddings (RoPE)
-
-```python
-
-def rope():
-    """
-    Rotary Position Embeddings (used in Llama)
-    """
-    print("Rotary Position Embeddings (RoPE)")
-    print("=" * 60)
-
-    print("""
-    RoPE is a clever relative positional encoding:
-
-    Instead of adding position to embeddings,
-    it ROTATES the embedding vectors based on position!
-
-    Think of it like:
-    • Word embedding is an arrow pointing in some direction
-    • Position determines how much to rotate that arrow
-    • The angle between arrows encodes relative distance
-    """)
-
-    print("\nAdvantages:")
-    print("• Naturally captures relative positions")
-    print("• Decays with distance (nearby words more similar)")
-    print("• Works for any sequence length")
-    print("\nUsed in: Llama, PaLM, many modern LLMs")
-
-rope()
-```
-
-### 3. The Context Window Challenge
-
-```python
-
-def context_window():
-    """
-    Positional encodings and context windows
-    """
-    print("Positional Encodings and Context Windows")
-    print("=" * 60)
-
-    print("""
-    The context window (e.g., 2048, 8192, 128K tokens)
-    is partly determined by positional encodings:
-
-    • Learned embeddings: Hard limit (can't go beyond trained length)
-    • Sinusoidal: Theoretically unlimited, but may degrade
-    • RoPE: Can extrapolate better than learned
-
-    This is why newer models have much larger context windows!
-    """)
-
-    models_context = {
-        "BERT": "512 tokens",
-        "GPT-3": "2048 tokens",
-        "GPT-4": "32K-128K tokens",
-        "Claude": "100K-200K tokens",
-        "Gemini": "1M tokens (with special encoding)"
-    }
-
-    print("\nContext windows:")
-    for model, context in models_context.items():
-        print(f"  • {model}: {context}")
-
-context_window()
-```
-
-### 4. Positional Information Flow
-
-```text
-
-Without position:    With position:
-    [cat]                [cat+pos₁]
-      ↓                     ↓
-    Self-attention      Self-attention
-      ↓                     ↓
-    [???]                [cat+context]
-
-    Can't tell if       Knows "cat" was
-    "cat" was first     first word
-    or third
-```
-
----
-
-## Positional Encoding Cheat Sheet
-
-| Type       | Formula              | Pros                    | Cons                |
-| ---------- | -------------------- | ----------------------- | ------------------- |
-| Sinusoidal | sin/cos functions    | Extrapolates, no params | Fixed pattern       |
-| Learned    | Trainable embeddings | Adapts to data          | Fixed max length    |
-| Relative   | Based on distances   | Better for length       | More complex        |
-| RoPE       | Rotation matrices    | Best of both            | Newer, less studied |
-
----
-
-## Quick Recap
-
-• Positional encodings add order information to word embeddings—like assigning seat numbers so the model knows that "dog bites man" is different from "man bites dog"
-
-• They come in different flavors—sinusoidal (fixed math functions), learned (trained like embeddings), and relative (focus on distances between words)
-
-• Modern LLMs use sophisticated positional encodings like RoPE—which rotate vectors based on position, naturally capturing relative distances and enabling much longer context windows
-
----
-
-## Mental Hook
-
-> "Positional encodings are the invisible ink that marks each word's place in line—without them, transformers would see 'cat sat' and 'sat cat' as identical twins, unable to tell who did what to whom."
+The encoding produces a unit circle in 2D space. As position increases, the encoding traces the unit circle, returning to the same point every 2π steps. This periodic property means sinusoidal encodings are not unique—positions 0 and 2π have the same encoding! In practice, the division by 10000^(2i/d_model) makes frequencies very low for higher dimensions, so periodicity is extremely long (e.g., 10000 steps). For d_model=2 with no frequency scaling, the ambiguity is problematic, which is why real transformers use higher dimensions with different frequencies.

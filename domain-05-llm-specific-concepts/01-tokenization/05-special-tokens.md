@@ -1,584 +1,266 @@
-# Special Tokens
+# Special tokens
 
-## The Stage Manager Analogy
-
-Imagine a theater production. Before the play starts, the stage manager calls "Places!" (actors get ready). During the play, there are cues for entrances and exits. At the end, "Curtain!" signals the conclusion. These aren't part of the script, but they're essential for the performance. That's what special tokens do for LLMs—they're markers that tell the model where sentences begin and end, when to separate different parts, and what task to perform.
-
-In LLMs, special tokens are crucial for understanding structure. They mark boundaries, separate different pieces of text, and even tell the model what task to perform. Without them, the model would see a continuous stream of words with no indication of where one sentence ends and another begins, or what it's supposed to do with the text.
+## **DOMAIN: LLM-SPECIFIC CONCEPTS | Sub domain: Tokenization**
 
 ---
 
-## What Are Special Tokens?
+### **1. Why this concept matters**
 
-### The Core Idea
-
-Special tokens are reserved tokens in the vocabulary that have specific meanings and functions, not representing actual words.
-
-```text
-
-Regular tokens: "The" "cat" "sat" "on" "the" "mat"
-
-With special tokens:
-[CLS] The cat sat on the mat [SEP]
-
-[CLS] = "This is for classification"
-[SEP] = "This is the end of a segment"
-```
-
-```python
-
-def special_tokens_intro():
-    """
-    The basic concept of special tokens
-    """
-    print("Special Tokens: The Stage Directions of LLMs")
-    print("=" * 60)
-
-    print("""
-    Special tokens are like markup language for text:
-
-    • They're not real words
-    • They have special meanings
-    • They guide model behavior
-    • They're part of the vocabulary
-    """)
-
-    print("\nAnalogy: Like HTML tags that tell the browser")
-    print("how to display content, not the content itself.")
-
-special_tokens_intro()
-```
+A raw text corpus contains only words, numbers, punctuation, and spaces. But language models need more: signals for the start and end of a sequence, separators between sentences, a marker for masked words to predict, and boundaries between system and user messages in a chat. These are special tokens. They are not part of the natural language vocabulary but are inserted during preprocessing to guide the model's behavior. Every LLM has them—[CLS], [SEP], <s>, </s>, <|im_start|>, and many others. Understanding special tokens means understanding how to communicate structure to a model that only sees token IDs.
 
 ---
 
-## Types of Special Tokens
+### **2. Core idea**
 
-### 1. Structure Tokens
+**Special tokens are artificial tokens added to the vocabulary that carry structural meaning (e.g., sequence start, end, separation, masking) and are never part of the natural text, allowing the model to learn task-specific behaviors.**
 
-These tokens mark the beginning, end, and boundaries of text.
+---
 
-```python
+### **3. Concrete analogy**
 
-def structure_tokens():
-    """
-    Tokens that define text structure
-    """
-    print("Structure Tokens: Marking Boundaries")
-    print("=" * 60)
+Imagine you are sending a telegram in the 1900s. Your message is just words: "SELL STOCK." But the telegraph operator needs signals to know where the message starts and ends, who it is from, and whether it is urgent.
 
-    tokens = {
-        "[CLS]": "Classification token (always first in BERT)",
-        "[SEP]": "Separator between sentences/segments",
-        "[EOS]": "End of sequence (in generation models)",
-        "[BOS]": "Beginning of sequence",
-        "<s>": "Start token (Llama, T5)",
-        "</s>": "End token (Llama, T5)",
-        "<|endoftext|>": "GPT's end token"
-    }
+So you use special codes:
 
-    for token, purpose in tokens.items():
-        print(f"  • {token}: {purpose}")
+- <START> marks the beginning
+- <END> marks the end
+- <SENDER> identifies you
+- <URGENT> flags priority
 
-    print("\nExample with BERT:")
-    print("  [CLS] I love this movie [SEP] It was great [SEP]")
+These codes are not part of the message content. They are meta-instructions to the system.
 
-structure_tokens()
+Special tokens in LLMs work the same way. The model sees [CLS] and knows "this token's output will be used for classification." It sees <|im_end|> and knows "the assistant's response ends here." These tokens shape the model's behavior without appearing in the natural text the model is trained to generate.
+
+---
+
+### **4. ASCII diagram**
+
 ```
+Common special tokens across different models:
 
-### 2. Control Tokens
+BERT (Encoder-only):
+    [CLS] - Classification token (output for aggregate representation)
+    [SEP] - Separator token (between sentences, or query vs passage)
+    [MASK] - Masked token (for MLM pre-training)
+    [UNK] - Unknown token (fallback for out-of-vocabulary)
+    [PAD] - Padding token (for batching sequences of different lengths)
 
-These tokens tell the model what task to perform.
 
-```python
+GPT (Decoder-only, using <|...|> style):
+    <|endoftext|> - End of document / separator
+    <|im_start|> - Start of chat message (system/user/assistant)
+    <|im_end|> - End of chat message
 
-def control_tokens():
-    """
-    Tokens that control model behavior
-    """
-    print("Control Tokens: Telling the Model What to Do")
-    print("=" * 60)
 
-    print("""
-    T5-style task prefixes:
+Llama (using special tokens):
+    <s> - Start of sequence (BOS)
+    </s> - End of sequence (EOS)
+    <unk> - Unknown token
 
-    "translate English to German: Hello world"
-    "summarize: The long article text..."
-    "question: What is the capital of France? context: France is a country..."
 
-    These aren't special tokens in vocabulary,
-    but they act like instructions.
-    """)
+T5 (SentencePiece, uses sentinel tokens):
+    <extra_id_0>, <extra_id_1>, ... - For span corruption pre-training
 
-    print("\nSpecial control tokens in some models:")
-    print("  • <pad>: Padding token")
-    print("  • <unk>: Unknown token")
-    print("  • <mask>: Masked token (BERT training)")
-    print("  • <sep>: Separator (some models)")
-    print("  • <cls>: Classification token (some models)")
 
-control_tokens()
-```
+Example: BERT input for sentence pair
 
-### 3. Training Tokens
+    [CLS] "cat sat" [SEP] "the cat slept" [SEP]
+       ↓       ↓        ↓         ↓            ↓
+    Token IDs: 101   ...   102    ...         102
 
-These tokens are used during training but may not appear in inference.
+    Model output: [CLS] representation used for classification
 
-```python
 
-def training_tokens():
-    """
-    Tokens used during training
-    """
-    print("Training Tokens: The Learning Helpers")
-    print("=" * 60)
+Example: Chat format with special tokens (Llama 3 style)
 
-    tokens = {
-        "[MASK]": "Masked token for BERT training",
-        "<mask>": "Mask token in some models",
-        "<pad>": "Padding to make batches uniform",
-        "[UNK]": "Unknown word (older models)"
-    }
-
-    for token, purpose in tokens.items():
-        print(f"  • {token}: {purpose}")
-
-    print("\nBERT's masked language modeling:")
-    print("  Input: The [MASK] sat on the mat")
-    print("  Target: cat")
-    print("  Model learns to predict masked words")
-
-training_tokens()
+    <|begin_of_text|>
+    <|start_header_id|>system<|end_header_id|>
+    You are a helpful assistant.
+    <|eot_id|>
+    <|start_header_id|>user<|end_header_id|>
+    What is 2+2?
+    <|eot_id|>
+    <|start_header_id|>assistant<|end_header_id|>
+    2+2 = 4.
+    <|eot_id|>
 ```
 
 ---
 
-## Special Tokens by Model Family
+### **5. Mathematical formulation**
 
-### BERT Family
+Let V be the regular vocabulary (words, subwords, characters/bytes). Define special tokens S.
 
-```python
+The extended vocabulary:
 
-def bert_special_tokens():
-    """
-    Special tokens in BERT
-    """
-    print("BERT Family Special Tokens")
-    print("=" * 60)
+$$
+V_{\text{total}} = V \cup S
+$$
 
-    print("""
-    BERT's vocabulary includes:
+Special tokens are assigned unique IDs, just like regular tokens.
 
-    [CLS] - First token always
-          • Final representation used for classification
-          • Aggregates whole sequence information
+**Special token roles:**
 
-    [SEP] - Separator token
-          • Marks end of sentence/segment
-          • Helps model distinguish different parts
+- **BOS (Beginning of Sequence):** Always inserted at the start of input. For decoder-only models, enables the model to begin generation.
 
-    [MASK] - Masked token
-          • Used only during training
-          • Model learns to predict original word
+- **EOS (End of Sequence):** Marks termination. During training, loss is not computed after EOS. During inference, generation stops when EOS is produced.
 
-    [PAD] - Padding token
-          • Makes all sequences same length in batch
-          • Attention masks ignore these
+- **PAD (Padding):** For batching sequences of different lengths. Padding tokens are masked in attention (ignored) and ignored in loss computation.
 
-    [UNK] - Unknown token
-          • Rare with subword tokenization
-          • Fallback for truly unknown chars
-    """)
+- **SEP (Separator):** Used in BERT to separate sentences. Helps the model learn sentence boundaries.
 
-    print("Example BERT input:")
-    print("  [CLS] I love this movie [SEP] It was great [SEP]")
+- **CLS (Classification):** Token whose final hidden state is used as aggregate representation for classification tasks.
 
-bert_special_tokens()
+- **MASK:** Used in masked language modeling. The model must predict the original token.
+
+- **UNK (Unknown):** Fallback for characters/tokens not in vocabulary. Modern LLMs (byte-level BPE, SentencePiece) rarely use UNK.
+
+**Attention mask for special tokens:**
+
+$$
+\text{AttentionMask}(i) = \begin{cases} 0 & \text{if token i is PAD} \\ 1 & \text{otherwise} \end{cases}
+$$
+
+**Loss mask for special tokens:**
+
+During training, loss for special tokens (e.g., PAD, BOS, separator tokens) is often masked out (ignored) because the model does not need to learn to predict them.
+
+---
+
+### **6. Worked example (step-by-step)**
+
+#### **Step 1: BERT-style classification**
+
+Task: Sentiment analysis of "I love NLP!"
+
+Preprocessing:
+
+1. Add [CLS] at start, [SEP] at end
+2. Tokenize (WordPiece)
+
+Result tokens:
+[CLS] I love NLP ! [SEP]
+Token IDs: 101 1045 2293 17953 999 102
+
+#### **Step 2: Model forward pass**
+
+Model processes all tokens, produces hidden states. The hidden state corresponding to [CLS] (position 0) is passed to a classification head. The model does not classify each word; it uses the aggregated [CLS] representation.
+
+#### **Step 3: Loss computation**
+
+Loss is computed only on the classification output (binary cross-entropy). The model never has to predict [CLS] or [SEP] as outputs—they are only input tokens.
+
+#### **Step 4: GPT generation**
+
+Prompt: "2+2="
+
+Tokenizer adds BOS if configured: <s> 2 + 2 =
+
+Model generates: "4" then <EOS>
+
+Sequence: <s> 2 + 2 = 4 <EOS>
+
+During training, loss is computed on all tokens except PAD. The model learns to predict the next token, including special tokens (EOS).
+
+#### **Step 5: Chat conversation (Llama 3 format)**
+
+System: "You are a helpful assistant."
+User: "What is 2+2?"
+
+Special token sequence:
+<|begin_of_text|>
+<|start_header_id|>system<|end_header_id|>
+You are a helpful assistant.
+<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+What is 2+2?
+<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
+2+2 = 4.
+<|eot_id|>
+
+The model learns that after <|start_header_id|>assistant<|end_header_id|>, it should generate a helpful response until <|eot_id|>. Special tokens encode the conversation structure.
+
+---
+
+### **7. How this appears inside neural networks and LLMs**
+
+- **BERT:** [CLS], [SEP], [MASK], [UNK], [PAD]. [CLS] output used for classification. [SEP] separates sentences in NSP (next sentence prediction, now optional).
+
+- **GPT-2/3/4:** <|endoftext|> as document separator. No BOS (implicit start). GPT-4 chat uses special tokens (less documented, but structure similar to Llama).
+
+- **Llama (Meta):** <s> (BOS), </s> (EOS), <unk>. For chat: <|begin_of_text|>, <|start_header_id|>, <|end_header_id|>, <|eot_id|>. These are explicitly part of the training data format.
+
+- **T5:** No special tokens for BOS/EOS. Uses sentinel tokens <extra_id_0> for span corruption. Relies on relative position embeddings.
+
+- **ChatML (OpenAI format):** <|im_start|>, <|im_end|> for system, user, assistant roles.
+
+- **PAD token and attention masking:** Essential for batching. PAD tokens are ignored in attention (mask = 0) and excluded from loss.
+
+- **Special token IDs are fixed:** Once tokenizer is trained, special tokens get fixed IDs (e.g., 0 for PAD, 1 for UNK, 2 for BOS, 3 for EOS). These are never merged with other tokens.
+
+---
+
+### **8. Brain-like connection (pragmatic markers)**
+
+Human speech uses words that are not part of the propositional content but guide conversation structure: "um," "well," "so," "okay." These are pragmatic markers. They signal turn-taking ("so..."), topic shifts ("now then"), or discourse boundaries. Special tokens in LLMs serve the same function: they are not about the content but about the structure. They tell the model "this is the start," "this is the end," "here comes the user," "here comes the assistant." The brain has dedicated mechanisms (e.g., right-hemisphere language areas) for processing these pragmatic signals. Special tokens are the LLM's pragmatic markers.
+
+---
+
+### **9. Common misunderstanding and why it is wrong**
+
+_Misunderstanding:_ "Special tokens are just implementation details. I can ignore them and just use raw text."
+
+_Why it is wrong:_ Without special tokens, the model does not know where a sequence starts or ends. Try chatting with a model that never saw <|im_start|>user tokens—it will not know who is speaking. For classification, without [CLS] or equivalent, you would have to pool over all token representations arbitrarily. Special tokens are not optional. They are how the model learns task structure. Removing them collapses the model to pure next-token prediction without any guidance. In chat, special tokens are essential for distinguishing system, user, and assistant messages—without them, the model cannot learn the conversational format.
+
+---
+
+### **10. Why This Matters**
+
 ```
-
-### GPT Family
-
-```python
-
-def gpt_special_tokens():
-    """
-    Special tokens in GPT
-    """
-    print("GPT Family Special Tokens")
-    print("=" * 60)
-
-    print("""
-    GPT uses simpler special tokens:
-
-    <|endoftext|> - End of sequence
-                  • Marks end of document
-                  • Separates different examples
-                  • Used as default separator
-
-    No [CLS], [SEP], or [MASK] - GPT generates, doesn't classify
-
-    GPT-3/ChatGPT added special tokens for chat:
-    <|im_start|>user
-    <|im_start|>assistant
-    <|im_end|>
-    """)
-
-    print("\nChat format example:")
-    print("  <|im_start|>user")
-    print("  What's the capital of France?")
-    print("  <|im_end|>")
-    print("  <|im_start|>assistant")
-    print("  Paris")
-    print("  <|im_end|>")
-
-gpt_special_tokens()
-```
-
-### T5 Family
-
-```python
-
-def t5_special_tokens():
-    """
-    Special tokens in T5
-    """
-    print("T5 Family Special Tokens")
-    print("=" * 60)
-
-    print("""
-    T5 uses SentencePiece with special tokens:
-
-    <s> - Start token
-        • Beginning of sequence
-
-    </s> - End token
-        • End of sequence
-        • Also used as separator
-
-    <pad> - Padding token
-        • Makes batches uniform
-
-    T5 also uses task prefixes as regular text:
-    "translate English to German: "
-    "summarize: "
-    "question: "
-    """)
-
-    print("\nExample T5 input:")
-    print("  <s> translate English to German: Hello world </s>")
-
-t5_special_tokens()
-```
-
-### Llama Family
-
-```python
-
-def llama_special_tokens():
-    """
-    Special tokens in Llama
-    """
-    print("Llama Family Special Tokens")
-    print("=" * 60)
-
-    print("""
-    Llama uses SentencePiece with:
-
-    <s> - Beginning of sequence
-    </s> - End of sequence
-    <unk> - Unknown (rarely used)
-
-    Llama 2 chat format:
-    [INST] Instruction [/INST] Response </s>
-    [INST] Another question [/INST] Answer </s>
-
-    The [INST] and [/INST] are special tokens
-    that mark instruction boundaries.
-    """)
-
-    print("\nLlama chat example:")
-    print("  <s>[INST] What's 2+2? [/INST] 4 </s>")
-
-llama_special_tokens()
+-------------------------------------------------------------
+|  WHY THIS MATTERS                                         |
+|                                                           |
+|  Text alone has no structure. There is no marker for     |
+|  "this is the beginning of the input" or "this is the    |
+|  separator between sentences." Special tokens provide     |
+|  this structure. They turn a raw string into a formatted  |
+|  message the model can parse. [CLS] aggregates for        |
+|  classification. <|im_start|> marks speaker turns. </s>    |
+|  signals end of generation. Without special tokens,       |
+|  your model is just guessing at the task. With them,      |
+|  you can communicate intent.                              |
+-------------------------------------------------------------
 ```
 
 ---
 
-## Special Tokens in Action
+### **11. Quick self-check question**
 
-### BERT-Style Processing
+You are fine-tuning a pre-trained GPT model for a multi-turn chat application. The base model's vocabulary includes <|endoftext|> but not chat-specific special tokens.
 
-```python
+**Question:** How do you modify the tokenizer to support chat format (system, user, assistant turns)? What special tokens would you add? What must you do with the model's embedding matrix?
 
-def bert_processing():
-    """
-    How BERT uses special tokens
-    """
-    print("BERT Processing with Special Tokens")
-    print("=" * 60)
-
-    sentence1 = "I love this movie"
-    sentence2 = "It was great"
-
-    print(f"Sentence 1: '{sentence1}'")
-    print(f"Sentence 2: '{sentence2}'")
-
-    # Tokenize (simulated)
-    tokens1 = ["I", "love", "this", "movie"]
-    tokens2 = ["It", "was", "great"]
-
-    # Add special tokens
-    bert_input = ["[CLS]"] + tokens1 + ["[SEP]"] + tokens2 + ["[SEP]"]
-
-    print("\nBERT input with special tokens:")
-    print(f"  {bert_input}")
-
-    print("\nWhat each token does:")
-    print("  [CLS] - Final representation used for classification")
-    print("  [SEP] - Separates the two sentences")
-    print("  [SEP] - Marks end of second sentence")
-
-    # Attention mask (1 = real token, 0 = padding)
-    attention_mask = [1] * len(bert_input)
-
-    print(f"\nAttention mask: {attention_mask}")
-    print("  (1 = attend to this token)")
-
-bert_processing()
-```
-
-### Generation with Special Tokens
-
-```python
-
-def generation_with_special():
-    """
-    How generation models use special tokens
-    """
-    print("Generation with Special Tokens")
-    print("=" * 60)
-
-    prompt = "The capital of France is"
-
-    print(f"Prompt: '{prompt}'")
-
-    # Simulated generation
-    print("\nGeneration process:")
-    print("  Step 1: Model sees prompt")
-    print("  Step 2: Generates ' Paris'")
-    print("  Step 3: Generates '</s>' (end token)")
-    print("  Step 4: Stops because end token generated")
-
-    print("\nFull sequence with special tokens:")
-    print("  <s> The capital of France is Paris </s>")
-
-    print("\nWithout end token, model would generate forever!")
-
-generation_with_special()
-```
-
-### Padding and Attention Masks
-
-```python
-
-def padding_demo():
-    """
-    How padding works in batches
-    """
-    print("Padding and Attention Masks")
-    print("=" * 60)
-
-    # Three sequences of different lengths
-    sequences = [
-        ["[CLS]", "I", "love", "it", "[SEP]"],
-        ["[CLS]", "Great", "movie", "[SEP]"],
-        ["[CLS]", "Wow", "[SEP]"]
-    ]
-
-    print("Original sequences:")
-    for i, seq in enumerate(sequences):
-        print(f"  Seq {i+1}: {seq}")
-
-    # Pad to same length
-    max_len = max(len(s) for s in sequences)
-    padded = []
-    attention_masks = []
-
-    for seq in sequences:
-        pad_len = max_len - len(seq)
-        padded_seq = seq + ["[PAD]"] * pad_len
-        mask = [1] * len(seq) + [0] * pad_len
-
-        padded.append(padded_seq)
-        attention_masks.append(mask)
-
-    print("\nPadded sequences:")
-    for i, seq in enumerate(padded):
-        print(f"  Seq {i+1}: {seq}")
-
-    print("\nAttention masks (1=real, 0=padding):")
-    for i, mask in enumerate(attention_masks):
-        print(f"  Seq {i+1}: {mask}")
-
-    print("\nModel ignores [PAD] tokens during attention!")
-
-padding_demo()
-```
+_(Answer hidden below)_
 
 ---
 
-## Special Tokens Comparison Table
+.
 
-| Token   | BERT      | GPT | T5  | Llama | Purpose           |
-| ------- | --------- | --- | --- | ----- | ----------------- | --- | ---------- |
-| [CLS]   | ✓         | -   | -   | -     | Classification    |
-| [SEP]   | ✓         | -   | -   | -     | Separator         |
-| [MASK]  | ✓         | -   | -   | -     | Training          |
-| <s>     | -         | -   | ✓   | ✓     | Start             |
-| </s>    | -         | -   | ✓   | ✓     | End               |
-| <       | endoftext | >   | -   | ✓     | -                 | -   | End        |
-| [PAD]   | ✓         | ✓   | ✓   | ✓     | Padding           |
-| [INST]  | -         | -   | -   | ✓     | Instruction start |
-| [/INST] | -         | -   | -   | ✓     | Instruction end   |
-| <       | im_start  | >   | -   | ✓     | -                 | -   | Chat start |
-| <       | im_end    | >   | -   | ✓     | -                 | -   | Chat end   |
+.
 
----
+.
 
-## Why This Matters for LLMs
+.
 
-### 1. They Enable Task Specification
+.
 
-```python
+**Answer:** You need to add new special tokens: e.g., <|im_start|>, <|im_end|>, and role tokens (system, user, assistant). Steps:
 
-def task_specification():
-    """
-    How special tokens specify tasks
-    """
-    print("Special Tokens Enable Task Specification")
-    print("=" * 60)
+1. Add these tokens to the tokenizer's vocabulary (reserve new IDs)
+2. Expand the model's embedding matrix to include these new token IDs (resize token embeddings). New embeddings can be initialized from existing token embeddings (e.g., copy the embedding of <|endoftext|> for <|im_start|> to start).
+3. Fine-tune the model on chat data formatted with these special tokens.
 
-    examples = {
-        "Classification (BERT)": "[CLS] This movie is great [SEP]",
-        "Sentence pair (BERT)": "[CLS] First sentence [SEP] Second [SEP]",
-        "Translation (T5)": "<s> translate English to German: Hello </s>",
-        "Chat (GPT)": "<|im_start|>user\nHello<|im_end|>\n<|im_start|>assistant\nHi<|im_end|>",
-        "Instruction (Llama)": "<s>[INST] Tell me a joke [/INST]"
-    }
+Without these steps, the tokenizer will treat <|im_start|> as unknown (or split into subwords it does know, losing the single-token semantics). The model would not have embedding vectors for these new tokens and could not process the chat format correctly.
 
-    for task, example in examples.items():
-        print(f"  • {task}: {example}")
-
-task_specification()
-```
-
-### 2. They Control Generation
-
-```python
-
-def generation_control():
-    """
-    How special tokens control generation
-    """
-    print("Special Tokens Control Generation")
-    print("=" * 60)
-
-    print("""
-    Generation loop:
-
-    1. Start with <s> or prompt
-    2. Generate next token
-    3. If token == </s> or <|endoftext|>: STOP
-    4. Otherwise, append and continue
-
-    This is why models know when to stop!
-    """)
-
-    print("\nWithout end tokens:")
-    print("  Model: 'The capital of France is Paris the capital of...'")
-    print("  (continues forever!)")
-
-generation_control()
-```
-
-### 3. They Enable Multi-Task Learning
-
-```python
-
-def multi_task():
-    """
-    Special tokens enable multiple tasks in one model
-    """
-    print("Special Tokens Enable Multi-Task Learning")
-    print("=" * 60)
-
-    print("""
-    T5 can do many tasks with the same model:
-
-    Task specified by prefix:
-    • "summarize: article text" → summary
-    • "translate English to German: Hello" → Hallo
-    • "cola sentence: This is grammatical." → acceptable
-
-    No need for different model heads!
-    """)
-
-multi_task()
-```
-
-### 4. They Structure Conversations
-
-```python
-
-def conversation():
-    """
-    Special tokens for chat
-    """
-    print("Special Tokens Structure Conversations")
-    print("=" * 60)
-
-    print("""
-    Modern chat models use special tokens to track dialogue:
-
-    <|im_start|>user
-    What's the weather?<|im_end|>
-    <|im_start|>assistant
-    It's sunny!<|im_end|>
-    <|im_start|>user
-    Great!<|im_end|>
-
-    The model learns the pattern:
-    • Who is speaking
-    • When turns change
-    • Conversation history
-    """)
-
-conversation()
-```
-
----
-
-## Special Tokens Cheat Sheet
-
-| Model Family | Start | End   | Separator       | Special       |
-| ------------ | ----- | ----- | --------------- | ------------- | --- | --- | -------- | ---- | ------ | --- |
-| BERT         | [CLS] | [SEP] | [SEP]           | [MASK]        |
-| GPT          | -     | <     | endoftext       | >             | -   | <   | im_start | >, < | im_end | >   |
-| T5           | <s>   | </s>  | </s>            | Task prefixes |
-| Llama        | <s>   | </s>  | [INST], [/INST] | <unk>         |
-| Common       | -     | -     | -               | [PAD]         |
-
----
-
-## Quick Recap
-
-• Special tokens are like stage directions for LLMs—they mark beginnings ([CLS], <s>), endings ([SEP], </s>), and structure how the model should interpret and generate text
-
-• Different model families use different special tokens—BERT uses [CLS] and [SEP], GPT uses <|endoftext|>, T5 and Llama use <s> and </s>, each designed for their specific architecture
-
-• Special tokens enable critical functionality—they tell the model when to stop generating, separate different parts of input, specify tasks, and structure multi-turn conversations
-
----
-
-## Mental Hook
-
-> "Special tokens are the stage directions of language models—they're not part of the dialogue, but without them, the actors wouldn't know when to enter, when to exit, or who should speak next."
+Alternatively, use a chat template format that the base tokenizer already handles (e.g., the model's native chat format). Many pre-trained models already include chat special tokens (Llama, Mistral). Check before adding.
