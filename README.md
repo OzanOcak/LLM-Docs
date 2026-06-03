@@ -1,6 +1,6 @@
 # ML/LLM Documentation
 
-Complete guide to Machine Learning, Deep Learning, and Large Language Models.
+Unlike traditional machine learning resources that separate pure math from engineering, this guide provides a direct, uninterrupted path from foundational linear algebra straight to production-grade LLM optimization. Every article strips away academic jargon to give you the exact intuition needed to build and scale modern AI models.
 
 ---
 
@@ -211,7 +211,7 @@ _The LLM's memory and knowledge access_ (19 articles)
 
 ---
 
-## 🚀 Quick Stats
+## Quick Stats
 
 | Domain                        | Subdomains | Articles |
 | ----------------------------- | ---------- | -------- |
@@ -225,7 +225,7 @@ _The LLM's memory and knowledge access_ (19 articles)
 
 ---
 
-## 📖 Learning Path
+## Learning Path
 
 1. **Beginner** → Domains 01 → 02 → 03
 2. **Intermediate** → Domains 04 → 05
