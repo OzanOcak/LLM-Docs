@@ -1,10 +1,10 @@
-# 🧠 ML/LLM Documentation
+# ML/LLM Documentation
 
 Complete guide to Machine Learning, Deep Learning, and Large Language Models.
 
 ---
 
-## 📚 Domain 01: Mathematical Foundations
+## Domain 01: Mathematical Foundations
 
 _The language ML speaks_ (16 articles)
 
@@ -35,7 +35,7 @@ _The language ML speaks_ (16 articles)
 
 ---
 
-## 📚 Domain 02: Machine Learning Fundamentals
+## Domain 02: Machine Learning Fundamentals
 
 _The core concepts_ (13 articles)
 
@@ -60,7 +60,7 @@ _The core concepts_ (13 articles)
 
 ---
 
-## 📚 Domain 03: Deep Learning Foundations
+## Domain 03: Deep Learning Foundations
 
 _The neural network layer_ (13 articles)
 
@@ -85,7 +85,7 @@ _The neural network layer_ (13 articles)
 
 ---
 
-## 📚 Domain 04: Advanced Architectures
+## Domain 04: Advanced Architectures
 
 _Where LLMs emerge_ (13 articles)
 
@@ -110,7 +110,7 @@ _Where LLMs emerge_ (13 articles)
 
 ---
 
-## 📚 Domain 05: LLM-Specific Concepts
+## Domain 05: LLM-Specific Concepts
 
 _What makes LLMs special_ (16 articles)
 
@@ -141,7 +141,7 @@ _What makes LLMs special_ (16 articles)
 
 ---
 
-## 📚 Domain 06: Vector Space & Retrieval
+## Domain 06: Vector Space & Retrieval
 
 _The LLM's memory and knowledge access_ (19 articles)
 
