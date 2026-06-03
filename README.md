@@ -4,6 +4,26 @@ Unlike traditional machine learning resources that separate pure math from engin
 
 ---
 
+**Stats:** 6 Domains | 16 Subdomains | 90 Deep-Dive Articles
+
+---
+
+## Our 11-Step Learning Framework
+
+Every single one of the 90 articles in this repository follows a strict, predictable framework designed to target every learning style (visual, mathematical, and practical):
+
+1. **Why This Concept Matters**: The macro-perspective and real-world importance.
+2. **Core Idea**: A razor-sharp, one-sentence summary.
+3. **Concrete Analogy**: Relatable real-world or biological comparisons (e.g., visual cortex parallel columns for Multi-Head Attention, or the hippocampus for Vector Spaces).
+4. **ASCII Diagram**: Clean visual mapping of data flow and tensor shapes.
+5. **Mathematical Formulation**: Clear equations written out with explicit parameter dimensions.
+6. **Worked Example**: A step-by-step mathematical walk-through using minimal, simplified numbers.
+7. **Production Context**: How this concept actually manifests inside modern LLMs (e.g., MQA, GQA, vLLM).
+8. **Brain-Like Connection**: The fascinating biological equivalent of the algorithm.
+9. **Common Misunderstanding**: Pitfalls, myths, and why they are wrong.
+10. **The Bottom Line**: A summary of why the architecture would fail without this specific piece.
+11. **Quick Self-Check**: A conceptual question to test your retention.
+
 ## Domain 01: Mathematical Foundations
 
 _The language ML speaks_ (16 articles)
