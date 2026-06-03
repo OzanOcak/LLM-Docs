@@ -8,7 +8,7 @@ Unlike traditional machine learning resources that separate pure math from engin
 
 ---
 
-## Our 11-Step Learning Framework
+## 11-Step Learning Framework
 
 Every single one of the 90 articles in this repository follows a strict, predictable framework designed to target every learning style (visual, mathematical, and practical):
 
